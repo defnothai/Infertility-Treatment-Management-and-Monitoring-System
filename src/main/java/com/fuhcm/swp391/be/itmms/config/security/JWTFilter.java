@@ -1,6 +1,5 @@
 package com.fuhcm.swp391.be.itmms.config.security;
 
-import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.service.JWTService;
 import com.fuhcm.swp391.be.itmms.service.MyUserDetailsService;
@@ -11,7 +10,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,20 +19,19 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.List;
 
 
 @Configuration
-public class JwtFilter extends OncePerRequestFilter {
+public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public JwtFilter(JWTService jwtService,
+    public JWTFilter(JWTService jwtService,
                      ApplicationContext applicationContext) {
         this.jwtService = jwtService;
         this.applicationContext = applicationContext;

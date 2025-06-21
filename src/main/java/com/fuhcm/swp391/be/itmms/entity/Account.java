@@ -67,7 +67,7 @@ public class Account {
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinTable(
             name = "AccountRoles",
             joinColumns = @JoinColumn(name = "userId"),

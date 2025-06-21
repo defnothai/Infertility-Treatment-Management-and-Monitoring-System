@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class Role implements GrantedAuthority {
     private AccountRole roleName;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     private List<Account> accounts;
 
     @Override
