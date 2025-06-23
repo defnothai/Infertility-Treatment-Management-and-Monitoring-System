@@ -57,7 +57,9 @@ public class SecurityConfig {
             "/api/home/**",
             "/api/doctors/**",
             "/api/services/**",
-            "/api/blogs/**"
+            "/api/blogs/**",
+            "/api/list/**",
+            "/api/manager/**"
     };
 
     @Bean

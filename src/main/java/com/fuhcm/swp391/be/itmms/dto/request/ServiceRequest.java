@@ -1,22 +1,21 @@
-package com.fuhcm.swp391.be.itmms.dto.response;
+package com.fuhcm.swp391.be.itmms.dto.request;
 
 import com.fuhcm.swp391.be.itmms.constant.ServiceStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceResponse {
+public class ServiceRequest {
 
-    private Long id;
     private String serviceName;
     private String subTitle;
     private double price;
     private String summary;
-    private String imgUrl;
-    private String slug;
     private ServiceStatus status;
+    private MultipartFile image;
 
 }

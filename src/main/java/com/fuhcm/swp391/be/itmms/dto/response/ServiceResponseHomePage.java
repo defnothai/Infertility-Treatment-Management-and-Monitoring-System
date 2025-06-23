@@ -8,15 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceResponse {
+public class ServiceResponseHomePage {
 
     private Long id;
     private String serviceName;
     private String subTitle;
-    private double price;
-    private String summary;
-    private String imgUrl;
+    private String urlImg;
     private String slug;
     private ServiceStatus status;
+
 
 }
