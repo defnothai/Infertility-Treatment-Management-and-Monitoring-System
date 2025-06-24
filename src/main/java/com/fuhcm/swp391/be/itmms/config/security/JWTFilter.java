@@ -48,7 +48,9 @@ public class JWTFilter extends OncePerRequestFilter {
             "POST:/api/auth/login",
             "POST:/api/auth/register/resend-verification-email",
             "POST:/api/auth/forgot-password",
-            "POST:/api/auth/reset-password"
+            "POST:/api/auth/reset-password",
+            "POST:/api/manager/**",
+            "PUT:/api/manager/**"
     );
 
     public boolean isPublicAPI(String uri, String method) {

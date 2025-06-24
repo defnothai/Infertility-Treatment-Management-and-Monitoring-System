@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.config.ModelMapperConfig;
+import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.LoginRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.RegisterRequest;
@@ -19,12 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AuthenticationService {
@@ -38,6 +41,7 @@ public class AuthenticationService {
     private static final String FORGOT_PASSWORD_URL = "http://localhost:3000/cap-nhat-mat-khau";
     private final ConfirmTokenRegisterService confirmTokenRegisterService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
     public AuthenticationService(AuthenticationRepository authenticationRepository,
                                  JWTService jwtService,
@@ -45,7 +49,8 @@ public class AuthenticationService {
                                  ModelMapperConfig modelMapperConfig,
                                  EmailService emailService,
                                  @Lazy ConfirmTokenRegisterService confirmTokenRegisterService,
-                                 PasswordEncoder passwordEncoder) {
+                                 PasswordEncoder passwordEncoder,
+                                 RoleService roleService) {
         this.authenticationRepository = authenticationRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -53,6 +58,12 @@ public class AuthenticationService {
         this.emailService = emailService;
         this.confirmTokenRegisterService = confirmTokenRegisterService;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+    }
+
+    public Account getCurrentAccount() {
+        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return this.findByEmail(account.getEmail());
     }
 
     public Account findByEmail(String email) {
@@ -129,6 +140,7 @@ public class AuthenticationService {
             account.setCreatedAt(now);
             account.setStatus(AccountStatus.DISABLED);
             account.setCreatedBy(account);
+            account.setRoles(List.of(roleService.findByRoleName(AccountRole.ROLE_USER)));
             authenticationRepository.save(account);
         }
 

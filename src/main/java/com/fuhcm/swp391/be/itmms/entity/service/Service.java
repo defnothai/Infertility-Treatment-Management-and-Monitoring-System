@@ -1,5 +1,7 @@
     package com.fuhcm.swp391.be.itmms.entity.service;
 
+    import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+    import com.fuhcm.swp391.be.itmms.constant.ServiceStatus;
     import com.fuhcm.swp391.be.itmms.entity.Account;
     import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
     import jakarta.persistence.*;
@@ -40,7 +42,12 @@
         private String slug;
 
         @Column(name = "ImgUrl", nullable = false)
+        @Lob
         private String imgUrl;
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "Status", nullable = false)
+        private ServiceStatus status;
 
         @ManyToOne
         @JoinColumn(name = "ManageBy", referencedColumnName = "Id")
