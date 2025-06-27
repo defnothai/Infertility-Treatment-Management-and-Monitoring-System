@@ -10,6 +10,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.EmailDetail;
 import com.fuhcm.swp391.be.itmms.dto.response.LoginResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.error.exception.ConfirmPasswordNotMatchException;
 import com.fuhcm.swp391.be.itmms.error.exception.EmailAlreadyExistsException;
 import com.fuhcm.swp391.be.itmms.repository.AuthenticationRepository;
@@ -67,8 +68,15 @@ public class AuthenticationService {
         if (principal instanceof UserDetails) {
             String email = ((UserDetails) principal).getUsername();
             return this.findByEmail(email);
+        }else {
+            throw new AuthenticationException("Người dùng chưa đăng nhập hoặc token không hợp lệ.");
         }
-        return null;
+    }
+
+    public List<String> getCurrentRoles() {
+            return this.getCurrentAccount().getRoles().stream()
+                    .map(role -> role.getRoleName().name())
+                    .toList();
     }
 
     public Account findByEmail(String email) {

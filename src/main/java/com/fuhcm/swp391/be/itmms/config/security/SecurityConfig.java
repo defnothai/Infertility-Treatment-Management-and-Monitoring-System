@@ -84,7 +84,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/invoices/**").hasAnyRole("MANAGER", "STAFF")
                         .requestMatchers("/api/reminders/**").hasRole("ADMIN")
                         .requestMatchers("/api/medical-records/authorize/**").hasRole("MANAGER")
-                        .requestMatchers("/api/services/manage/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/service/manage/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/reviews/manage/**").hasRole("ADMIN")
                         .requestMatchers("/api/accounts/manage/**").hasRole("ADMIN")
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")

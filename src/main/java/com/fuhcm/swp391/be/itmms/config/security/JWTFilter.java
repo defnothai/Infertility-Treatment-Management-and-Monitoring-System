@@ -48,13 +48,13 @@ public class JWTFilter extends OncePerRequestFilter {
             "POST:/api/auth/login",
             "POST:/api/auth/register/resend-verification-email",
             "POST:/api/auth/forgot-password",
-            "POST:/api/auth/reset-password"
+            "POST:/api/auth/reset-password",
+            "GET:/api/home/**",
+            "GET:/api/list/**"
     );
 
     public boolean isPublicAPI(String uri, String method) {
         AntPathMatcher matcher = new AntPathMatcher();
-
-        if(method.equals("GET")) return true;
 
         return PUBLIC_API.stream().anyMatch(pattern -> {
             String[] parts = pattern.split(":", 2);

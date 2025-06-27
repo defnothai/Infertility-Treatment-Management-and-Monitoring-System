@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -59,15 +60,6 @@ public class ServiceService {
 
     public ResponseEntity getAllServicesInListPage() {
         List<com.fuhcm.swp391.be.itmms.entity.service.Service> services = serviceRepository.findByStatusNot(ServiceStatus.DEPRECATED);
-        List<ServiceResponse> serviceRespons = new ArrayList<>();
-        for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
-            serviceRespons.add(modelMapper.map(service, ServiceResponse.class));
-        }
-        return ResponseEntity.ok(serviceRespons);
-    }
-
-    public ResponseEntity getAllServices() {
-        List<com.fuhcm.swp391.be.itmms.entity.service.Service> services = serviceRepository.findAll();
         List<ServiceResponse> serviceResponse = new ArrayList<>();
         for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
             serviceResponse.add(modelMapper.map(service, ServiceResponse.class));
@@ -75,16 +67,31 @@ public class ServiceService {
         return ResponseEntity.ok(serviceResponse);
     }
 
+    public ResponseEntity getAllServices() {
+        List<com.fuhcm.swp391.be.itmms.entity.service.Service> services;
+        Account currentAccount = authenticationService.getCurrentAccount();
+        if (authenticationService.getCurrentRoles().contains("ROLE_ADMIN")) {
+            services = serviceRepository.findAll();
+        }else {
+            services = serviceRepository.findByAccount(currentAccount);
+        }
+        List<ServiceResponse> responses = new ArrayList<>();
+        for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
+            ServiceResponse serviceResponse = modelMapper.map(service, ServiceResponse.class);
+            serviceResponse.setManagerInfo(doctorService.getCurrentManagerInfo(service.getAccount().getEmail()));
+            responses.add(serviceResponse);
+        }
+        return ResponseEntity.ok(responses);
+    }
+
     public ResponseEntity<ResponseFormat<Object>> createService(ServiceRequest serviceRequest) throws IOException {
         com.fuhcm.swp391.be.itmms.entity.service.Service service =
                 modelMapper.map(serviceRequest, com.fuhcm.swp391.be.itmms.entity.service.Service.class);
         service.setSlug(SlugUtil.toSlug(service.getServiceName()));
         Account currentAccount = authenticationService.getCurrentAccount();
-        if (currentAccount == null) {
-            throw new RuntimeException("Người dùng chưa đăng nhập hoặc token không hợp lệ.");
-        }
+
         ServiceResponse response = new ServiceResponse();
-        if (!currentAccount.getRoles().contains("ROLE_ADMIN")) {
+        if (!authenticationService.getCurrentRoles().contains("ROLE_ADMIN")) {
             service.setAccount(currentAccount);
             serviceRequest.setManagerInfo(doctorService.getCurrentManagerInfo(currentAccount.getEmail()));
         }else {
