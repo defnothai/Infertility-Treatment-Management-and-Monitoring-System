@@ -45,12 +45,15 @@ public class UploadImageFileService implements UploadImageFile {
 
     private File convert(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
-        File convFile = new File(String.join(generatePublicValue(file.getOriginalFilename()), getFileName(file.getOriginalFilename())[1]));
+        String publicValue = generatePublicValue(file.getOriginalFilename());
+        String extension = getFileName(file.getOriginalFilename())[1];
+        File convFile = new File(publicValue + "." + extension);
         try (InputStream is = file.getInputStream()) {
             Files.copy(is, convFile.toPath());
         }
         return convFile;
     }
+
 
     private void cleanDisk(File file) {
         try {

@@ -67,7 +67,8 @@ public class ServiceDetails {
     @Column(name = "HospitalProcedureImgUrl", nullable = false)
     private String hospitalProcedureImgUrl;
 
-    @ManyToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ServiceID", referencedColumnName = "Id")
     private Service service;
+
 }

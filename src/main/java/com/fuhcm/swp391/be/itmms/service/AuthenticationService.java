@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -62,8 +63,12 @@ public class AuthenticationService {
     }
 
     public Account getCurrentAccount() {
-        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return this.findByEmail(account.getEmail());
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            return this.findByEmail(email);
+        }
+        return null;
     }
 
     public Account findByEmail(String email) {

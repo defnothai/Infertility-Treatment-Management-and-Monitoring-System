@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ServiceDetailsResponse {
 
+    private Long id;
+
     @Lob
     private String concept;
 

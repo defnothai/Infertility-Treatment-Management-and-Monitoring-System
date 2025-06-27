@@ -1,6 +1,8 @@
 package com.fuhcm.swp391.be.itmms.dto.request;
 
 import com.fuhcm.swp391.be.itmms.constant.ServiceStatus;
+import com.fuhcm.swp391.be.itmms.dto.AccountDTO;
+import com.fuhcm.swp391.be.itmms.dto.response.ManagerInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class ServiceRequest {
     private double price;
     private String summary;
     private ServiceStatus status;
-    private MultipartFile image;
+    private String imgUrl;
+    private ManagerInfo managerInfo;
 
 }

@@ -22,4 +22,9 @@ public class DoctorController {
     public ResponseEntity getDoctorsInHomePage() {
         return doctorService.getDoctorsInHomePage();
     }
+
+    @GetMapping("/api/manager-info")
+    public ResponseEntity getManagerInfo() {
+        return doctorService.getManagerInfo();
+    }
 }

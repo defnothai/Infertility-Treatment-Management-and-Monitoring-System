@@ -36,15 +36,16 @@ public class ServiceController {
     }
 
     @PostMapping("/api/manager/services")
-    public ResponseEntity createService(@ModelAttribute ServiceRequest serviceRequest) throws IOException {
+    public ResponseEntity createService(@RequestBody ServiceRequest serviceRequest) throws IOException {
         return serviceService.createService(serviceRequest);
     }
 
     @PutMapping("/api/manager/services/{id}")
     public ResponseEntity updateService(@PathVariable Long id,
-                                        @ModelAttribute ServiceRequest serviceRequest) throws IOException, NotFoundException {
+                                        @RequestBody ServiceRequest serviceRequest) throws IOException, NotFoundException {
         return serviceService.updateService(id, serviceRequest);
     }
+
 
 
 }

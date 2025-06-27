@@ -1,23 +1,24 @@
-package com.fuhcm.swp391.be.itmms.dto.response;
+package com.fuhcm.swp391.be.itmms.dto;
 
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class AccountResponse {
+public class AccountDTO {
+
     private Long id;
     private String fullName;
     private String email;
-    private LocalDateTime createdAt;
     private AccountStatus status;
-    private String phoneNumber;
-    private Gender gender;
-    private Account createdBy;
-
+    private List<Role> roles;
 }

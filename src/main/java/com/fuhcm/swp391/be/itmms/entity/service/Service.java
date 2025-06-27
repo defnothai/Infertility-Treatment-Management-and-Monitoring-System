@@ -59,9 +59,21 @@
         @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
         private List<ServiceReview> reviews;
 
-        @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
-        private List<ServiceDetails> details;
-
         @OneToMany(mappedBy = "service")
         private List<TreatmentPlan> plans;
+
+        @Override
+        public String toString() {
+            return "Service{" +
+                    "status=" + status +
+                    ", id=" + id +
+                    ", serviceName='" + serviceName + '\'' +
+                    ", subTitle='" + subTitle + '\'' +
+                    ", price=" + price +
+                    ", summary='" + summary + '\'' +
+                    ", slug='" + slug + '\'' +
+                    ", imgUrl='" + imgUrl + '\'' +
+                    ", account=" + account +
+                    '}';
+        }
     }
