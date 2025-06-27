@@ -13,7 +13,7 @@ public class ServiceResponseHomePage {
     private Long id;
     private String serviceName;
     private String subTitle;
-    private String urlImg;
+    private String imgUrl;
     private String slug;
     private ServiceStatus status;
 
