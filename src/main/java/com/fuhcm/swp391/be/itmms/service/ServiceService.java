@@ -112,13 +112,8 @@ public class ServiceService {
                                                                 ServiceRequest serviceRequest) throws NotFoundException, IOException {
         Account account = authenticationService.findByEmail(serviceRequest.getManagerInfo().getEmail());
         com.fuhcm.swp391.be.itmms.entity.service.Service service = this.findById(id);
-        service.setServiceName(serviceRequest.getServiceName());
-        service.setSubTitle(serviceRequest.getSubTitle());
-        service.setPrice(serviceRequest.getPrice());
-        service.setSummary(serviceRequest.getSummary());
-        service.setImgUrl(serviceRequest.getImgUrl());
+        modelMapper.map(serviceRequest, service);
         service.setSlug(SlugUtil.toSlug(service.getServiceName()));
-        service.setStatus(serviceRequest.getStatus());
         service.setAccount(account);
         ServiceResponse response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
         response.setManagerInfo(serviceRequest.getManagerInfo());

@@ -31,25 +31,27 @@ public class ServiceDetailsService {
         this.serviceService = serviceService;
     }
 
-    public ServiceDetails findById(Long serviceId) throws NotFoundException {
-        return serviceDetailsRepository.findById(serviceId)
+    public ServiceDetails findByServiceId(Long serviceId) throws NotFoundException {
+        return serviceDetailsRepository.findByServiceId(serviceId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết dịch vụ"));
+    }
+
+    public ServiceDetails findById(Long id) throws NotFoundException {
+        return serviceDetailsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết dịch vụ"));
     }
 
     public ResponseEntity getServiceDetails(Long serviceId) throws NotFoundException {
-        return null;
+        ServiceDetails serviceDetails = findByServiceId(serviceId);
+        ServiceDetailsResponse response = modelMapper.map(serviceDetails, ServiceDetailsResponse.class);
+        response.setSlug(serviceDetails.getService().getSlug());
+        return ResponseEntity.ok(response);
     }
 
 
     public ResponseEntity<ResponseFormat<Object>> createServiceDetails(Long serviceId,
-                                                               ServiceDetailsRequest serviceDetailsRequest) throws IOException, NotFoundException {
-        String conceptImgUrl = uploadImageFile.uploadImage(serviceDetailsRequest.getConceptImage());
-        String procedureDetailsImgUrl = uploadImageFile.uploadImage(serviceDetailsRequest.getProcedureDetailsImage());
-        String hospitalProcedureImgUrl = uploadImageFile.uploadImage(serviceDetailsRequest.getHospitalProcedureImage());
+                                                                       ServiceDetailsRequest serviceDetailsRequest) throws IOException, NotFoundException {
         ServiceDetails serviceDetails = modelMapper.map(serviceDetailsRequest, ServiceDetails.class);
-        serviceDetails.setConceptImgUrl(conceptImgUrl);
-        serviceDetails.setProcedureDetails(procedureDetailsImgUrl);
-        serviceDetails.setHospitalProcedureImgUrl(hospitalProcedureImgUrl);
         serviceDetails.setService(serviceService.findById(serviceId));
         ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
@@ -58,5 +60,21 @@ public class ServiceDetailsService {
                                                         "SERVICE_DETAILS_CREATED_SUCCESS",
                                                         "Tạo mới chi tiết dịch vụ thành công",
                                                         response));
+    }
+
+
+    public ResponseEntity<ResponseFormat<Object>> updateServiceDetails(Long id,
+                                               ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException {
+        ServiceDetails serviceDetails = this.findById(id);
+        modelMapper.map(serviceDetailsRequest, serviceDetails);
+
+
+        serviceDetails.setId(id);
+        ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
+        response.setSlug(serviceDetails.getService().getSlug());
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.CREATED.value(),
+                                                    "SERVICE_DETAILS_UPDATED_SUCCESS",
+                                                    "Cập nhật chi tiết dịch vụ thành công",
+                                                    response));
     }
 }

@@ -18,15 +18,21 @@ public class ServiceDetailsController {
         this.serviceDetailsService = serviceDetailsService;
     }
 
-    @GetMapping("api/service-detail/{serviceId}")
+    @GetMapping("api/service-details/{serviceId}")
     public ResponseEntity getServiceDetails(@PathVariable Long serviceId) throws NotFoundException {
         return serviceDetailsService.getServiceDetails(serviceId);
     }
 
-    @PostMapping("api/service-detail/{serviceId}")
+    @PostMapping("api/service-details/{serviceId}")
     public ResponseEntity createServiceDetails(@PathVariable Long serviceId,
-                                               @ModelAttribute ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException, IOException {
+                                               @RequestBody ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException, IOException {
         return serviceDetailsService.createServiceDetails(serviceId, serviceDetailsRequest);
+    }
+
+    @PutMapping("api/service-details/{id}")
+    public ResponseEntity updateServiceDetails(@PathVariable Long id,
+                                               @RequestBody ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException, IOException {
+        return serviceDetailsService.updateServiceDetails(id, serviceDetailsRequest);
     }
 
 

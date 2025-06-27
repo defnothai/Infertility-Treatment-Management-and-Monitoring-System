@@ -11,15 +11,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class ServiceDetailsRequest {
 
     private String concept;
-    private MultipartFile conceptImage;
+    private String conceptImgUrl;
     private String condition;
     private String assignment;
     private String unAssignment;
     private String procedureDetails;
-    private MultipartFile procedureDetailsImage;
+    private String procedureDetailsImgUrl;
     private String successRate;
     private String experience;
     private String risk;
     private String hospitalProcedure;
-    private MultipartFile hospitalProcedureImage;
+    private String hospitalProcedureImgUrl;
 }

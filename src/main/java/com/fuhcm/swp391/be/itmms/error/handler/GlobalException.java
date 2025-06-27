@@ -5,6 +5,7 @@ import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.error.exception.ConfirmPasswordNotMatchException;
 import com.fuhcm.swp391.be.itmms.error.exception.EmailAlreadyExistsException;
 import com.fuhcm.swp391.be.itmms.error.exception.EmailNotFoundException;
+import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -41,7 +42,8 @@ public class GlobalException {
 
     @ExceptionHandler(value = {
             UsernameNotFoundException.class,
-            EmailNotFoundException.class
+            EmailNotFoundException.class,
+            NotFoundException.class,
     })
     public ResponseEntity<ResponseFormat<Object>> handleIdException(Exception ex) {
         ResponseFormat<Object> res = new ResponseFormat<Object>();

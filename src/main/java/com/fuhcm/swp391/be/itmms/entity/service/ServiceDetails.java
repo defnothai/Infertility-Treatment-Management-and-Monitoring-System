@@ -17,7 +17,7 @@ public class ServiceDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
-    private int id;
+    private Long id;
 
     @Lob
     @Column(name = "Concept", nullable = false, columnDefinition = "NVARCHAR(MAX)")
