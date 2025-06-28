@@ -23,7 +23,7 @@ public class DoctorService {
         this.authenticationService = authenticationService;
     }
 
-    public ResponseEntity getDoctorsInHomePage() {
+    public List<DoctorResponse> getDoctorsInHomePage() {
         List<Doctor> doctors = doctorRepository.findAll();
         List<DoctorResponse> doctorResponses = new ArrayList<>();
         DoctorResponse doctorResponse;
@@ -35,10 +35,10 @@ public class DoctorService {
             String slug = doctor.getSlug();
             doctorResponses.add(new DoctorResponse(fullName, position, achivement, imgUrl, slug));
         }
-        return ResponseEntity.ok(doctorResponses);
+        return doctorResponses;
     }
 
-    public ResponseEntity getManagerInfo() {
+    public List<ManagerInfo> getManagerInfo() {
         List<Doctor> doctors = doctorRepository.findAll();
         List<ManagerInfo> managers = new ArrayList<>();
         for (Doctor doctor : doctors) {
@@ -49,7 +49,7 @@ public class DoctorService {
                                              doctor.getPosition()));
             }
         }
-        return ResponseEntity.ok(managers);
+        return managers;
     }
 
     public ManagerInfo getCurrentManagerInfo(String email) {

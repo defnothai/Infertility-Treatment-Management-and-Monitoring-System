@@ -103,7 +103,7 @@ public class AuthenticationService {
     }
 
 
-    public ResponseEntity<ResponseFormat<Object>> login(LoginRequest loginRequest) {
+    public LoginResponse login(LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     loginRequest.getEmail(),
@@ -117,13 +117,11 @@ public class AuthenticationService {
         LoginResponse loginResponse = modelMapper.map(account, LoginResponse.class);
         String token = jwtService.generateJWT(account.getEmail());
         loginResponse.setToken(token);
-        return ResponseEntity.ok
-                (new ResponseFormat<>(HttpStatus.OK.value(),
-                        "LOGIN_SUCCESS", "Đăng nhập thành công", loginResponse));
+        return loginResponse;
     }
 
     @Transactional
-    public ResponseEntity<ResponseFormat<Object>> register(RegisterRequest registerRequest) {
+    public void register(RegisterRequest registerRequest) {
         if (!isValidConfirmPassword(
                 registerRequest.getPassword(),
                 registerRequest.getConfirmPassword())) {
@@ -165,13 +163,9 @@ public class AuthenticationService {
         emailDetail.setFullName(registerRequest.getFullName());
         emailDetail.setLink(BASE_URL + "?token=" + token);
         emailService.sendRegistrationEmail(emailDetail);
-
-        return ResponseEntity.ok(
-                new ResponseFormat<>(200, "OK",
-                        "Email xác nhận đã được gửi, vui lòng kiểm tra hộp thư", null));
     }
 
-    public ResponseEntity<ResponseFormat<Object>> confirmEmail(String token) {
+    public void confirmEmail(String token) {
 
         Account account = confirmTokenRegisterService.extractAccount(token);
 
@@ -191,12 +185,11 @@ public class AuthenticationService {
         account.setStatus(AccountStatus.ENABLED);
         account.setCreatedAt(LocalDateTime.now());
         Account updatedAccount = authenticationRepository.save(account);
-        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.CREATED.value(), "ACCOUNT_CREATED", "Tạo tài khoản thành công", null));
     }
 
 
     @Transactional
-    public ResponseEntity<ResponseFormat<Object>> resendVerificationEmail(String email) {
+    public void resendVerificationEmail(String email) {
         Account account = this.findByEmail(email);
 
         if (account.getStatus() != AccountStatus.DISABLED) {
@@ -217,10 +210,9 @@ public class AuthenticationService {
 
         emailService.sendRegistrationEmail(emailDetail);
 
-        return ResponseEntity.ok(new ResponseFormat<>(200, "OK", "Email xác nhận đã được gửi lại, vui lòng kiểm tra hộp thư", null));
     }
 
-    public ResponseEntity<ResponseFormat<Object>> forgotPassword(String email) {
+    public void forgotPassword(String email) {
         Account account = this.findByEmail(email);
         String token = jwtService.generateJWT(account.getEmail());
         EmailDetail emailDetail = new EmailDetail();
@@ -229,12 +221,9 @@ public class AuthenticationService {
         emailDetail.setFullName(account.getFullName());
         emailDetail.setLink(FORGOT_PASSWORD_URL + "?token=" + token);
         emailService.sendForgotPasswordEmail(emailDetail);
-        return ResponseEntity.ok(
-                new ResponseFormat<>(200, "OK",
-                        "Email xác nhận đã được gửi, vui lòng kiểm tra hộp thư", token));
     }
 
-    public ResponseEntity<ResponseFormat<Object>> resetPassword(ResetPasswordRequest resetPasswordRequest) {
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
         if (!isValidConfirmPassword(resetPasswordRequest.getPassword(), resetPasswordRequest.getConfirmPassword())) {
             throw new ConfirmPasswordNotMatchException("Xác nhận mật khẩu không khớp mật khẩu");
         }
@@ -242,6 +231,5 @@ public class AuthenticationService {
         Account account = jwtService.extractAccount(token);
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         authenticationRepository.save(account);
-        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(), "RESET_PASSWORD", "Đặt lại mật khẩu thành công", null));
     }
 }

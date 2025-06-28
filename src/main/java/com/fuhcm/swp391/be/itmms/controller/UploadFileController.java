@@ -1,6 +1,8 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
+import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.UploadImageFile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +23,10 @@ public class UploadFileController {
 
     @PostMapping("/api/upload-image")
     public ResponseEntity uploadFile(@RequestParam("image") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(uploadImageFile.uploadImage(file)) ;
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                                                        "UPLOAD_IMAGE_SUCCESS",
+                                                        "Tải ảnh lên thành công",
+                                                            uploadImageFile.uploadImage(file)));
     }
 
 }

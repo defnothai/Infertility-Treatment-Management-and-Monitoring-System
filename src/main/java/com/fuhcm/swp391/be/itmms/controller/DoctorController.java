@@ -1,7 +1,9 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
 
+import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.DoctorService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +22,22 @@ public class DoctorController {
 
     @GetMapping("/api/home/doctors")
     public ResponseEntity getDoctorsInHomePage() {
-        return doctorService.getDoctorsInHomePage();
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                                            "FETCH_SUCCESS",
+                                        "Lấy dữ liệu thành công",
+                                                doctorService.getDoctorsInHomePage())
+        );
+
     }
 
     @GetMapping("/api/manager-info")
     public ResponseEntity getManagerInfo() {
-        return doctorService.getManagerInfo();
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_SUCCESS",
+                        "Lấy dữ liệu thành công",
+                        doctorService.getManagerInfo())
+        );
     }
 }

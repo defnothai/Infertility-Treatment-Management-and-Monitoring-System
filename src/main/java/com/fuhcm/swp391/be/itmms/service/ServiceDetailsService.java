@@ -41,29 +41,25 @@ public class ServiceDetailsService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết dịch vụ"));
     }
 
-    public ResponseEntity getServiceDetails(Long serviceId) throws NotFoundException {
+    public ServiceDetailsResponse getServiceDetails(Long serviceId) throws NotFoundException {
         ServiceDetails serviceDetails = findByServiceId(serviceId);
         ServiceDetailsResponse response = modelMapper.map(serviceDetails, ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
-        return ResponseEntity.ok(response);
+        return response;
     }
 
 
-    public ResponseEntity<ResponseFormat<Object>> createServiceDetails(Long serviceId,
+    public ServiceDetailsResponse createServiceDetails(Long serviceId,
                                                                        ServiceDetailsRequest serviceDetailsRequest) throws IOException, NotFoundException {
         ServiceDetails serviceDetails = modelMapper.map(serviceDetailsRequest, ServiceDetails.class);
         serviceDetails.setService(serviceService.findById(serviceId));
         ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
-                                                        "SERVICE_DETAILS_CREATED_SUCCESS",
-                                                        "Tạo mới chi tiết dịch vụ thành công",
-                                                        response));
+        return response;
     }
 
 
-    public ResponseEntity<ResponseFormat<Object>> updateServiceDetails(Long id,
+    public ServiceDetailsResponse updateServiceDetails(Long id,
                                                ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException {
         ServiceDetails serviceDetails = this.findById(id);
         modelMapper.map(serviceDetailsRequest, serviceDetails);
@@ -72,9 +68,6 @@ public class ServiceDetailsService {
         serviceDetails.setId(id);
         ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
-        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.CREATED.value(),
-                                                    "SERVICE_DETAILS_UPDATED_SUCCESS",
-                                                    "Cập nhật chi tiết dịch vụ thành công",
-                                                    response));
+        return response;
     }
 }

@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.treatment;
 
+import com.fuhcm.swp391.be.itmms.entity.service.ServiceStage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,4 +41,8 @@ public class TreatmentStageProgress {
 
     @OneToMany(mappedBy = "progress", cascade = CascadeType.ALL)
     private List<TreatmentSession> sessions;
+
+    @ManyToOne
+    @JoinColumn(name = "ServiceStageID", referencedColumnName = "Id")
+    private ServiceStage serviceStage;
 }

@@ -13,9 +13,6 @@ import com.fuhcm.swp391.be.itmms.utils.SlugUtil;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -30,17 +27,15 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final ModelMapper modelMapper;
     private final AuthenticationService authenticationService;
-    private final UploadImageFile uploadImageFile;
     private final DoctorService doctorService;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ModelMapper modelMapper,
                           AuthenticationService authenticationService,
-                          UploadImageFile uploadImageFile, DoctorService doctorService) {
+                          DoctorService doctorService) {
         this.serviceRepository = serviceRepository;
         this.modelMapper = modelMapper;
         this.authenticationService = authenticationService;
-        this.uploadImageFile = uploadImageFile;
         this.doctorService = doctorService;
     }
 
@@ -49,25 +44,25 @@ public class ServiceService {
                                 .orElseThrow(() -> new NotFoundException("Dịch vụ không tồn tại"));
     }
 
-    public ResponseEntity getAllServicesInHomePage() {
+    public List<ServiceResponseHomePage> getAllServicesInHomePage() {
         List<com.fuhcm.swp391.be.itmms.entity.service.Service> services = serviceRepository.findByStatusNot(ServiceStatus.DEPRECATED);
         List<ServiceResponseHomePage> serviceResponseHomePages = new ArrayList<>();
         for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
             serviceResponseHomePages.add(modelMapper.map(service, ServiceResponseHomePage.class));
         }
-        return ResponseEntity.ok(serviceResponseHomePages);
+        return serviceResponseHomePages;
     }
 
-    public ResponseEntity getAllServicesInListPage() {
+    public List<ServiceResponse> getAllServicesInListPage() {
         List<com.fuhcm.swp391.be.itmms.entity.service.Service> services = serviceRepository.findByStatusNot(ServiceStatus.DEPRECATED);
         List<ServiceResponse> serviceResponse = new ArrayList<>();
         for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
             serviceResponse.add(modelMapper.map(service, ServiceResponse.class));
         }
-        return ResponseEntity.ok(serviceResponse);
+        return serviceResponse;
     }
 
-    public ResponseEntity getAllServices() {
+    public List<ServiceResponse> getAllServices() {
         List<com.fuhcm.swp391.be.itmms.entity.service.Service> services;
         Account currentAccount = authenticationService.getCurrentAccount();
         if (authenticationService.getCurrentRoles().contains("ROLE_ADMIN")) {
@@ -81,10 +76,10 @@ public class ServiceService {
             serviceResponse.setManagerInfo(doctorService.getCurrentManagerInfo(service.getAccount().getEmail()));
             responses.add(serviceResponse);
         }
-        return ResponseEntity.ok(responses);
+        return responses;
     }
 
-    public ResponseEntity<ResponseFormat<Object>> createService(ServiceRequest serviceRequest) throws IOException {
+    public ServiceResponse createService(ServiceRequest serviceRequest) throws IOException {
         com.fuhcm.swp391.be.itmms.entity.service.Service service =
                 modelMapper.map(serviceRequest, com.fuhcm.swp391.be.itmms.entity.service.Service.class);
         service.setSlug(SlugUtil.toSlug(service.getServiceName()));
@@ -100,15 +95,10 @@ public class ServiceService {
         }
         response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
         response.setManagerInfo(serviceRequest.getManagerInfo());
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                            .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
-                                    "SERVICE_CREATED_SUCCESS",
-                                    "Tạo mới dịch vụ thành công",
-                                    response));
+        return response;
     }
 
-    public ResponseEntity<ResponseFormat<Object>> updateService(Long id,
+    public ServiceResponse updateService(Long id,
                                                                 ServiceRequest serviceRequest) throws NotFoundException, IOException {
         Account account = authenticationService.findByEmail(serviceRequest.getManagerInfo().getEmail());
         com.fuhcm.swp391.be.itmms.entity.service.Service service = this.findById(id);
@@ -117,9 +107,6 @@ public class ServiceService {
         service.setAccount(account);
         ServiceResponse response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
         response.setManagerInfo(serviceRequest.getManagerInfo());
-        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                                    "SERVICE_UPDATED_SUCCESS",
-                                    "Cập nhật dịch vụ thành công",
-                                    response));
+        return response;
     }
 }
