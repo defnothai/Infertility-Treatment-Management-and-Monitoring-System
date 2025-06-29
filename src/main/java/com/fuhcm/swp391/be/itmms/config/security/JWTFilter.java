@@ -44,9 +44,9 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private final List<String> PUBLIC_API = List.of(
-            "POST:/api/auth/register",
+            "POST:/api/auth/register/**",
+            "GET:/api/auth/register/**",
             "POST:/api/auth/login",
-            "POST:/api/auth/register/resend-verification-email",
             "POST:/api/auth/forgot-password",
             "POST:/api/auth/reset-password",
             "GET:/api/home/**",

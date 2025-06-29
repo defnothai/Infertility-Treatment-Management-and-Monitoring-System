@@ -20,7 +20,7 @@ public class ServiceDetailsController {
         this.serviceDetailsService = serviceDetailsService;
     }
 
-    @GetMapping("api/service-details/{serviceId}")
+    @GetMapping("/api/services/{serviceId}/service-details")
     public ResponseEntity getServiceDetails(@PathVariable Long serviceId) throws NotFoundException {
         return ResponseEntity.ok(
                 new ResponseFormat<>(HttpStatus.OK.value(),
@@ -30,7 +30,7 @@ public class ServiceDetailsController {
         );
     }
 
-    @PostMapping("api/manage/service-details/{serviceId}")
+    @PostMapping("/api/manage/services/{serviceId}/service-details")
     public ResponseEntity createServiceDetails(@PathVariable Long serviceId,
                                                @RequestBody ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException, IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -40,8 +40,8 @@ public class ServiceDetailsController {
                         serviceDetailsService.createServiceDetails(serviceId, serviceDetailsRequest)));
     }
 
-    @PutMapping("api/manage/service-details/{id}")
-    public ResponseEntity updateServiceDetails(@PathVariable Long id,
+    @PutMapping("api/manage/services/{serviceId}/service-details/{id}")
+    public ResponseEntity updateServiceDetails(@PathVariable("id") Long id,
                                                @RequestBody ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException, IOException {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.CREATED.value(),
                 "SERVICE_DETAILS_UPDATED_SUCCESS",

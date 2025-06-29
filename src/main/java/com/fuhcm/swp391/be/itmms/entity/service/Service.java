@@ -23,7 +23,7 @@
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "Id")
-        private int id;
+        private Long id;
 
         @Column(name = "ServiceName", nullable = false, columnDefinition = "NVARCHAR(100)")
         private String serviceName;
