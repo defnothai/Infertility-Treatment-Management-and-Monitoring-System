@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.entity.doctor.DoctorReview;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.service.ServiceReview;
@@ -24,7 +25,7 @@ public class User {
     @NotBlank(message = "Địa chỉ không được để trống")
     @Size(max = 255, message = "Địa chỉ tối đa 255 ký tự")
     @Size(min = 10, message = "Địa chỉ ít nhất 10 ký tự")
-    @Column(name = "Address", nullable = false, length = 255)
+    @Column(name = "Address", nullable = false, length = 255, columnDefinition = "NVARCHAR(255)")
     private String address;
 
     @NotNull(message = "Ngày sinh không được để trống")
@@ -51,25 +52,32 @@ public class User {
     private String insuranceNumber;
 
     @OneToOne
+    @JsonIgnore
     @JoinColumn(name = "AccountID", referencedColumnName = "Id")
     private Account account;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Report> reports;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Reminder> reminders;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<DoctorReview> doctorReviews;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ServiceReview> serviceReviews;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private MedicalRecord medicalRecord;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Appointment> appointments;
 
 }
