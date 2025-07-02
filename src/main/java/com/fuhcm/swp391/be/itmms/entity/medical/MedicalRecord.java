@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.medical;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import com.fuhcm.swp391.be.itmms.entity.User;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -28,9 +30,10 @@ public class MedicalRecord {
     private String notes;
 
     @Column(name = "FollowUpdate", nullable = false)
-    private Date followUpdate;
+    private LocalDate followUpdate;
 
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<MedicalRecordAccess> medicalRecordAccess;
 
     @OneToOne(mappedBy = "medicalRecord", cascade = CascadeType.ALL)

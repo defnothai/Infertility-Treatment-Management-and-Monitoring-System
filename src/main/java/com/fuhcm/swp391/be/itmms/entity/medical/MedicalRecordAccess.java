@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -23,10 +24,10 @@ public class MedicalRecordAccess {
     private Long id;
 
     @Column(name = "DayStart", nullable = false)
-    private Date dayStart;
+    private LocalDate dayStart;
 
     @Column(name = "DayEnd", nullable = true)
-    private Date dayEnd;
+    private LocalDate dayEnd;
 
     @ManyToOne
     @JoinColumn(name = "GrantedBy", referencedColumnName = "Id")

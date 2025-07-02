@@ -46,6 +46,7 @@ public class AccountService {
     public void register(Account account) {
         accountRepo.save(account);
     }
+    public Account updateAccount(Account account) {return accountRepo.save(account);}
 
     public List<PatientInfo> getPatientInfo() throws NotFoundException {
         Role userRole = roleService.findByRoleName(AccountRole.ROLE_USER);

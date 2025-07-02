@@ -60,4 +60,7 @@ public class DoctorService {
                                doctor.getPosition());
     }
 
+    public Object createMedicalRecord() {
+        return null;
+    }
 }

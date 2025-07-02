@@ -1,7 +1,6 @@
 package com.fuhcm.swp391.be.itmms.dto;
 
 import com.fuhcm.swp391.be.itmms.constant.Gender;
-import io.jsonwebtoken.security.Password;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
