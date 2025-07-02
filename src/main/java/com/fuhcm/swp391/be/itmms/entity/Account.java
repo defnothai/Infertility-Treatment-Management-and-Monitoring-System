@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
@@ -75,27 +76,59 @@ public class Account {
     )
     private List<Role> roles;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BlogPost> blogPost;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Report> report;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "assignTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Schedule> schedules2;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Service> services;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MedicalRecordAccess> medicalRecordAccess;
 
+    @OneToMany(mappedBy = "grantedTo")
+    private List<MedicalRecordAccess> grantedAccesses;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Application> applications;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invoice> invoices;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<LabTestResult> labTestResults;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<ScheduleTemplate>  scheduleTemplates;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<Appointment> appointments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Appointment> appointments2;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Invoice> invoices2;
+
 }

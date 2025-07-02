@@ -6,7 +6,7 @@ import com.fuhcm.swp391.be.itmms.entity.service.ServiceReview;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -30,7 +30,7 @@ public class User {
     @NotNull(message = "Ngày sinh không được để trống")
     @Past(message = "Ngày sinh không hợp lệ")
     @Column(name = "DayOfBirth", nullable = false)
-    private LocalDate dob;
+    private LocalDateTime dob;
 
     @NotBlank(message = "Số CMND/CCCD không được để trống")
     @Size(max = 15, message = "Số CMND/CCCD tối đa 15 ký tự")
@@ -68,8 +68,5 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private MedicalRecord medicalRecord;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Appointment> appointments;
 
 }

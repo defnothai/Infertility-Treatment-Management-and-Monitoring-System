@@ -1,5 +1,7 @@
 package com.fuhcm.swp391.be.itmms.config.security;
 
+import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.Role;
 import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.service.JWTService;
 import com.fuhcm.swp391.be.itmms.service.MyUserDetailsService;
@@ -11,8 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -27,19 +33,22 @@ import java.util.List;
 @Configuration
 public class JWTFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
-    private final ApplicationContext applicationContext;
+    @Autowired
+    private JWTService jwtService;
 
     @Autowired
-    public JWTFilter(JWTService jwtService,
-                     ApplicationContext applicationContext) {
-        this.jwtService = jwtService;
-        this.applicationContext = applicationContext;
+    private ApplicationContext applicationContext;
+    public JWTFilter(){}
+
+    @Bean
+    public JWTFilter jwtFilter() {
+        return new JWTFilter();
     }
 
     public String getToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
+        System.out.println(authHeader.substring(7));
         return authHeader.substring(7);
     }
 
@@ -48,7 +57,8 @@ public class JWTFilter extends OncePerRequestFilter {
             "POST:/api/auth/login",
             "POST:/api/auth/register/resend-verification-email",
             "POST:/api/auth/forgot-password",
-            "POST:/api/auth/reset-password"
+            "POST:/api/auth/reset-password",
+            "GET:/api/payment/vn-pay-callback"
     );
 
     public boolean isPublicAPI(String uri, String method) {
@@ -72,36 +82,40 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (isPublicAPI(request.getRequestURI(), request.getMethod())) {
-            filterChain.doFilter(request, response);
-        }else {
-            String token = getToken(request);
-            if(token == null){
-                throw new AuthenticationException("Empty token!");
-            }
+        System.out.println("JWT Filter activated for URI: " + request.getRequestURI());
+        String token = getToken(request);
+        System.out.println("TOKEN: " + token);
 
-            String email;
+        if (token != null && !token.isEmpty()) {
             try {
-                email = jwtService.extractEmail(token);
-            } catch (ExpiredJwtException expiredJwtException) {
-                throw new AuthenticationException("Expired Token!");
-            } catch (MalformedJwtException malformedJwtException) {
-                throw new AuthenticationException("Invalid Token!");
-            }
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                MyUserDetailsService userDetailsService = applicationContext.getBean(MyUserDetailsService.class);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                if(jwtService.validateToken(token, userDetails)){
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                String email = jwtService.extractEmail(token);
+                Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+                if (email != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
+                    MyUserDetailsService userDetailsService = applicationContext.getBean(MyUserDetailsService.class);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    List<GrantedAuthority> authorities = jwtService.getAuthoritiesFromToken(token);
+                    if (jwtService.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        System.out.println("✅ SET AUTH for user: " + email);
+                    }
                 }
+            } catch (ExpiredJwtException e) {
+                throw new AuthenticationException("Expired token");
+            } catch (MalformedJwtException e) {
+                throw new AuthenticationException("Invalid token");
             }
-
-            filterChain.doFilter(request, response);
         }
+
+        // ✅ Nếu là private API mà không có authentication → chặn
+        if (!isPublicAPI(request.getRequestURI(), request.getMethod()) &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+            throw new AuthenticationException("Token missing or invalid for protected API");
+        }
+
+        // ✅ Cho request đi tiếp
+        filterChain.doFilter(request, response);
     }
 }

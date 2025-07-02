@@ -1,26 +1,29 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.KeyGenerator;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JWTService {
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     private final AuthenticationService authenticationService;
     @Value("${secret-key}")
@@ -38,6 +41,12 @@ public class JWTService {
     public String generateJWT(String email) {
 
         Map<String, Object> claims = new HashMap<String, Object>();
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        List<String> roleNames = account.getRoles().stream()
+                .map(role -> role.getRoleName().name()) // "ADMIN", "USER"
+                .collect(Collectors.toList());
+        claims.put("roles", roleNames);
 
         return Jwts.builder()
                 .claims()
@@ -72,8 +81,19 @@ public class JWTService {
                 getPayload();
     }
 
+    public List<GrantedAuthority> getAuthoritiesFromToken(String token) {
+        Claims claims = extractAllClaims(token);
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractEmail(token);
+        System.out.println("Set auth for :" + username);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 

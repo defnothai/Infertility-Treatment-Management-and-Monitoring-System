@@ -1,23 +1,18 @@
-package com.fuhcm.swp391.be.itmms.dto.response;
+package com.fuhcm.swp391.be.itmms.dto.request;
 
+import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
-import com.fuhcm.swp391.be.itmms.entity.Role;
-import lombok.*;
-
-import java.util.List;
-
+import lombok.Data;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LoginResponse {
-
+public class AccountCreateRequest {
     private String fullName;
     private String email;
+    private String password;
     private AccountStatus status;
     private String phoneNumber;
     private Gender gender;
-    private String token;
-
+    private Long createdBy;
+    private AccountRole roles;
 }
