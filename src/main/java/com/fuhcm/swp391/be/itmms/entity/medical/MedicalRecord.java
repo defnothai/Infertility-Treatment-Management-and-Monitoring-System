@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.entity.medical;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import com.fuhcm.swp391.be.itmms.entity.User;
 import jakarta.persistence.*;
@@ -42,4 +43,7 @@ public class MedicalRecord {
     @OneToOne
     @JoinColumn(name = "PatientID", referencedColumnName = "Id")
     private User user;
+
+    @OneToMany(mappedBy = "medicalRecord")
+    private List<LabTestResult> labTestResults;
 }
