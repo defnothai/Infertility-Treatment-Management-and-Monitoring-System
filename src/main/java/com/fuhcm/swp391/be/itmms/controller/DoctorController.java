@@ -29,14 +29,5 @@ public class DoctorController {
 
     }
 
-    @GetMapping("/api/manager-info")
-    public ResponseEntity getManagerInfo() {
-        return ResponseEntity.ok(
-                new ResponseFormat<>(HttpStatus.OK.value(),
-                        "FETCH_SUCCESS",
-                        "Lấy dữ liệu thành công",
-                        doctorService.getManagerInfo())
-        );
-    }
 
 }

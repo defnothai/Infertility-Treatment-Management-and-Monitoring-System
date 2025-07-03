@@ -38,4 +38,13 @@ public class AccountController {
                     accountService.getPatientInfo()));
         }
     }
+
+//    @GetMapping("/api/staffs")
+//    public ResponseEntity getStaffAccount() {
+//        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+//                                                        "FETCH_SUCCESS",
+//                                                        "Lấy thông tin thành công",
+//                                                        accountService.getStaffAccount()));
+//    }
+
 }

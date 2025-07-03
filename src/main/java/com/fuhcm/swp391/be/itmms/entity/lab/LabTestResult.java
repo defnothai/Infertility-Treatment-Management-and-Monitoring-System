@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.lab;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
 import com.fuhcm.swp391.be.itmms.entity.Account;

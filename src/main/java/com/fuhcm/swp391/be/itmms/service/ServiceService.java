@@ -1,10 +1,8 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.ServiceStatus;
-import com.fuhcm.swp391.be.itmms.dto.AccountDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.ServiceRequest;
-import com.fuhcm.swp391.be.itmms.dto.response.ManagerInfo;
-import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
+import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
 import com.fuhcm.swp391.be.itmms.dto.response.ServiceResponseHomePage;
 import com.fuhcm.swp391.be.itmms.dto.response.ServiceResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
@@ -27,7 +25,6 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
     private final ModelMapper modelMapper;
     private final AuthenticationService authenticationService;
-    private final DoctorService doctorService;
 
     public ServiceService(ServiceRepository serviceRepository,
                           ModelMapper modelMapper,
@@ -36,7 +33,6 @@ public class ServiceService {
         this.serviceRepository = serviceRepository;
         this.modelMapper = modelMapper;
         this.authenticationService = authenticationService;
-        this.doctorService = doctorService;
     }
 
     public com.fuhcm.swp391.be.itmms.entity.service.Service findById(Long id) throws NotFoundException {
@@ -72,9 +68,7 @@ public class ServiceService {
         }
         List<ServiceResponse> responses = new ArrayList<>();
         for (com.fuhcm.swp391.be.itmms.entity.service.Service service : services) {
-            ServiceResponse serviceResponse = modelMapper.map(service, ServiceResponse.class);
-            serviceResponse.setManagerInfo(doctorService.getCurrentManagerInfo(service.getAccount().getEmail()));
-            responses.add(serviceResponse);
+            responses.add(modelMapper.map(service, ServiceResponse.class));
         }
         return responses;
     }
@@ -88,25 +82,23 @@ public class ServiceService {
         ServiceResponse response = new ServiceResponse();
         if (!authenticationService.getCurrentRoles().contains("ROLE_ADMIN")) {
             service.setAccount(currentAccount);
-            serviceRequest.setManagerInfo(doctorService.getCurrentManagerInfo(currentAccount.getEmail()));
         }else {
-            service.setAccount(authenticationService.findByEmail(serviceRequest.getManagerInfo().getEmail()));
-
+            service.setAccount(authenticationService.findByEmail(serviceRequest.getManagerAccount().getEmail()));
         }
         response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
-        response.setManagerInfo(serviceRequest.getManagerInfo());
+        response.setManagerAccount(modelMapper.map(currentAccount, AccountBasic.class));
         return response;
     }
 
     public ServiceResponse updateService(Long id,
-                                                                ServiceRequest serviceRequest) throws NotFoundException, IOException {
-        Account account = authenticationService.findByEmail(serviceRequest.getManagerInfo().getEmail());
+                                         ServiceRequest serviceRequest) throws NotFoundException, IOException {
+        Account account = authenticationService.findByEmail(serviceRequest.getManagerAccount().getEmail());
         com.fuhcm.swp391.be.itmms.entity.service.Service service = this.findById(id);
         modelMapper.map(serviceRequest, service);
         service.setSlug(SlugUtil.toSlug(service.getServiceName()));
         service.setAccount(account);
         ServiceResponse response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
-        response.setManagerInfo(serviceRequest.getManagerInfo());
+        response.setManagerAccount(serviceRequest.getManagerAccount());
         return response;
     }
 }

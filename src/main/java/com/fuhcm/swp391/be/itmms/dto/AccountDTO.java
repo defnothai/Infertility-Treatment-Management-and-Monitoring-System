@@ -1,14 +1,11 @@
 package com.fuhcm.swp391.be.itmms.dto;
 
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
-import com.fuhcm.swp391.be.itmms.constant.Gender;
-import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data

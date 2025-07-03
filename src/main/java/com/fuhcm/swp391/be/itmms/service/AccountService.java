@@ -2,11 +2,10 @@ package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
-import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
-import jakarta.transaction.Transactional;
 import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,4 +83,13 @@ public class AccountService {
                 .map(account -> modelMapper.map(account, PatientInfo.class))
                 .collect(Collectors.toList());
     }
+
+    public List<AccountBasic> getManagerAccount() {
+        return accountRepo
+                .findByRoles(roleService.findByRoleName(AccountRole.ROLE_MANAGER))
+                .stream()
+                .map(account -> modelMapper.map(account, AccountBasic.class))
+                .collect(Collectors.toList());
+    }
+
 }

@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ManagerInfo {
+public class AccountBasic {
 
     private String fullName;
     private String email;
-    private String position;
 
 }
