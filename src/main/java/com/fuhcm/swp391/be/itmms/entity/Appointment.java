@@ -52,7 +52,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "BookBy", referencedColumnName = "Id")
-    private User user;
+    private Account user;
 
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
     private TreatmentPlan treatmentPlan;
