@@ -27,14 +27,16 @@ import java.util.List;
 @Configuration
 public class JWTFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
-    private final ApplicationContext applicationContext;
+    @Autowired
+    private JWTService jwtService;
 
     @Autowired
-    public JWTFilter(JWTService jwtService,
-                     ApplicationContext applicationContext) {
-        this.jwtService = jwtService;
-        this.applicationContext = applicationContext;
+    private ApplicationContext applicationContext;
+    public JWTFilter(){}
+
+    @Bean
+    public JWTFilter jwtFilter() {
+        return new JWTFilter();
     }
 
     public String getToken(HttpServletRequest request) {
@@ -72,36 +74,34 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (isPublicAPI(request.getRequestURI(), request.getMethod())) {
-            filterChain.doFilter(request, response);
-        }else {
-            String token = getToken(request);
-            if(token == null){
-                throw new AuthenticationException("Empty token!");
-            }
+        String token = getToken(request);
 
-            String email;
+        if (token != null && !token.isEmpty()) {
             try {
-                email = jwtService.extractEmail(token);
-            } catch (ExpiredJwtException expiredJwtException) {
-                throw new AuthenticationException("Expired Token!");
-            } catch (MalformedJwtException malformedJwtException) {
-                throw new AuthenticationException("Invalid Token!");
-            }
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                MyUserDetailsService userDetailsService = applicationContext.getBean(MyUserDetailsService.class);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                if(jwtService.validateToken(token, userDetails)){
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                String email = jwtService.extractEmail(token);
+                Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+                if (email != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
+                    MyUserDetailsService userDetailsService = applicationContext.getBean(MyUserDetailsService.class);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    List<GrantedAuthority> authorities = jwtService.getAuthoritiesFromToken(token);
+                    if (jwtService.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
+            } catch (ExpiredJwtException e) {
+                throw new AuthenticationException("Expired token");
+            } catch (MalformedJwtException e) {
+                throw new AuthenticationException("Invalid token");
             }
-
-            filterChain.doFilter(request, response);
         }
+        
+        if (!isPublicAPI(request.getRequestURI(), request.getMethod()) &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+            throw new AuthenticationException("Token missing or invalid for protected API");
+        }
+        filterChain.doFilter(request, response);
     }
 }
