@@ -3,12 +3,15 @@ package com.fuhcm.swp391.be.itmms.service;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
 import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
+import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
+import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -92,4 +95,21 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
+    public ProfileResponse getUserProfile(Authentication authentication) {
+        Account account = accountRepo.findByEmail(authentication.getName());
+        if(account == null){
+            return null;
+        } else {
+            ProfileResponse profileResponse = new ProfileResponse();
+            User user = account.getUser();
+            profileResponse.setUserName(account.getFullName());
+            profileResponse.setDateOfBirth(user.getDob());
+            profileResponse.setGender(account.getGender());
+            profileResponse.setIdentityNumber((user.getIdentityNumber()));
+            profileResponse.setNationality(user.getNationality());
+            profileResponse.setInsuranceNumber(user.getInsuranceNumber());
+            profileResponse.setAddress(user.getAddress());
+            return profileResponse;
+        }
+    }
 }
