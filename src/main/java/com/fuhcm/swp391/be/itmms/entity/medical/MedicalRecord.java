@@ -27,17 +27,21 @@ public class MedicalRecord {
     @Column(name = "Id")
     private Long id;
 
-    @Column(name = "Notes", nullable = true)
-    private String notes;
+    @Column(name = "Symptoms", nullable = true, columnDefinition = "NVARCHAR(255)")
+    private String symptoms;
 
-    @Column(name = "FollowUpdate", nullable = false)
-    private LocalDate followUpdate;
+    @Column(name = "Diagnosis", nullable = true, columnDefinition = "NVARCHAR(255)")
+    private String diagnosis;
 
-    @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
+    @Column(name = "CreatedAt", nullable = false)
+    private LocalDate createdAt;
+
+    @OneToMany(mappedBy = "medicalRecord")
     @JsonIgnore
     private List<MedicalRecordAccess> medicalRecordAccess;
 
-    @OneToOne(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "medicalRecord")
+    @JsonIgnore
     private TreatmentPlan treatmentPlan;
 
     @OneToOne

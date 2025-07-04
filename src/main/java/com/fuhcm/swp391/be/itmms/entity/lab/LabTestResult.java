@@ -32,17 +32,17 @@ public class LabTestResult {
     @Column(name = "TestDate", nullable = false)
     private LocalDate testDate;
 
-    @Column(name = "ResultSummary", nullable = true)
+    @Column(name = "ResultSummary", nullable = true, columnDefinition = "NVARCHAR(255)")
     private String resultSummary;
 
-    @Column(name = "ResultDetails", nullable = true)
+    @Column(name = "ResultDetails", nullable = true, columnDefinition = "NVARCHAR(255)")
     private String resultDetails;
 
     @Column(name = "Status", nullable = false)
     @Enumerated(EnumType.STRING)
     private LabTestResultStatus status;
 
-    @Column(name = "Notes", nullable = true)
+    @Column(name = "Notes", nullable = true, columnDefinition = "NVARCHAR(255)")
     private String notes;
 
     @Column(name = "LabTestType", nullable = false)

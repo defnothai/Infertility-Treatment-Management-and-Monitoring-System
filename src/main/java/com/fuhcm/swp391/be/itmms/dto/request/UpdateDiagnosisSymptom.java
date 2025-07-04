@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MedicalRecordRequest {
+public class UpdateDiagnosisSymptom {
 
-    private String notes;
+    private String diagnosis;
+    private String symptoms;
 
 }

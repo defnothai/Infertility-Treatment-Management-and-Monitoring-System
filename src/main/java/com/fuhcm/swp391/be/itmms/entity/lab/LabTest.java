@@ -20,7 +20,7 @@ public class LabTest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
-    private int id;
+    private Long id;
 
     @Column(name = "Name", nullable = false)
     private String name;

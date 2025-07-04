@@ -26,15 +26,10 @@ public class LabTestResultResponse {
     private LabTestResultStatus status;
     private String notes;
     private LabTestResultType labTestType;
-    private LabTestDTO test;
-    private Account account;
+    private String labTestName;
+    private Long labTestId;
+    private String staffFullName;
+    private Long staffAccountId;
 
-    @ManyToOne
-    @JoinColumn(name = "SessionID", referencedColumnName = "Id")
-    private TreatmentSession session;
-
-    @ManyToOne
-    @JoinColumn(name = "MedicalRecordId", referencedColumnName = "Id")
-    private MedicalRecord medicalRecord;
 
 }

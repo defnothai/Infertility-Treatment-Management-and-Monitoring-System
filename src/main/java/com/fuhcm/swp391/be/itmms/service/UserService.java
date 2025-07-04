@@ -28,12 +28,16 @@ public class UserService {
                             .orElseThrow(() -> new NotFoundException("Thông tin người dùng không tồn tại"));
     }
 
+    public User findByAccount(Account account) throws NotFoundException {
+        return userRepository
+                .findByAccount(account)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết bệnh nhân"));
+    }
+
     public PatientInfoDetails getPatientInfoDetails(Long accountId) throws NotFoundException {
         Account account = accountService.findById(accountId);
         PatientInfo patientInfo = modelMapper.map(account, PatientInfo.class);
-        User user = userRepository
-                .findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy chi tiết bệnh nhân"));
+        User user = this.findByAccount(account);
         return new PatientInfoDetails(patientInfo, user);
     }
 

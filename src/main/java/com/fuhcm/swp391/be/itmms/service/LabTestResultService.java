@@ -3,8 +3,9 @@ package com.fuhcm.swp391.be.itmms.service;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
 import com.fuhcm.swp391.be.itmms.dto.LabTestDTO;
-import com.fuhcm.swp391.be.itmms.dto.LabTestResultDTO;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.repository.LabTestResultRepository;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LabTestResultService {
@@ -44,6 +46,28 @@ public class LabTestResultService {
         }
     }
 
+    public List<LabTestResultResponse> getInitLabTestResults(Long medicalRecordId) {
+        List<LabTestResult> results = labTestResultRepository
+                .findByLabTestTypeAndMedicalRecord_Id(LabTestResultType.INITIAL, medicalRecordId);
+
+        return results.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+    }
+
+    private LabTestResultResponse convertToResponse(LabTestResult result) {
+        LabTestResultResponse response = modelMapper.map(result, LabTestResultResponse.class);
+        if (result.getTest() != null) {
+            response.setLabTestId(result.getTest().getId());
+            response.setLabTestName(result.getTest().getName());
+        }
+
+        if (result.getAccount() != null) {
+            response.setStaffAccountId(result.getAccount().getId());
+            response.setStaffFullName(result.getAccount().getFullName());
+        }
+        return response;
+    }
 
     public List<LabTestResultDTO> findAll() {
         List<LabTestResult> labTestResults = labTestResultRepository.findAll();
