@@ -1,5 +1,8 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
+import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +29,7 @@ public class Schedule {
     private Long id;
 
     @Column(name = "WorkDate", nullable = false)
-    private Date workDate;
+    private LocalDate workDate;
 
     @Column(name = "RoomNumber", nullable = false, length = 5)
     private int roomNumber;
@@ -33,23 +38,31 @@ public class Schedule {
     private int maxCapacity;
 
     @Column(name = "CreateAt", nullable = false)
-    private Date createAt;
+    private LocalDate createAt;
 
     @Column(name = "Note", nullable = true, length = 255)
     private String note;
 
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private ScheduleStatus status;
+
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "AssignBy", referencedColumnName = "Id")
     private Account account;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<Appointment> appointments;
 
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "DoctorID", referencedColumnName = "Id")
-    private Doctor doctor;
+    @JoinColumn(name = "Assigned", referencedColumnName = "Id")
+    private Account assignTo;
 
     @ManyToOne
     @JoinColumn(name = "ShiftID", referencedColumnName = "Id")
     private Shift shift;
+
 }

@@ -109,4 +109,8 @@ public class Account {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     private List<LabTestResult> labTestResults;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<ScheduleTemplate>  scheduleTemplates;
 }

@@ -1,6 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.doctor;
 
-import com.fuhcm.swp391.be.itmms.constant.DoctorStatus;
+import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class Doctor {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private DoctorStatus status;
+    private EmploymentStatus status;
 
     @Column(name = "Achivements", nullable = true, length = 255, columnDefinition = "NVARCHAR(MAX)")
     private String achivements;
@@ -52,9 +52,6 @@ public class Doctor {
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<BlogPost> blogPost;
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Schedule> schedule;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<DoctorReview> doctorReview;

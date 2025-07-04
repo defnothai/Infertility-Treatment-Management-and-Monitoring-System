@@ -19,10 +19,12 @@ public class LabTestController {
     @GetMapping("/api/lab-test")
     public ResponseEntity getLabTests() {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                                                        "FETCH_SUCCESS",
-                                                        "Lấy dữ liệu các mẫu xét nghiệm thành công",
-                                                        labTestService.getLabTests()));
+                "FETCH_SUCCESS",
+                "Lấy dữ liệu các mẫu xét nghiệm thành công",
+                labTestService.getLabTests()));
     }
+
+
 
 
 }
