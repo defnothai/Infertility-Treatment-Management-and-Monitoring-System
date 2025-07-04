@@ -75,9 +75,9 @@ public class User {
     @OneToOne(mappedBy = "user")
     @JsonIgnore
     private MedicalRecord medicalRecord;
-
-    @OneToMany(mappedBy = "user")
-    @JsonIgnore
-    private List<Appointment> appointments;
+//
+//    @OneToMany(mappedBy = "user")
+//    @JsonIgnore
+//    private List<Appointment> appointments;
 
 }
