@@ -21,14 +21,24 @@ public class LabTestResultController {
         this.labTestResultService = labTestResultService;
     }
 
-    @PostMapping("/api/lab-test-result/init")
-    public ResponseEntity sendInitLabTestRequest(@RequestBody LabTestResultRequest labTestResultRequest) throws NotFoundException {
-        labTestResultService.sendInitLabTestRequest(labTestResultRequest);
+    @PostMapping("/api/lab-test-result/init/{recordId}")
+    public ResponseEntity sendInitLabTestRequest(@PathVariable("recordId") Long recordId,
+            @RequestBody LabTestResultRequest labTestResultRequest) throws NotFoundException {
+        labTestResultService.sendInitLabTestRequest(recordId, labTestResultRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
                                             "SEND_TEST_REQUEST_SUCCESS",
                                             "Gửi yêu cầu xét nghiệm thành công",
                                             null));
+    }
+
+    @GetMapping("/api/lab-test-result/init/{recordId}")
+    public ResponseEntity sendInitLabTestRequest(@PathVariable("recordId") Long recordId)
+                                                    throws NotFoundException {
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                                                    "FETCH_DATA_SUCCESS",
+                                                    "Lấy dữ liệu thành công",
+                                                        labTestResultService.getInitLabTestResults(recordId)));
     }
 
     @GetMapping("/api/lab-test-result")

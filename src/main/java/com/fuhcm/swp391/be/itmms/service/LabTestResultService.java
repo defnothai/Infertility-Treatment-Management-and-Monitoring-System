@@ -1,20 +1,31 @@
 package com.fuhcm.swp391.be.itmms.service;
 
+import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
+import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
 import com.fuhcm.swp391.be.itmms.dto.LabTestDTO;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
+import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.Schedule;
+import com.fuhcm.swp391.be.itmms.entity.Shift;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.LabTestResultRepository;
+import com.fuhcm.swp391.be.itmms.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,24 +35,36 @@ public class LabTestResultService {
     private final LabTestService labTestService;
     private final ModelMapper modelMapper;
     private final MedicalRecordService medicalRecordService;
+    private final AccountRepository accountRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final RoleService roleService;
 
     public LabTestResultService(LabTestResultRepository labTestResultRepository,
-                                LabTestService labTestService, ModelMapper modelMapper, MedicalRecordService medicalRecordService) {
+                                LabTestService labTestService,
+                                ModelMapper modelMapper,
+                                MedicalRecordService medicalRecordService,
+                                AccountRepository accountRepository,
+                                ScheduleRepository scheduleRepository, RoleService roleService) {
         this.labTestResultRepository = labTestResultRepository;
         this.labTestService = labTestService;
         this.modelMapper = modelMapper;
         this.medicalRecordService = medicalRecordService;
+        this.accountRepository = accountRepository;
+        this.scheduleRepository = scheduleRepository;
+        this.roleService = roleService;
     }
 
     @Transactional
-    public void sendInitLabTestRequest(LabTestResultRequest labTestResultRequest) throws NotFoundException {
-        for (LabTestDTO labTestDTO : labTestResultRequest.getTests()) {
+    public void sendInitLabTestRequest(Long recordId,
+                                       LabTestResultRequest labTestResultRequest) throws NotFoundException {
+        for (Long testId : labTestResultRequest.getTestIds()) {
             LabTestResult labTestResult = new LabTestResult();
             labTestResult.setLabTestType(LabTestResultType.INITIAL);
-            labTestResult.setStatus(LabTestResultStatus.NOT_STARTED);
+            labTestResult.setStatus(LabTestResultStatus.PROCESSING);
             labTestResult.setTestDate(LocalDate.now());
-            labTestResult.setTest(labTestService.findById(labTestDTO.getId()));
-            labTestResult.setMedicalRecord(medicalRecordService.findById(labTestResultRequest.getMedicalRecordId()));
+            labTestResult.setTest(labTestService.findById(testId));
+            labTestResult.setMedicalRecord(medicalRecordService.findById(recordId));
+            labTestResult.setAccount(findLeastBusyStaff(LocalDate.now()));
             labTestResultRepository.save(labTestResult);
         }
     }
@@ -100,6 +123,42 @@ public class LabTestResultService {
         }).toList();
     }
 
+    private Account findLeastBusyStaff(LocalDate date) throws NotFoundException {
+        LocalTime currentTime = LocalTime.now();
+
+        List<Schedule> activeSchedules = scheduleRepository.findByWorkDateAndStatus(date, ScheduleStatus.WORKING);
+        if (activeSchedules.isEmpty()) {
+            throw new NotFoundException("Không có nhân viên làm việc trong hôm nay");
+        }
+
+        List<Account> eligibleStaff = new ArrayList<>();
+        for (Schedule schedule : activeSchedules) {
+            Shift shift = schedule.getShift();
+            if (shift != null &&
+                    currentTime.isAfter(shift.getStartTime()) &&
+                    currentTime.isBefore(shift.getEndTime()) &&
+                    schedule.getStatus().equals(ScheduleStatus.WORKING) &&
+                    schedule.getAssignTo().getRoles().contains(roleService.findByRoleName(AccountRole.ROLE_STAFF))) {
+                eligibleStaff.add(schedule.getAssignTo());
+            }
+        }
+
+        if (eligibleStaff.isEmpty()) {
+            throw new NotFoundException("Không có nhân viên làm việc trong ca làm hiện tại");
+        }
+
+        List<Long> staffIds = labTestResultRepository.findLeastBusyAccountIdByDateAndShift(date, LocalTime.now().toString());
+
+        if (staffIds.isEmpty()) {
+            return eligibleStaff.getFirst();
+        }else {
+            return accountRepository.findById(staffIds.getFirst()).orElseThrow(() -> new NotFoundException("Không tìm thấy nhân viên"));
+        }
+    }
+
+
+}
+
 
 //    public LabTestResult updateLabTestResult(Long id, LabTestResult updatedResult) {
 //        LabTestResult existing = labTestResultRepository.findById(id)
@@ -119,4 +178,4 @@ public class LabTestResultService {
 //
 //        return labTestResultRepository.save(existing);
 //    }
-}
+

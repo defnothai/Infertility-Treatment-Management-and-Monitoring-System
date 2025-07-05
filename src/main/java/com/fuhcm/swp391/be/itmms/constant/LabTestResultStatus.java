@@ -4,5 +4,4 @@ public enum LabTestResultStatus {
 
     COMPLETED,
     PROCESSING,
-    NOT_STARTED
 }
