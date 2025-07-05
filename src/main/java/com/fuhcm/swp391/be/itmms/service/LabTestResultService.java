@@ -55,8 +55,10 @@ public class LabTestResultService {
     }
 
     @Transactional
-    public void sendInitLabTestRequest(Long recordId,
-                                       LabTestResultRequest labTestResultRequest) throws NotFoundException {
+    public List<LabTestResultResponse> sendInitLabTestRequest(Long recordId,
+                                                              LabTestResultRequest labTestResultRequest) throws NotFoundException {
+        List<LabTestResultResponse> responses = new ArrayList<>();
+
         for (Long testId : labTestResultRequest.getTestIds()) {
             LabTestResult labTestResult = new LabTestResult();
             labTestResult.setLabTestType(LabTestResultType.INITIAL);
@@ -65,9 +67,20 @@ public class LabTestResultService {
             labTestResult.setTest(labTestService.findById(testId));
             labTestResult.setMedicalRecord(medicalRecordService.findById(recordId));
             labTestResult.setAccount(findLeastBusyStaff(LocalDate.now()));
-            labTestResultRepository.save(labTestResult);
+
+            LabTestResult saved = labTestResultRepository.save(labTestResult);
+            LabTestResultResponse response = modelMapper.map(saved, LabTestResultResponse.class);
+            response.setLabTestName(saved.getTest().getName());
+            response.setLabTestId(saved.getTest().getId());
+            response.setStaffFullName(saved.getAccount().getFullName());
+            response.setStaffAccountId(saved.getAccount().getId());
+
+            responses.add(response);
         }
+
+        return responses;
     }
+
 
     public List<LabTestResultResponse> getInitLabTestResults(Long medicalRecordId) {
         List<LabTestResult> results = labTestResultRepository

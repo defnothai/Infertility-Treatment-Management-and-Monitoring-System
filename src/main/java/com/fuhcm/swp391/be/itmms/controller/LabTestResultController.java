@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.LabTestDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTest;
 import com.fuhcm.swp391.be.itmms.service.LabTestResultService;
@@ -24,12 +25,15 @@ public class LabTestResultController {
     @PostMapping("/api/lab-test-result/init/{recordId}")
     public ResponseEntity sendInitLabTestRequest(@PathVariable("recordId") Long recordId,
             @RequestBody LabTestResultRequest labTestResultRequest) throws NotFoundException {
-        labTestResultService.sendInitLabTestRequest(recordId, labTestResultRequest);
+        List<LabTestResultResponse> responses = labTestResultService.sendInitLabTestRequest(recordId, labTestResultRequest);
+        if (responses.size() <= 0) {
+            throw new RuntimeException("Gửi yêu cầu xét nghiệm thất bại");
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
                                             "SEND_TEST_REQUEST_SUCCESS",
                                             "Gửi yêu cầu xét nghiệm thành công",
-                                            null));
+                                            responses));
     }
 
     @GetMapping("/api/lab-test-result/init/{recordId}")
