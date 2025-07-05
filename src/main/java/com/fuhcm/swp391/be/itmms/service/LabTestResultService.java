@@ -4,13 +4,14 @@ import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
 import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
-import com.fuhcm.swp391.be.itmms.dto.LabTestDTO;
-import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultDTO;
+import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultForStaffRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
+import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.LabTestResultRepository;
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,13 +70,9 @@ public class LabTestResultService {
             LabTestResult saved = labTestResultRepository.save(labTestResult);
             LabTestResultResponse response = modelMapper.map(saved, LabTestResultResponse.class);
             response.setLabTestName(saved.getTest().getName());
-            response.setLabTestId(saved.getTest().getId());
             response.setStaffFullName(saved.getAccount().getFullName());
-            response.setStaffAccountId(saved.getAccount().getId());
-
             responses.add(response);
         }
-
         return responses;
     }
 
@@ -94,47 +89,31 @@ public class LabTestResultService {
     private LabTestResultResponse convertToResponse(LabTestResult result) {
         LabTestResultResponse response = modelMapper.map(result, LabTestResultResponse.class);
         if (result.getTest() != null) {
-            response.setLabTestId(result.getTest().getId());
             response.setLabTestName(result.getTest().getName());
         }
 
         if (result.getAccount() != null) {
-            response.setStaffAccountId(result.getAccount().getId());
             response.setStaffFullName(result.getAccount().getFullName());
         }
         return response;
     }
 
-    public List<LabTestResultDTO> findAll() {
-        List<LabTestResult> labTestResults = labTestResultRepository.findAll();
 
-        return labTestResults.stream().map(result -> {
-            LabTestResultDTO dto = new LabTestResultDTO();
-            dto.setLabTestType(result.getLabTestType());
-            dto.setResultSummary(result.getResultSummary());
-            dto.setResultDetails(result.getResultDetails());
-            dto.setStatus(result.getStatus());
-            dto.setTestDate(result.getTestDate());
-            dto.setNotes(result.getNotes());
+    public List<LabTestResultResponse> findAll() {
+        return labTestResultRepository.findAll().stream().map(entity -> {
+            LabTestResultResponse dto = modelMapper.map(entity, LabTestResultResponse.class);
 
-            if (result.getTest() != null) {
-                dto.setTestName(result.getTest().getName());
+            if (entity.getTest() != null) {
+                dto.setLabTestName(entity.getTest().getName());
             }
 
-            if (result.getAccount() != null) {
-                String fullNameStaff = result.getAccount().getFullName();
-                dto.setFullNameStaff(fullNameStaff);
-                dto.setEmailStaff(result.getAccount().getEmail());
-            }
-
-            if (result.getMedicalRecord() != null && result.getMedicalRecord().getUser() != null) {
-                String fullNamePatient = result.getMedicalRecord().getUser().getAccount().getFullName();
-                dto.setFullNamePatient(fullNamePatient);
-                dto.setPhoneNumberPatient(result.getMedicalRecord().getUser().getAccount().getPhoneNumber());
+            if (entity.getAccount() != null) {
+                dto.setStaffFullName(entity.getAccount().getFullName());
             }
             return dto;
-        }).toList();
+        }).collect(Collectors.toList());
     }
+
 
     private Account findLeastBusyStaff(LocalDate date) throws NotFoundException {
         LocalTime currentTime = LocalTime.now();
@@ -169,26 +148,60 @@ public class LabTestResultService {
         }
     }
 
+    @Transactional
+    public LabTestResultForStaffResponse updateLabTestResultForStaff(Long id, LabTestResultForStaffRequest request) throws NotFoundException {
+        LabTestResult labTestResult = labTestResultRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Kết quả xét nghiệm không tồn tại"));
+
+        labTestResult.setResultSummary(request.getResultSummary());
+        labTestResult.setResultDetails(request.getResultDetails());
+        labTestResult.setStatus(request.getStatus());
+        labTestResult.setNotes(request.getNotes());
+
+        labTestResultRepository.save(labTestResult);
+
+        LabTestResultForStaffResponse response = modelMapper.map(labTestResult, LabTestResultForStaffResponse.class);
+
+        if (labTestResult.getTest() != null) {
+            response.setLabTestName(labTestResult.getTest().getName());
+        }
+
+        if (labTestResult.getMedicalRecord() != null && labTestResult.getMedicalRecord().getUser() != null) {
+            User patient = labTestResult.getMedicalRecord().getUser();
+            response.setPatientFullName(patient.getAccount().getFullName());
+            response.setPatientDob(patient.getDob().toString());
+            response.setPatientPhoneNumber(patient.getAccount().getPhoneNumber());
+            response.setPatientGender(patient.getAccount().getGender());
+        }
+        return response;
+    }
+
+
+    public List<LabTestResultForStaffResponse> searchLabTestResults(String phoneNumber, String fullName, LocalDate testDate) {
+        List<LabTestResult> results = labTestResultRepository.searchByFilters(phoneNumber, fullName, testDate);
+
+        return results.stream().map(ltr -> {
+            LabTestResultForStaffResponse response = modelMapper.map(ltr, LabTestResultForStaffResponse.class);
+
+            if (ltr.getTest() != null) {
+                response.setLabTestName(ltr.getTest().getName());
+            }
+
+            if (ltr.getMedicalRecord() != null && ltr.getMedicalRecord().getUser() != null) {
+                Account acc = ltr.getMedicalRecord().getUser().getAccount();
+                response.setPatientFullName(acc.getFullName());
+                response.setPatientPhoneNumber(acc.getPhoneNumber());
+                response.setPatientGender(acc.getGender());
+                if (acc.getUser() != null) {
+                    response.setPatientDob(acc.getUser().getDob().toString());
+                }
+            }
+            return response;
+        }).toList();
+    }
+
+
 
 }
 
-
-//    public LabTestResult updateLabTestResult(Long id, LabTestResult updatedResult) {
-//        LabTestResult existing = labTestResultRepository.findById(id)
-//                .orElseThrow(() -> new NotFoundException("LabTestResult not found with id: " + id));
-//
-//        // update fields
-//        existing.setTestDate(updatedResult.getTestDate());
-//        existing.setResultSummary(updatedResult.getResultSummary());
-//        existing.setResultDetails(updatedResult.getResultDetails());
-//        existing.setStatus(updatedResult.getStatus());
-//        existing.setNotes(updatedResult.getNotes());
-//        existing.setLabTestType(updatedResult.getLabTestType());
-//        existing.setTest(updatedResult.getTest());
-//        existing.setAccount(updatedResult.getAccount());
-//        existing.setSession(updatedResult.getSession());
-//        existing.setMedicalRecord(updatedResult.getMedicalRecord());
-//
-//        return labTestResultRepository.save(existing);
-//    }
 

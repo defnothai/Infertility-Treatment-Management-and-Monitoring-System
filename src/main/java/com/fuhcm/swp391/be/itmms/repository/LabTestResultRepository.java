@@ -38,6 +38,23 @@ public interface LabTestResultRepository extends JpaRepository<LabTestResult, Lo
             @Param("currentTime") String currentTimeStr
     );
 
+    @Query("""
+    SELECT ltr
+    FROM LabTestResult ltr
+    JOIN ltr.medicalRecord mr
+    JOIN mr.user u
+    JOIN u.account a
+    WHERE (:phoneNumber IS NULL OR a.phoneNumber LIKE %:phoneNumber%)
+      AND (:fullName IS NULL OR a.fullName LIKE %:fullName%)
+      AND (:testDate IS NULL OR ltr.testDate = :testDate)
+""")
+    List<LabTestResult> searchByFilters(@Param("phoneNumber") String phoneNumber,
+                                        @Param("fullName") String fullName,
+                                        @Param("testDate") LocalDate testDate);
+
+
+
+
 
 
 

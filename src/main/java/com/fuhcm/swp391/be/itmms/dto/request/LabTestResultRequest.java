@@ -7,6 +7,5 @@ import java.util.List;
 @Data
 public class LabTestResultRequest {
 
-    private long medicalRecordId;
     private List<Long> testIds;
 }

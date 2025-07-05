@@ -2,16 +2,11 @@ package com.fuhcm.swp391.be.itmms.dto.response;
 
 import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LabTestResultResponse {
+public class LabTestResultForStaffResponse {
 
     private Long id;
     private LocalDate testDate;
@@ -20,5 +15,9 @@ public class LabTestResultResponse {
     private LabTestResultStatus status;
     private String notes;
     private String labTestName;
-    private String staffFullName;
+    private String patientFullName;
+    private String patientDob;
+    private String patientPhoneNumber;
+    private Gender patientGender;
+
 }
