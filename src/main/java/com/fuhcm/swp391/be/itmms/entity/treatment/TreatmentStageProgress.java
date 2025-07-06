@@ -38,6 +38,8 @@ public class TreatmentStageProgress {
     @Column(name = "DateComplete", nullable = true)
     private LocalDate dayComplete;
 
+    @Column(name = "isActive", nullable = true)
+    private boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "TreatmentPlanID", referencedColumnName = "Id")

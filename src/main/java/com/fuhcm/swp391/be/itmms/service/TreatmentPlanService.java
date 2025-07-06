@@ -26,6 +26,7 @@ public class TreatmentPlanService {
     private final ModelMapper modelMapper;
     private final ServiceService serviceService;
     private final MedicalRecordService medicalRecordService;
+    private final TreatmentStageProgressRepository treatmentStageProgressRepository;
 
     public TreatmentPlanService(TreatmentPlanRepository treatmentPlanRepository,
                                 ModelMapper modelMapper,
@@ -36,6 +37,7 @@ public class TreatmentPlanService {
         this.modelMapper = modelMapper;
         this.serviceService = serviceService;
         this.medicalRecordService = medicalRecordService;
+        this.treatmentStageProgressRepository = treatmentStageProgressRepository;
     }
 
     public List<TreatmentPlanResponse> getByMedicalRecordId(Long medicalRecordId) {
@@ -47,9 +49,11 @@ public class TreatmentPlanService {
 
             List<TreatmentStageProgressResponse> stageResponses = new ArrayList<>();
             for (TreatmentStageProgress progress : plan.getTreatmentStageProgress()) {
-                TreatmentStageProgressResponse progressResponse = modelMapper.map(progress, TreatmentStageProgressResponse.class);
-                progressResponse.setStageName(progress.getServiceStage().getName());
-                stageResponses.add(progressResponse);
+                if (progress.getServiceStage().isActive()) {
+                    TreatmentStageProgressResponse progressResponse = modelMapper.map(progress, TreatmentStageProgressResponse.class);
+                    progressResponse.setStageName(progress.getServiceStage().getName());
+                    stageResponses.add(progressResponse);
+                }
             }
             response.setTreatmentStageProgressResponses(stageResponses);
             responses.add(response);
@@ -87,6 +91,7 @@ public class TreatmentPlanService {
             progress.setPlan(plan);
             progress.setServiceStage(stage);
             progress.setStatus(TreatmentStageStatus.NOT_STARTED);
+            progress.setActive(true);
             progress.setNotes("");
             progress.setDayStart(null);
             progress.setDayComplete(null);
@@ -110,6 +115,26 @@ public class TreatmentPlanService {
         response.setDateStart(plan.getDayStart());
         return response;
     }
+
+    @Transactional
+    public TreatmentPlanResponse updateTreatmentPlan(Long planId, TreatmentPlanRequest request) throws NotFoundException {
+        TreatmentPlan existingPlan = treatmentPlanRepository.findById(planId)
+                .orElseThrow(() -> new NotFoundException("Bạn chưa tạo phác đồ điều trị trước đó"));
+        com.fuhcm.swp391.be.itmms.entity.service.Service newService = serviceService.findById(request.getServiceId());
+        existingPlan.setService(newService);
+        for (TreatmentStageProgress oldProgress : existingPlan.getTreatmentStageProgress()) {
+            oldProgress.setActive(false);
+        }
+        List<TreatmentStageProgress> newProgresses = buildStageProgresses(existingPlan, newService.getStage());
+        existingPlan.getTreatmentStageProgress().addAll(newProgresses);
+        treatmentPlanRepository.save(existingPlan);
+        return buildTreatmentPlanResponse(existingPlan, newProgresses, newService);
+    }
+
+
+
+
+
 
 
 
