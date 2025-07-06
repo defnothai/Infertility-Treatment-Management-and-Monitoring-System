@@ -20,7 +20,7 @@ public class TreatmentPlanController {
         this.treatmentPlanService = treatmentPlanService;
     }
 
-    @GetMapping("/api/treatment-plan/medical-record/{medicalRecordId}")
+    @GetMapping("/api/medical-record/{medicalRecordId}/treatment-plan")
     public ResponseEntity<?> getTreatmentPlansByMedicalRecordId(@PathVariable("medicalRecordId") Long medicalRecordId) throws NotFoundException {
         List<TreatmentPlanResponse> responses = treatmentPlanService.getByMedicalRecordId(medicalRecordId);
         if (responses.isEmpty()) {
@@ -36,12 +36,21 @@ public class TreatmentPlanController {
         );
     }
 
-    @PostMapping("/api/treatment-plan/medical-record")
+    @PostMapping("/api/medical-record/treatment-plan")
     public ResponseEntity<?> createTreatmentPlan(@RequestBody TreatmentPlanRequest request) throws NotFoundException {
         TreatmentPlanResponse response = treatmentPlanService.createTreatmentPlanWithStages(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseFormat<>(HttpStatus.CREATED.value(), "CREATE_SUCCESS", "Tạo TreatmentPlan thành công", response)
         );
+    }
+
+    @PutMapping("/api/medical-record/treatment-plan/{planId}")
+    public ResponseEntity updateTreatmentPlan(@PathVariable("planId") Long planId, @RequestBody TreatmentPlanRequest request) throws NotFoundException {
+        TreatmentPlanResponse updatedPlan = treatmentPlanService.updateTreatmentPlan(planId, request);
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "UPDATE_SUCCESS",
+                "Cập nhật phác đồ điều trị thành công",
+                updatedPlan));
     }
 
 }
