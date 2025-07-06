@@ -2,7 +2,9 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.ServiceStageRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
+import com.fuhcm.swp391.be.itmms.dto.response.TreatmentPlanResponse;
 import com.fuhcm.swp391.be.itmms.service.ServiceStageService;
+import com.fuhcm.swp391.be.itmms.service.TreatmentPlanService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import java.util.List;
 public class ServiceStageController {
 
     private final ServiceStageService serviceStageService;
+
     public ServiceStageController(ServiceStageService serviceStageService) {
         this.serviceStageService = serviceStageService;
     }
@@ -44,12 +47,7 @@ public class ServiceStageController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/api/manage/services/{serviceId}/service-stage")
-    public ResponseEntity getServiceStages(@PathVariable("serviceId") Long serviceId) throws NotFoundException {
-        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                                                      "FETCH_SUCCESS",
-                                                      "Lấy dữ liệu thành công",
-                                                     serviceStageService.getAllServiceStages(serviceId)));
-    }
+
+
 
 }

@@ -1,6 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
-import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;    
+import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -55,8 +55,6 @@ public class Appointment {
     @JoinColumn(name = "BookBy", referencedColumnName = "Id")
     private Account user;
 
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
-    private TreatmentPlan treatmentPlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctor", nullable = false)

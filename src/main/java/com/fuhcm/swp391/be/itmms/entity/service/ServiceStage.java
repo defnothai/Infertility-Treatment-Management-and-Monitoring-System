@@ -22,7 +22,7 @@ public class ServiceStage {
     @Column(name = "Id")
     private int id;
 
-    @Column(name = "Name", nullable = false, length = 50)
+    @Column(name = "Name", nullable = false, columnDefinition = "NVARCHAR(50)")
     private String name;
 
     @Column(name = "StageOrder", nullable = false)
