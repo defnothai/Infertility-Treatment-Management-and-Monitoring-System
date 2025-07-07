@@ -8,6 +8,7 @@ import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultForStaffRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
@@ -16,6 +17,7 @@ import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.LabTestResultRepository;
 import com.fuhcm.swp391.be.itmms.repository.ScheduleRepository;
+import com.fuhcm.swp391.be.itmms.repository.UltrasoundRepository;
 import jakarta.transaction.Transactional;
 import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
@@ -85,6 +87,7 @@ public class LabTestResultService {
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
+
 
     private LabTestResultResponse convertToResponse(LabTestResult result) {
         LabTestResultResponse response = modelMapper.map(result, LabTestResultResponse.class);
