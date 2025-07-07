@@ -52,7 +52,6 @@ public class SecurityConfig {
             "/api/home/**",
             "/api/doctors/**",
             "/api/services/**",
-            "/api/blogs/**",
             "/api/list/**",
             "/api/manager/**"
     };
@@ -64,6 +63,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
                         .requestMatchers(PUBLIC_API).permitAll()
 
                         // USER role
@@ -75,10 +75,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/schedules/view/**").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
 
                         // DOCTOR role
+                        .requestMatchers(HttpMethod.GET, "/api/blogs/mine").hasRole("DOCTOR")
                         .requestMatchers("/api/blogs/manage/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/patient-records/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/treatments/follow-up/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/schedules/manage/**").hasAnyRole("DOCTOR", "ADMIN")
+
+                        //STAFF role
+                        .requestMatchers(HttpMethod.GET, "/api/consultation").hasRole("STAFF")
+                        .requestMatchers(HttpMethod.PUT, "/api/consultation").hasAnyRole("STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/consultation").hasAnyRole("STAFF")
+
+                        //MANAGER role
+                        .requestMatchers(HttpMethod.GET, "/api/blogs").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/blogs").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/blogs").hasRole("MANAGER")
 
                         // ADMIN role
                         .requestMatchers("/api/invoices/**").hasAnyRole("MANAGER", "STAFF")
