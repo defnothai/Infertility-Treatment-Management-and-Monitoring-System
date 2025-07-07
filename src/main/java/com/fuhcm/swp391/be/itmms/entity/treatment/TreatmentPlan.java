@@ -41,9 +41,6 @@ public class TreatmentPlan {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TreatmentStageProgress> treatmentStageProgress;
 
-    @OneToMany(mappedBy = "plan")
-    private List<TreatmentSession> treatmentSessions;
-
     @OneToOne(mappedBy = "treatmentPlan")
     private Invoice invoice;
 }

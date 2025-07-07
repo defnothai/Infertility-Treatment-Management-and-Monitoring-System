@@ -72,10 +72,8 @@ public class TreatmentPlanService {
         plan.setService(service);
         plan.setDayStart(LocalDate.now());
 
-        // Lưu plan trước để có id (vì progress cần foreign key)
         TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
 
-        // Tạo progress và gán foreign key
         List<TreatmentStageProgress> progresses = new ArrayList<>();
         for (ServiceStage stage : service.getStage()) {
             TreatmentStageProgress progress = new TreatmentStageProgress();
@@ -99,16 +97,13 @@ public class TreatmentPlanService {
         TreatmentPlan existingPlan = treatmentPlanRepository.findById(planId)
                 .orElseThrow(() -> new NotFoundException("Bạn chưa tạo phác đồ điều trị trước đó"));
 
-        // Đổi service
         com.fuhcm.swp391.be.itmms.entity.service.Service newService = serviceService.findById(request.getServiceId());
         existingPlan.setService(newService);
 
-        // Đánh dấu các progress cũ là inactive
         for (TreatmentStageProgress progress : existingPlan.getTreatmentStageProgress()) {
             progress.setActive(false);
         }
 
-        // Tạo mới các progress
         List<TreatmentStageProgress> newProgresses = new ArrayList<>();
         for (ServiceStage stage : newService.getStage()) {
             TreatmentStageProgress progress = new TreatmentStageProgress();
@@ -120,13 +115,10 @@ public class TreatmentPlanService {
             newProgresses.add(progress);
         }
 
-        // Lưu các progress mới một cách chủ động (thay vì rely vào cascade)
         List<TreatmentStageProgress> savedProgresses = treatmentStageProgressRepository.saveAll(newProgresses);
 
-        // Thêm vào list plan
         existingPlan.getTreatmentStageProgress().addAll(savedProgresses);
 
-        // Lưu lại plan (chỉ cập nhật service, không rely vào cascade để insert progress)
         treatmentPlanRepository.save(existingPlan);
 
         return buildTreatmentPlanResponse(existingPlan, savedProgresses);
