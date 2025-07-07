@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -25,20 +26,19 @@ public class TreatmentSession {
     private Long id;
 
     @Column(name = "Date", nullable = false)
-    private Date date;
+    private LocalDate date;
 
-    @Column(name = "Diagnosis", nullable = false)
+    @Column(name = "Diagnosis", nullable = false, columnDefinition = "NVARCHAR(255)")
     private String diagnosis;
 
-    @Column(name = "Symptoms", nullable = true)
+    @Column(name = "Symptoms", nullable = true, columnDefinition = "NVARCHAR(255)")
     private String symptoms;
 
-    @Column(name = "Notes", nullable = true)
+    @Column(name = "Notes", nullable = true, columnDefinition = "NVARCHAR(255)")
     private String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "TreatmentPlanID", referencedColumnName = "Id")
-    private TreatmentPlan plan;
+    @Column(name = "isActive", nullable = false)
+    private boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "ProgressID", referencedColumnName = "Id")

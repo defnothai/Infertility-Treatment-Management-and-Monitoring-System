@@ -23,41 +23,42 @@ import java.util.List;
 public class TreatmentPlanService {
 
     private final TreatmentPlanRepository treatmentPlanRepository;
+    private final TreatmentStageProgressRepository treatmentStageProgressRepository;
     private final ModelMapper modelMapper;
     private final ServiceService serviceService;
     private final MedicalRecordService medicalRecordService;
-    private final TreatmentStageProgressRepository treatmentStageProgressRepository;
 
     public TreatmentPlanService(TreatmentPlanRepository treatmentPlanRepository,
+                                TreatmentStageProgressRepository treatmentStageProgressRepository,
                                 ModelMapper modelMapper,
                                 ServiceService serviceService,
-                                MedicalRecordService medicalRecordService,
-                                TreatmentStageProgressRepository treatmentStageProgressRepository) {
+                                MedicalRecordService medicalRecordService) {
         this.treatmentPlanRepository = treatmentPlanRepository;
+        this.treatmentStageProgressRepository = treatmentStageProgressRepository;
         this.modelMapper = modelMapper;
         this.serviceService = serviceService;
         this.medicalRecordService = medicalRecordService;
-        this.treatmentStageProgressRepository = treatmentStageProgressRepository;
     }
 
     public List<TreatmentPlanResponse> getByMedicalRecordId(Long medicalRecordId) {
         List<TreatmentPlan> plans = treatmentPlanRepository.findByMedicalRecord_Id(medicalRecordId);
         List<TreatmentPlanResponse> responses = new ArrayList<>();
+
         for (TreatmentPlan plan : plans) {
             TreatmentPlanResponse response = modelMapper.map(plan, TreatmentPlanResponse.class);
             response.setServiceName(plan.getService().getServiceName());
 
             List<TreatmentStageProgressResponse> stageResponses = new ArrayList<>();
             for (TreatmentStageProgress progress : plan.getTreatmentStageProgress()) {
-                if (progress.getServiceStage().isActive()) {
-                    TreatmentStageProgressResponse progressResponse = modelMapper.map(progress, TreatmentStageProgressResponse.class);
-                    progressResponse.setStageName(progress.getServiceStage().getName());
-                    stageResponses.add(progressResponse);
+                if (progress.isActive()) {
+                    stageResponses.add(toStageProgressResponse(progress));
                 }
             }
+
             response.setTreatmentStageProgressResponses(stageResponses);
             responses.add(response);
         }
+
         return responses;
     }
 
@@ -65,78 +66,88 @@ public class TreatmentPlanService {
     public TreatmentPlanResponse createTreatmentPlanWithStages(TreatmentPlanRequest request) throws NotFoundException {
         MedicalRecord medicalRecord = medicalRecordService.findById(request.getMedicalRecordId());
         com.fuhcm.swp391.be.itmms.entity.service.Service service = serviceService.findById(request.getServiceId());
-        TreatmentPlan plan = buildTreatmentPlan(request, medicalRecord, service);
 
-        List<TreatmentStageProgress> progresses = buildStageProgresses(plan, service.getStage());
-        plan.setTreatmentStageProgress(progresses);
-
-        // Lưu TreatmentPlan (và cascade cả progresses)
-        treatmentPlanRepository.save(plan);
-        return buildTreatmentPlanResponse(plan, progresses, service);
-    }
-
-    private TreatmentPlan buildTreatmentPlan(TreatmentPlanRequest request, MedicalRecord record,
-                                             com.fuhcm.swp391.be.itmms.entity.service.Service service) {
         TreatmentPlan plan = new TreatmentPlan();
-        plan.setMedicalRecord(record);
+        plan.setMedicalRecord(medicalRecord);
         plan.setService(service);
         plan.setDayStart(LocalDate.now());
-        return plan;
-    }
 
-    private List<TreatmentStageProgress> buildStageProgresses(TreatmentPlan plan, List<ServiceStage> serviceStages) {
+        TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
+
         List<TreatmentStageProgress> progresses = new ArrayList<>();
-        for (ServiceStage stage : serviceStages) {
+        for (ServiceStage stage : service.getStage()) {
             TreatmentStageProgress progress = new TreatmentStageProgress();
-            progress.setPlan(plan);
+            progress.setPlan(savedPlan); // gán plan đã có id
             progress.setServiceStage(stage);
             progress.setStatus(TreatmentStageStatus.NOT_STARTED);
             progress.setActive(true);
             progress.setNotes("");
-            progress.setDayStart(null);
-            progress.setDayComplete(null);
             progresses.add(progress);
         }
-        return progresses;
+
+        List<TreatmentStageProgress> savedProgresses = treatmentStageProgressRepository.saveAll(progresses);
+        savedPlan.setTreatmentStageProgress(savedProgresses);
+
+        return buildTreatmentPlanResponse(savedPlan, savedProgresses);
     }
 
-    private TreatmentPlanResponse buildTreatmentPlanResponse(TreatmentPlan plan,
-                                                             List<TreatmentStageProgress> progresses,
-                                                             com.fuhcm.swp391.be.itmms.entity.service.Service service) {
-        TreatmentPlanResponse response = modelMapper.map(plan, TreatmentPlanResponse.class);
-        response.setServiceName(service.getServiceName());
-
-        List<TreatmentStageProgressResponse> progressResponses = progresses.stream().map(progress -> {
-            TreatmentStageProgressResponse progressResponse = modelMapper.map(progress, TreatmentStageProgressResponse.class);
-            progressResponse.setStageName(progress.getServiceStage().getName());
-            return progressResponse;
-        }).toList();
-        response.setTreatmentStageProgressResponses(progressResponses);
-        response.setDateStart(plan.getDayStart());
-        return response;
-    }
 
     @Transactional
     public TreatmentPlanResponse updateTreatmentPlan(Long planId, TreatmentPlanRequest request) throws NotFoundException {
         TreatmentPlan existingPlan = treatmentPlanRepository.findById(planId)
                 .orElseThrow(() -> new NotFoundException("Bạn chưa tạo phác đồ điều trị trước đó"));
+
         com.fuhcm.swp391.be.itmms.entity.service.Service newService = serviceService.findById(request.getServiceId());
         existingPlan.setService(newService);
-        for (TreatmentStageProgress oldProgress : existingPlan.getTreatmentStageProgress()) {
-            oldProgress.setActive(false);
+
+        for (TreatmentStageProgress progress : existingPlan.getTreatmentStageProgress()) {
+            progress.setActive(false);
         }
-        List<TreatmentStageProgress> newProgresses = buildStageProgresses(existingPlan, newService.getStage());
-        existingPlan.getTreatmentStageProgress().addAll(newProgresses);
+
+        List<TreatmentStageProgress> newProgresses = new ArrayList<>();
+        for (ServiceStage stage : newService.getStage()) {
+            TreatmentStageProgress progress = new TreatmentStageProgress();
+            progress.setPlan(existingPlan);
+            progress.setServiceStage(stage);
+            progress.setStatus(TreatmentStageStatus.NOT_STARTED);
+            progress.setActive(true);
+            progress.setNotes("");
+            newProgresses.add(progress);
+        }
+
+        List<TreatmentStageProgress> savedProgresses = treatmentStageProgressRepository.saveAll(newProgresses);
+
+        existingPlan.getTreatmentStageProgress().addAll(savedProgresses);
+
         treatmentPlanRepository.save(existingPlan);
-        return buildTreatmentPlanResponse(existingPlan, newProgresses, newService);
+
+        return buildTreatmentPlanResponse(existingPlan, savedProgresses);
     }
 
 
+    private TreatmentPlanResponse buildTreatmentPlanResponse(TreatmentPlan plan, List<TreatmentStageProgress> progresses) {
+        TreatmentPlanResponse response = modelMapper.map(plan, TreatmentPlanResponse.class);
+        response.setServiceName(plan.getService().getServiceName());
 
+        List<TreatmentStageProgressResponse> progressResponses = new ArrayList<>();
+        for (TreatmentStageProgress progress : progresses) {
+            progressResponses.add(toStageProgressResponse(progress));
+        }
 
+        response.setTreatmentStageProgressResponses(progressResponses);
+        response.setDateStart(plan.getDayStart());
 
+        return response;
+    }
 
-
-
-
+    private TreatmentStageProgressResponse toStageProgressResponse(TreatmentStageProgress progress) {
+        TreatmentStageProgressResponse res = new TreatmentStageProgressResponse();
+        res.setId(progress.getId());
+        res.setDateStart(progress.getDayStart());
+        res.setDateComplete(progress.getDayComplete());
+        res.setNotes(progress.getNotes());
+        res.setStatus(progress.getStatus());
+        res.setStageName(progress.getServiceStage().getName());
+        return res;
+    }
 }
