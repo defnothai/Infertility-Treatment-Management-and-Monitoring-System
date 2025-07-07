@@ -78,9 +78,17 @@ public class Account {
     )
     private List<Role> roles;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "handler")
     @JsonIgnore
     private List<BlogPost> blogPost;
+
+    @OneToMany(mappedBy = "createdBy")
+    @JsonIgnore
+    private List<BlogPost> blogPosts;
+
+    @OneToMany(mappedBy = "deletedBy")
+    @JsonIgnore
+    private List<BlogPost> blogPosts1;
 
     @OneToMany(mappedBy = "account")
     @JsonIgnore
@@ -113,4 +121,8 @@ public class Account {
     @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<ScheduleTemplate>  scheduleTemplates;
+
+    @OneToMany(mappedBy = "staff")
+    @JsonIgnore
+    private List<Consultation>  consultations;
 }

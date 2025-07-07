@@ -51,9 +51,6 @@ public class Doctor {
     private Account account;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<BlogPost> blogPost;
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<DoctorReview> doctorReview;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
