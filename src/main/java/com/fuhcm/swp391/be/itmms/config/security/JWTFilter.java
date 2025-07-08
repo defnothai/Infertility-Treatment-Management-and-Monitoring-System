@@ -1,7 +1,5 @@
 package com.fuhcm.swp391.be.itmms.config.security;
 
-import com.fuhcm.swp391.be.itmms.entity.Account;
-import com.fuhcm.swp391.be.itmms.entity.Role;
 import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.service.JWTService;
 import com.fuhcm.swp391.be.itmms.service.MyUserDetailsService;
@@ -48,23 +46,22 @@ public class JWTFilter extends OncePerRequestFilter {
     public String getToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) return null;
-        System.out.println(authHeader.substring(7));
         return authHeader.substring(7);
     }
 
     private final List<String> PUBLIC_API = List.of(
-            "POST:/api/auth/register",
+            "POST:/api/auth/register/**",
+            "GET:/api/auth/register/**",
             "POST:/api/auth/login",
-            "POST:/api/auth/register/resend-verification-email",
             "POST:/api/auth/forgot-password",
             "POST:/api/auth/reset-password",
+            "GET:/api/home/**",
+            "GET:/api/list/**",
             "GET:/api/payment/vn-pay-callback"
     );
 
     public boolean isPublicAPI(String uri, String method) {
         AntPathMatcher matcher = new AntPathMatcher();
-
-        if(method.equals("GET")) return true;
 
         return PUBLIC_API.stream().anyMatch(pattern -> {
             String[] parts = pattern.split(":", 2);
@@ -82,9 +79,7 @@ public class JWTFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("JWT Filter activated for URI: " + request.getRequestURI());
         String token = getToken(request);
-        System.out.println("TOKEN: " + token);
 
         if (token != null && !token.isEmpty()) {
             try {
@@ -99,7 +94,6 @@ public class JWTFilter extends OncePerRequestFilter {
                                 new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
-                        System.out.println("✅ SET AUTH for user: " + email);
                     }
                 }
             } catch (ExpiredJwtException e) {
@@ -108,14 +102,11 @@ public class JWTFilter extends OncePerRequestFilter {
                 throw new AuthenticationException("Invalid token");
             }
         }
-
-        // ✅ Nếu là private API mà không có authentication → chặn
+        
         if (!isPublicAPI(request.getRequestURI(), request.getMethod()) &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
             throw new AuthenticationException("Token missing or invalid for protected API");
         }
-
-        // ✅ Cho request đi tiếp
         filterChain.doFilter(request, response);
     }
 }

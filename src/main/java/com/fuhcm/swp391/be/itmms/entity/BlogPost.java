@@ -1,12 +1,16 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fuhcm.swp391.be.itmms.constant.BlogStatus;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.NaturalId;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -22,28 +26,39 @@ public class BlogPost {
     @Column(name = "Id")
     private Long id;
 
-    @Column(name = "Title", nullable = false, length = 255)
+    @Column(name = "Title", nullable = false, length = 1000)
+    @Nationalized
     private String title;
 
-    @Column(name = "Content", nullable = false, length = 255)
+    @Lob
+    @Column(name = "Content", nullable = false)
+    @Nationalized
     private String content;
 
     @Column(name = "CreatedAt", nullable = false)
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "Status", nullable = false, length = 10)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private BlogStatus status;
 
-    @Column(name = "ApprovedAt", nullable = false)
-    private Date approvedAt;
+    @Column(name = "HandledAt", nullable = true)
+    private LocalDate handleAt;
+
+    @Column(name = "DeletedAt", nullable = true)
+    private LocalDate deletedAt;
 
     @ManyToOne
-    @JoinColumn(name = "ApprovedBy", referencedColumnName = "Id")
-    private Account account;
+    @JoinColumn(name = "DeletedBy", referencedColumnName = "Id")
+    private Account deletedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "Handler", referencedColumnName = "Id")
+    private Account handler;
 
     @ManyToOne
     @JoinColumn(name = "CreatedBy", referencedColumnName = "Id")
-    private Doctor doctor;
+    private Account createdBy;
 
 
 }

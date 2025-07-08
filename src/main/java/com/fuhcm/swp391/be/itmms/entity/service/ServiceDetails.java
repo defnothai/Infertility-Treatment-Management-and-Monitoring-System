@@ -17,36 +17,58 @@ public class ServiceDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
-    private int id;
+    private Long id;
 
-    @Column(name = "Concept", nullable = false)
+    @Lob
+    @Column(name = "Concept", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String concept;
 
-    @Column(name = "Condition", nullable = false)
+    @Column(name = "ConceptImgUrl", nullable = false)
+    @Lob
+    private String conceptImgUrl;
+
+    @Lob
+    @Column(name = "Condition", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String condition;
 
-    @Column(name = "Assignment", nullable = false)
+    @Lob
+    @Column(name = "Assignment", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String assignment;
 
-    @Column(name = "UnAssignment", nullable = false)
+    @Lob
+    @Column(name = "UnAssignment", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String unAssignment;
 
-    @Column(name = "ProcedureDetails", nullable = false)
+    @Lob
+    @Column(name = "ProcedureDetails", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String procedureDetails;
 
-    @Column(name = "SuccessRate", nullable = false)
+    @Column(name = "ProcedureDetailsImgUrl", nullable = false)
+    @Lob
+    private String procedureDetailsImgUrl;
+
+    @Lob
+    @Column(name = "SuccessRate", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String successRate;
 
-    @Column(name = "Experience", nullable = false)
+    @Lob
+    @Column(name = "Experience", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String experience;
 
-    @Column(name = "Risk", nullable = false)
+    @Lob
+    @Column(name = "Risk", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String risk;
 
-    @Column(name = "ProcedureName", nullable = false)
-    private String procedure;
+    @Lob
+    @Column(name = "HospitalProcedure", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    private String hospitalProcedure;
 
-    @ManyToOne
+    @Lob
+    @Column(name = "HospitalProcedureImgUrl", nullable = false)
+    private String hospitalProcedureImgUrl;
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ServiceID", referencedColumnName = "Id")
     private Service service;
+
 }

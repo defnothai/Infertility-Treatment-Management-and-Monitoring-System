@@ -3,10 +3,7 @@ package com.fuhcm.swp391.be.itmms.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
@@ -15,7 +12,6 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "Role")
 public class Role implements GrantedAuthority {
 
@@ -23,6 +19,10 @@ public class Role implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private int id;
+
+    public Role(AccountRole roleName) {
+        this.roleName = roleName;
+    }
 
     @Column(name = "RoleName", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
@@ -36,4 +36,6 @@ public class Role implements GrantedAuthority {
     public String getAuthority() {
         return this.roleName.name();
     }
+
+
 }

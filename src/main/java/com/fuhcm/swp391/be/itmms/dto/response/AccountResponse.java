@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class AccountResponse {
-    private long id;
+    private Long id;
     private String fullName;
     private String email;
     private LocalDateTime createdAt;
@@ -20,8 +20,4 @@ public class AccountResponse {
     private Gender gender;
     private Account createdBy;
 
-    public AccountResponse(long id, String fullName){
-        this.id = id;
-        this.fullName = fullName;
-    }
 }

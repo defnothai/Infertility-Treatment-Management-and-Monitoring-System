@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.doctor;
 
+import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,10 @@ public class Doctor {
     @Column(name = "Position", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String position;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EmploymentStatus status;
+
     @Column(name = "Achivements", nullable = true, length = 255, columnDefinition = "NVARCHAR(MAX)")
     private String achivements;
 
@@ -42,11 +47,8 @@ public class Doctor {
     private String imgUrl;
 
     @OneToOne
-    @JoinColumn(name = "AccountID", referencedColumnName = "Id")
+    @JoinColumn(name = "AccountId", referencedColumnName = "Id")
     private Account account;
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<BlogPost> blogPost;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<DoctorReview> doctorReview;

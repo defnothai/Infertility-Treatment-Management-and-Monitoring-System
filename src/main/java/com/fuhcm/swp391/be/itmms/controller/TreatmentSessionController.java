@@ -1,0 +1,76 @@
+package com.fuhcm.swp391.be.itmms.controller;
+
+import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
+import com.fuhcm.swp391.be.itmms.dto.response.TreatmentSessionResponse;
+import com.fuhcm.swp391.be.itmms.service.TreatmentSessionService;
+import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+public class TreatmentSessionController {
+
+    private final TreatmentSessionService treatmentSessionService;
+
+    @GetMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions")
+    public ResponseEntity getByProgress(@PathVariable Long progressId) throws NotFoundException {
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "FETCH_SUCCESS",
+                        "Lấy dữ liệu các buổi khám thành công",
+                        treatmentSessionService.getByProgressId(progressId)));
+    }
+
+    @PostMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions")
+    public ResponseEntity<?> create(
+            @PathVariable Long progressId,
+            @RequestBody TreatmentSessionRequest request
+    ) throws NotFoundException {
+        TreatmentSessionResponse response = treatmentSessionService.create(progressId, request);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "CREATE_SUCCESS",
+                        "Tạo buổi khám thành công",
+                        response
+                )
+        );
+    }
+
+    @DeleteMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
+    public ResponseEntity<?> softDelete(@PathVariable Long sessionId) throws NotFoundException {
+        treatmentSessionService.softDeleteById(sessionId);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "DELETE_SUCCESS",
+                        "Xóa buổi khám thành công",
+                        null
+                )
+        );
+    }
+
+    @PutMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
+    public ResponseEntity<?> updateSession(
+            @PathVariable Long sessionId,
+            @RequestBody TreatmentSessionRequest request
+    ) throws NotFoundException {
+        TreatmentSessionResponse response = treatmentSessionService.update(sessionId, request);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "UPDATE_SUCCESS",
+                        "Cập nhật buổi khám thành công",
+                        response
+                )
+        );
+    }
+
+
+
+}

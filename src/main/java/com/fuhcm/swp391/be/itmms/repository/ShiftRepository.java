@@ -9,8 +9,8 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 @Repository
-public interface ShiftRepository extends JpaRepository<Shift, Integer> {
-    Optional<Shift> findById(int id);
+public interface ShiftRepository extends JpaRepository<Shift, Long> {
+    Optional<Shift> findById(long id);
 
     @Query(
             value = "SELECT TOP 1 * FROM Shift " +

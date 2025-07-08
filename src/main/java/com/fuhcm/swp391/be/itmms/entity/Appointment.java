@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Date;
+import java.time.LocalTime;
 
 @Entity
 @Setter
@@ -47,12 +47,6 @@ public class Appointment {
     @Column(name = "PatientName", nullable = false, length = 20)
     private String patientName;
 
-    @Column(name = "PhoneNumber", nullable = false, length = 20)
-    private String phoneNumber;
-
-    @Column(name = "Message", nullable = true, length = 1000)
-    private String message;
-
     @ManyToOne
     @JoinColumn(name = "Schedule_Id", referencedColumnName = "Id")
     private Schedule schedule;
@@ -61,8 +55,6 @@ public class Appointment {
     @JoinColumn(name = "BookBy", referencedColumnName = "Id")
     private Account user;
 
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
-    private TreatmentPlan treatmentPlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctor", nullable = false)

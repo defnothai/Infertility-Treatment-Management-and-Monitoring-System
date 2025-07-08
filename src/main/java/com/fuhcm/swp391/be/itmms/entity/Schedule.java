@@ -1,6 +1,8 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
+import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,6 +42,10 @@ public class Schedule {
 
     @Column(name = "Note", nullable = true, length = 255)
     private String note;
+
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private ScheduleStatus status;
 
     @JsonIgnore
     @ManyToOne

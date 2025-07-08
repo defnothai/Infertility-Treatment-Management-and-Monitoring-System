@@ -61,14 +61,16 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy")
     private Account createdBy;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "account")
+    @JsonIgnore
     private User user;
 
-    @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     @JoinTable(
             name = "AccountRoles",
             joinColumns = @JoinColumn(name = "userId"),
@@ -76,59 +78,51 @@ public class Account {
     )
     private List<Role> roles;
 
+    @OneToMany(mappedBy = "handler")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BlogPost> blogPost;
 
+    @OneToMany(mappedBy = "createdBy")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BlogPost> blogPosts;
+
+    @OneToMany(mappedBy = "deletedBy")
+    @JsonIgnore
+    private List<BlogPost> blogPosts1;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
     private List<Report> report;
 
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "assignTo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Schedule> schedules2;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Service> services;
 
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MedicalRecordAccess> medicalRecordAccess;
 
-    @OneToMany(mappedBy = "grantedTo")
-    private List<MedicalRecordAccess> grantedAccesses;
-
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Application> applications;
 
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invoice> invoices;
 
+    @OneToMany(mappedBy = "account")
     @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<LabTestResult> labTestResults;
 
     @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<ScheduleTemplate>  scheduleTemplates;
 
+    @OneToMany(mappedBy = "staff")
     @JsonIgnore
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Appointment> appointments;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Appointment> appointments2;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-    private List<Invoice> invoices2;
-
+    private List<Consultation>  consultations;
 }

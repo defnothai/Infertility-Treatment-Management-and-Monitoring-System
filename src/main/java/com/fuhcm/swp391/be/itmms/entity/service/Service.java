@@ -1,5 +1,7 @@
     package com.fuhcm.swp391.be.itmms.entity.service;
 
+    import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+    import com.fuhcm.swp391.be.itmms.constant.ServiceStatus;
     import com.fuhcm.swp391.be.itmms.entity.Account;
     import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
     import jakarta.persistence.*;
@@ -21,7 +23,7 @@
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "Id")
-        private int id;
+        private Long id;
 
         @Column(name = "ServiceName", nullable = false, columnDefinition = "NVARCHAR(100)")
         private String serviceName;
@@ -40,7 +42,12 @@
         private String slug;
 
         @Column(name = "ImgUrl", nullable = false)
+        @Lob
         private String imgUrl;
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "Status", nullable = false)
+        private ServiceStatus status;
 
         @ManyToOne
         @JoinColumn(name = "ManageBy", referencedColumnName = "Id")
@@ -52,9 +59,21 @@
         @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
         private List<ServiceReview> reviews;
 
-        @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
-        private List<ServiceDetails> details;
-
         @OneToMany(mappedBy = "service")
         private List<TreatmentPlan> plans;
+
+        @Override
+        public String toString() {
+            return "Service{" +
+                    "status=" + status +
+                    ", id=" + id +
+                    ", serviceName='" + serviceName + '\'' +
+                    ", subTitle='" + subTitle + '\'' +
+                    ", price=" + price +
+                    ", summary='" + summary + '\'' +
+                    ", slug='" + slug + '\'' +
+                    ", imgUrl='" + imgUrl + '\'' +
+                    ", account=" + account +
+                    '}';
+        }
     }

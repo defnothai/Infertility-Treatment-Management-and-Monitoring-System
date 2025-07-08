@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,10 +44,12 @@ public class JWTService {
     public String generateJWT(String email) {
 
         Map<String, Object> claims = new HashMap<String, Object>();
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
         List<String> roleNames = account.getRoles().stream()
-                .map(role -> role.getRoleName().name()) // "ADMIN", "USER"
+                .map(role -> role.getRoleName().name())
                 .collect(Collectors.toList());
         claims.put("roles", roleNames);
 
@@ -81,19 +86,8 @@ public class JWTService {
                 getPayload();
     }
 
-    public List<GrantedAuthority> getAuthoritiesFromToken(String token) {
-        Claims claims = extractAllClaims(token);
-        List<String> roles = claims.get("roles", List.class);
-
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-    }
-
-
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractEmail(token);
-        System.out.println("Set auth for :" + username);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
@@ -105,4 +99,12 @@ public class JWTService {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public List<GrantedAuthority> getAuthoritiesFromToken(String token) {
+        Claims claims = extractAllClaims(token);
+        List<String> roles = claims.get("roles", List.class);
+
+        return roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
 }

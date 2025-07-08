@@ -1,48 +1,59 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
-import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
-import org.springframework.beans.factory.annotation.Autowired;
+import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Set;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
 public class AccountController {
 
-    @Autowired
-    private AccountService accountService;
+    private final AccountService accountService;
 
-    @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<?>> getProfile(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(false, "Chưa đăng nhập hoặc token không hợp lệ", null));
-        }
-        ProfileResponse profileResponse = accountService.getProfile(authentication);
-        if(profileResponse == null){
-            return ResponseEntity.ok(new ApiResponse<>(true, "Lấy profile không thành công", null));
-        }
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy profile thành công", profileResponse));
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/appointments/available-doctors")
-    public ResponseEntity<ApiResponse<?>> getAvailableDoctors(Authentication authentication) {
-        Set<AccountResponse> availableDoctors = accountService.getAvailableDoctors();
-        if(availableDoctors == null ||  availableDoctors.isEmpty()){
-            return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách doctor thất bại", null));
+    @GetMapping("/api/patients")
+    public ResponseEntity getPatientList(
+            @RequestParam(value = "phone-number", required = false) String phoneNumber,
+            @RequestParam(value = "email", required = false) String email
+    ) throws NotFoundException {
+        if (phoneNumber != null) {
+            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                    "FETCH_DATA_SUCCESS",
+                    "Lấy thông tin theo số điện thoại thành công",
+                    accountService.searchPatientByPhoneNumber(phoneNumber)));
+        } else if (email != null) {
+            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                    "FETCH_DATA_SUCCESS",
+                    "Lấy thông tin theo email thành công",
+                    accountService.searchPatientByEmail(email)));
+        } else {
+            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                    "FETCH_DATA_SUCCESS",
+                    "Lấy tất cả bệnh nhân thành công",
+                    accountService.getPatientInfo()));
         }
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách doctor thành công",  availableDoctors));
+    }
+
+    @GetMapping("/api/user/profile")
+    public ResponseEntity getUserProfile(Authentication authentication) throws NotFoundException {
+        ProfileResponse profileResponse = accountService.getUserProfile(authentication);
+        if(profileResponse == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseFormat<>(HttpStatus.NOT_FOUND.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy thông tin profile thất bại",
+                            null));
+        }
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "FETCH_DATA_SUCCESS",
+                "Lấy thông tin profile thành công",
+                profileResponse));
     }
 }

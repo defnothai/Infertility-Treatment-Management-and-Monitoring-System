@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -27,15 +28,11 @@ public class TreatmentPlan {
     private Long id;
 
     @Column(name = "DateStart")
-    private Date dayStart;
+    private LocalDate dayStart;
 
     @ManyToOne
     @JoinColumn(name = "ServiceID", referencedColumnName = "Id")
     private Service service;
-
-    @OneToOne
-    @JoinColumn(name = "AppointmentID", referencedColumnName = "Id")
-    private Appointment appointment;
 
     @OneToOne
     @JoinColumn(name = "MedicalRecordID", referencedColumnName = "Id")
@@ -44,9 +41,6 @@ public class TreatmentPlan {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
     private List<TreatmentStageProgress> treatmentStageProgress;
 
-    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
-    private List<TreatmentSession> treatmentSessions;
-
-    @OneToOne(mappedBy = "treatmentPlan", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "treatmentPlan")
     private Invoice invoice;
 }

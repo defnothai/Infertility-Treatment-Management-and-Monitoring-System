@@ -56,7 +56,8 @@ public class SecurityConfig {
             "/api/home/**",
             "/api/doctors/**",
             "/api/services/**",
-            "/api/blogs/**"
+            "/api/list/**",
+            "/api/manager/**"
     };
 
     @Bean
@@ -68,6 +69,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
                         .requestMatchers(PUBLIC_API).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
@@ -82,16 +84,27 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/schedules/view/**").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
 
                         // DOCTOR role
+                        .requestMatchers(HttpMethod.GET, "/api/blogs/mine").hasRole("DOCTOR")
                         .requestMatchers("/api/blogs/manage/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/patient-records/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/treatments/follow-up/**").hasAnyRole("DOCTOR", "ADMIN")
                         .requestMatchers("/api/schedules/manage/**").hasAnyRole("DOCTOR", "ADMIN")
 
+                        //STAFF role
+                        .requestMatchers(HttpMethod.GET, "/api/consultation").hasRole("STAFF")
+                        .requestMatchers(HttpMethod.PUT, "/api/consultation").hasAnyRole("STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/consultation").hasAnyRole("STAFF")
+
+                        //MANAGER role
+                        .requestMatchers(HttpMethod.GET, "/api/blogs").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/api/blogs").hasRole("MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/blogs").hasRole("MANAGER")
+
                         // ADMIN role
                         .requestMatchers("/api/invoices/**").hasAnyRole("MANAGER", "STAFF")
                         .requestMatchers("/api/reminders/**").hasRole("ADMIN")
                         .requestMatchers("/api/medical-records/authorize/**").hasRole("MANAGER")
-                        .requestMatchers("/api/services/manage/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/api/service/manage/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/reviews/manage/**").hasRole("ADMIN")
                         .requestMatchers("/api/accounts/manage/**").hasRole("ADMIN")
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")

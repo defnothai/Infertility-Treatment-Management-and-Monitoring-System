@@ -18,6 +18,6 @@ public class LoginResponse {
     private AccountStatus status;
     private String phoneNumber;
     private Gender gender;
+    private List<Role> roles;
     private String token;
-
 }
