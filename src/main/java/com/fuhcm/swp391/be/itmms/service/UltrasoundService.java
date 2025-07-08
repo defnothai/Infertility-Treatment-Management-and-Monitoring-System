@@ -6,13 +6,18 @@ import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
+import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.MedicalRecordRepository;
+import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
 import com.fuhcm.swp391.be.itmms.repository.UltrasoundRepository;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +31,7 @@ public class UltrasoundService {
     private final ModelMapper modelMapper;
     private final AccountRepository accountRepository;
     private final MedicalRecordRepository medicalRecordRepository;
+    private final TreatmentSessionRepository treatmentSessionRepository;
 
     public List<UltrasoundResponse> getInitialUltrasoundsByMedicalRecordId(Long medicalRecordId) {
         List<Ultrasound> ultrasounds = ultrasoundRepository.findByMedicalRecordIdAndTypeAndIsActiveTrue(
@@ -87,6 +93,37 @@ public class UltrasoundService {
         ultrasound.setActive(false);
         ultrasoundRepository.save(ultrasound);
     }
+
+    @Transactional
+    public UltrasoundResponse createFollowUpUltrasound(Long sessionId, UltrasoundRequest request, Authentication authentication) throws NotFoundException {
+        TreatmentSession session = treatmentSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
+
+        MedicalRecord medicalRecord = medicalRecordRepository.findById(request.getMedicalRecordId())
+                .orElseThrow(() -> new NotFoundException("Medical record not found"));
+
+        Account doctor = accountRepository.findByEmail(authentication.getName());
+
+        Ultrasound ultrasound = new Ultrasound();
+        ultrasound.setDate(LocalDate.now());
+        ultrasound.setResult(request.getResult());
+        ultrasound.setImageUrls(String.join(";", request.getImageUrls()));
+        ultrasound.setType(UltrasoundType.FOLLOW_UP);
+        ultrasound.setActive(true);
+        ultrasound.setSession(session);
+        ultrasound.setMedicalRecord(medicalRecord);
+        ultrasound.setDoctor(doctor);
+        ultrasound = ultrasoundRepository.save(ultrasound);
+
+        UltrasoundResponse response = new UltrasoundResponse();
+        response.setId(ultrasound.getId());
+        response.setDate(ultrasound.getDate());
+        response.setResult(ultrasound.getResult());
+        response.setImgUrls(request.getImageUrls());
+
+        return response;
+    }
+
 
 
 }

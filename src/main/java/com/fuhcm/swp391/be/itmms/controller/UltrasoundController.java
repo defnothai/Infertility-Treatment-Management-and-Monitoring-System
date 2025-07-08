@@ -4,6 +4,7 @@ import com.fuhcm.swp391.be.itmms.dto.request.UltrasoundRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.service.UltrasoundService;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,24 @@ public class UltrasoundController {
                 )
         );
     }
+
+    @PostMapping("/api/treatment-sessions/{sessionId}/follow-up-ultrasound")
+    public ResponseEntity<?> createFollowUpUltrasound(
+            @PathVariable Long sessionId,
+            @RequestBody UltrasoundRequest request,
+            Authentication authentication) throws NotFoundException {
+
+        UltrasoundResponse response = ultrasoundService.createFollowUpUltrasound(sessionId, request, authentication);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseFormat<>(
+                        HttpStatus.CREATED.value(),
+                        "CREATE_SUCCESS",
+                        "Tạo kết quả siêu âm FOLLOW_UP thành công",
+                        response
+                ));
+    }
+
 
 
 
