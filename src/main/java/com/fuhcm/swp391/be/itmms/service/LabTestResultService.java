@@ -8,18 +8,19 @@ import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultForStaffRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
 import com.fuhcm.swp391.be.itmms.entity.User;
+import com.fuhcm.swp391.be.itmms.entity.lab.LabTest;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
-import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
-import com.fuhcm.swp391.be.itmms.repository.LabTestResultRepository;
-import com.fuhcm.swp391.be.itmms.repository.ScheduleRepository;
-import com.fuhcm.swp391.be.itmms.repository.UltrasoundRepository;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
+import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
+import com.fuhcm.swp391.be.itmms.repository.*;
 import jakarta.transaction.Transactional;
 import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class LabTestResultService {
 
     private final LabTestResultRepository labTestResultRepository;
@@ -39,21 +41,8 @@ public class LabTestResultService {
     private final AccountRepository accountRepository;
     private final ScheduleRepository scheduleRepository;
     private final RoleService roleService;
-
-    public LabTestResultService(LabTestResultRepository labTestResultRepository,
-                                LabTestService labTestService,
-                                ModelMapper modelMapper,
-                                MedicalRecordService medicalRecordService,
-                                AccountRepository accountRepository,
-                                ScheduleRepository scheduleRepository, RoleService roleService) {
-        this.labTestResultRepository = labTestResultRepository;
-        this.labTestService = labTestService;
-        this.modelMapper = modelMapper;
-        this.medicalRecordService = medicalRecordService;
-        this.accountRepository = accountRepository;
-        this.scheduleRepository = scheduleRepository;
-        this.roleService = roleService;
-    }
+    private final TreatmentSessionRepository treatmentSessionRepository;
+    private final LabTestRepository labTestRepository;
 
     @Transactional
     public List<LabTestResultResponse> sendInitLabTestRequest(Long recordId,
@@ -200,6 +189,44 @@ public class LabTestResultService {
                 }
             }
             return response;
+        }).toList();
+    }
+
+    @Transactional
+    public List<LabTestResultResponse> sendFollowUpLabTestResultsRequest(Long recordId, Long sessionId, LabTestResultRequest request) throws NotFoundException, BadRequestException {
+        TreatmentSession session = treatmentSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
+
+        MedicalRecord medicalRecord = medicalRecordService.findById(recordId);
+
+        Account staff = this.findLeastBusyStaff(LocalDate.now());
+
+        List<LabTest> tests = labTestRepository.findAllById(request.getTestIds());
+        if (tests.isEmpty()) {
+            throw new BadRequestException("Không có sẵn dịch vụ cho các loại xét nghiệm này");
+        }
+
+        List<LabTestResult> savedResults = new ArrayList<>();
+        for (LabTest test : tests) {
+            LabTestResult result = new LabTestResult();
+            result.setTestDate(LocalDate.now());
+            result.setStatus(LabTestResultStatus.PROCESSING);
+            result.setLabTestType(LabTestResultType.FOLLOW_UP);
+            result.setTest(test);
+            result.setAccount(staff);
+            result.setSession(session);
+            result.setMedicalRecord(medicalRecord);
+            savedResults.add(labTestResultRepository.save(result));
+        }
+
+        return savedResults.stream().map(result -> {
+            LabTestResultResponse dto = new LabTestResultResponse();
+            dto.setId(result.getId());
+            dto.setTestDate(result.getTestDate());
+            dto.setStatus(result.getStatus());
+            dto.setLabTestName(result.getTest().getName());
+            dto.setStaffFullName(result.getAccount().getFullName());
+            return dto;
         }).toList();
     }
 

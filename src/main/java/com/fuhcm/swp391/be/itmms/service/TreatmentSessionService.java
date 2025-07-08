@@ -1,7 +1,11 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.SessionDetailsResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentSessionResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
+import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentStageProgress;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
@@ -68,6 +72,42 @@ public class TreatmentSessionService {
         session.setNotes(request.getNotes());
         TreatmentSession updated = sessionRepository.save(session);
         return modelMapper.map(updated, TreatmentSessionResponse.class);
+    }
+
+    public SessionDetailsResponse getSessionDetail(Long sessionId) throws NotFoundException {
+        TreatmentSession session = treatmentSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
+
+        SessionDetailsResponse response = new SessionDetailsResponse();
+
+        List<LabTestResultResponse> labResponses = session.getLabTestResults().stream()
+                .map(lab -> {
+                    LabTestResultResponse dto = new LabTestResultResponse();
+                    dto.setId(lab.getId());
+                    dto.setTestDate(lab.getTestDate());
+                    dto.setResultSummary(lab.getResultSummary());
+                    dto.setResultDetails(lab.getResultDetails());
+                    dto.setStatus(lab.getStatus());
+                    dto.setNotes(lab.getNotes());
+                    dto.setLabTestName(lab.getTest().getName());
+                    dto.setStaffFullName(lab.getAccount().getFullName());
+                    return dto;
+                }).toList();
+        response.setLabTestResults(labResponses);
+
+        List<UltrasoundResponse> usResponses = session.getUltrasounds().stream()
+                .filter(Ultrasound::isActive)
+                .map(us -> {
+                    UltrasoundResponse dto = new UltrasoundResponse();
+                    dto.setId(us.getId());
+                    dto.setDate(us.getDate());
+                    dto.setResult(us.getResult());
+                    dto.setImgUrls(List.of(us.getImageUrls().split(";")));
+                    return dto;
+                }).toList();
+        response.setUltrasounds(usResponses);
+
+        return response;
     }
 
 

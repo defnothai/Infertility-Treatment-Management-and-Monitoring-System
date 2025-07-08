@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
+import com.fuhcm.swp391.be.itmms.dto.response.SessionDetailsResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentSessionResponse;
 import com.fuhcm.swp391.be.itmms.service.TreatmentSessionService;
 import javassist.NotFoundException;
@@ -70,6 +71,20 @@ public class TreatmentSessionController {
                 )
         );
     }
+
+    @GetMapping("/api/treatment-sessions/{sessionId}/details")
+    public ResponseEntity<?> getSessionDetail(@PathVariable Long sessionId) throws NotFoundException {
+        SessionDetailsResponse response = treatmentSessionService.getSessionDetail(sessionId);
+        return ResponseEntity.ok(new ResponseFormat<>(
+                HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy chi tiết buổi điều trị thành công",
+                response
+        ));
+    }
+
+
+
 
 
 
