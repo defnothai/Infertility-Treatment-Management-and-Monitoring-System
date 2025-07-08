@@ -108,11 +108,9 @@ public class PrescriptionService {
         if (prescriptions.isEmpty()) {
             throw new NotFoundException("Không có đơn thuốc nào cho buổi khám này");
         }
-
         List<PrescriptionResponse> result = new ArrayList<>();
         for (Prescription p : prescriptions) {
             PrescriptionResponse res = modelMapper.map(p, PrescriptionResponse.class);
-
             List<MedicationPrescriptionResponse> meds = p.getMedicationPrescriptions().stream()
                     .filter(MedicationPrescription::isActive)
                     .map(mp -> {
@@ -121,7 +119,6 @@ public class PrescriptionService {
                         return r;
                     })
                     .toList();
-
             res.setMedications(meds);
             result.add(res);
         }
