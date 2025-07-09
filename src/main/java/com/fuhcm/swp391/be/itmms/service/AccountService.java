@@ -95,6 +95,13 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
+    public List<AccountBasic> getDoctorAccounts() {
+        List<Account> doctors = accountRepo.findByRoles(roleService.findByRoleName(AccountRole.ROLE_DOCTOR));
+        return doctors.stream()
+                .map(AccountBasic::new)
+                .collect(Collectors.toList());
+    }
+
     public ProfileResponse getUserProfile(Authentication authentication) {
         Account account = accountRepo.findByEmail(authentication.getName());
         if(account == null){

@@ -55,7 +55,6 @@ public class Appointment {
     @JoinColumn(name = "BookBy", referencedColumnName = "Id")
     private Account user;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctor", nullable = false)
     private Account doctor;

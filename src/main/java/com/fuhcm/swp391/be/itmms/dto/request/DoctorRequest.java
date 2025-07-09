@@ -1,18 +1,10 @@
-package com.fuhcm.swp391.be.itmms.dto.response;
-
+package com.fuhcm.swp391.be.itmms.dto.request;
 
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DoctorResponse {
-
-    private Long id;
-    private String fullName;
+public class DoctorRequest {
     private String expertise;
     private String position;
     private EmploymentStatus status;
@@ -20,5 +12,4 @@ public class DoctorResponse {
     private String description;
     private String slug;
     private String imgUrl;
-
 }

@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
+import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
 import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class AccountController {
@@ -55,5 +58,16 @@ public class AccountController {
                 "FETCH_DATA_SUCCESS",
                 "Lấy thông tin profile thành công",
                 profileResponse));
+    }
+
+    @GetMapping("/api/manage/doctors")
+    public ResponseEntity getDoctorAccounts() {
+        List<AccountBasic> doctorAccounts = accountService.getDoctorAccounts();
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách tài khoản bác sĩ thành công",
+                        doctorAccounts)
+        );
     }
 }

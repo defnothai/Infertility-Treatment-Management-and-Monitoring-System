@@ -30,11 +30,11 @@ public class Doctor {
     private String position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "Status", nullable = false)
     private EmploymentStatus status;
 
-    @Column(name = "Achivements", nullable = true, length = 255, columnDefinition = "NVARCHAR(MAX)")
-    private String achivements;
+    @Column(name = "Achievements", nullable = true, length = 255, columnDefinition = "NVARCHAR(MAX)")
+    private String achievements;
 
     @Column(name = "Description", nullable = false, length = 255, columnDefinition = "NVARCHAR(MAX)")
     @Lob
