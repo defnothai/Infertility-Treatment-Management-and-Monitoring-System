@@ -1,18 +1,15 @@
-package com.fuhcm.swp391.be.itmms.dto.response;
+package com.fuhcm.swp391.be.itmms.dto.request;
 
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class HospitalAchievementResponse {
+public class HospitalAchievementRequest {
 
-    private Long id;
     private String title;
     private String description;
     private LocalDate achievedAt;
     private String imgUrl;
-    private String slug;
-    private String createdByName;
 
 }

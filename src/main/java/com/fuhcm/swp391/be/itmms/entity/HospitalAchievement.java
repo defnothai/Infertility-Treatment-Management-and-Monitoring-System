@@ -22,25 +22,25 @@ public class HospitalAchievement {
     @Column(name = "Title", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String title;
 
-    @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Description", columnDefinition = "NVARCHAR(MAX)", nullable = false)
     @Lob
     private String description;
 
-    @Column(name = "AchievedAt")
+    @Column(name = "AchievedAt", nullable = false)
     private LocalDate achievedAt;
 
-    @Column(name = "ImgUrl")
+    @Column(name = "ImgUrl", nullable = false)
     @Lob
     private String imgUrl;
 
-    @Column(name = "Status", nullable = false, length = 10)
-    private String status;
+    @Column(name = "IsActive", nullable = false)
+    private boolean isActive;
 
     @Column(name = "Slug", nullable = false)
     private String slug;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CreatedBy")
+    @JoinColumn(name = "CreatedBy", nullable = false)
     private Account createdBy;
 }
 
