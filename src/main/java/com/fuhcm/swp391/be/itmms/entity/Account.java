@@ -125,4 +125,7 @@ public class Account {
     @OneToMany(mappedBy = "staff")
     @JsonIgnore
     private List<Consultation>  consultations;
+
+    @OneToMany(mappedBy = "doctor")
+    private List<Ultrasound> ultrasounds;
 }

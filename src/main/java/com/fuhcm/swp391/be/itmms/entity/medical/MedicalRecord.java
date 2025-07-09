@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.entity.medical;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import com.fuhcm.swp391.be.itmms.entity.User;
@@ -50,4 +51,7 @@ public class MedicalRecord {
 
     @OneToMany(mappedBy = "medicalRecord")
     private List<LabTestResult> labTestResults;
+
+    @OneToMany(mappedBy = "medicalRecord")
+    private List<Ultrasound> ultrasounds;
 }

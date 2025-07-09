@@ -13,4 +13,5 @@ public class TreatmentPlanResponse {
     private String serviceName;
     private List<TreatmentStageProgressResponse> treatmentStageProgressResponses;
 
+
 }

@@ -27,13 +27,14 @@ public class MedicalRecordService {
     private final AccountService accountService;
     private final LabTestResultService labTestResultService;
     private final ModelMapper modelMapper;
+    private final UltrasoundService ultrasoundService;
 
     public MedicalRecordService(MedicalRecordRepository medicalRecordRepository,
                                 UserService userService,
                                 MedicalRecordAccessRepository medicalRecordAccessRepository,
                                 AuthenticationService authenticationService,
                                 AccountService accountService,
-                                @Lazy LabTestResultService labTestResultService, ModelMapper modelMapper) {
+                                @Lazy LabTestResultService labTestResultService, ModelMapper modelMapper, UltrasoundService ultrasoundService) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.userService = userService;
         this.medicalRecordAccessRepository = medicalRecordAccessRepository;
@@ -41,6 +42,7 @@ public class MedicalRecordService {
         this.accountService = accountService;
         this.labTestResultService = labTestResultService;
         this.modelMapper = modelMapper;
+        this.ultrasoundService = ultrasoundService;
     }
 
 
@@ -87,7 +89,7 @@ public class MedicalRecordService {
         response.setInsuranceNumber(user.getInsuranceNumber());
 
         response.setInitLabTestResults(labTestResultService.getInitLabTestResults(medicalRecord.getId()));
-
+        response.setInitUltrasounds(ultrasoundService.getInitialUltrasoundsByMedicalRecordId(medicalRecord.getId()));
         return response;
     }
 
