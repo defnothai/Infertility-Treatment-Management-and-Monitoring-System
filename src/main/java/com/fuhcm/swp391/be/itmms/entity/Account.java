@@ -128,4 +128,7 @@ public class Account {
 
     @OneToMany(mappedBy = "doctor")
     private List<Ultrasound> ultrasounds;
+
+    @OneToMany(mappedBy = "createdBy")
+    private List<HospitalAchievement> achievements;
 }

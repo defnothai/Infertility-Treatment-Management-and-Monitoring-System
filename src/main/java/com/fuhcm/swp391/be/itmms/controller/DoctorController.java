@@ -64,6 +64,18 @@ public class DoctorController {
         );
     }
 
+    @PostMapping("/api/manage/doctors/details")
+    public ResponseEntity<?> createDoctor(@RequestBody DoctorRequest request) throws NotFoundException {
+        DoctorResponse response = doctorService.createDoctor(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseFormat<>(HttpStatus.CREATED.value(),
+                        "CREATE_SUCCESS",
+                        "Tạo bác sĩ thành công",
+                        response)
+        );
+    }
+
+
 
 
 

@@ -9,6 +9,7 @@ import com.fuhcm.swp391.be.itmms.entity.Role;
 import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import javassist.NotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -52,7 +53,7 @@ public class AccountService {
 
     public List<PatientInfo> getPatientInfo() throws NotFoundException {
         Role userRole = roleService.findByRoleName(AccountRole.ROLE_USER);
-        List<Account> patients = accountRepo.findByRoles(userRole);
+        List<Account> patients = accountRepo.findByRoles(List.of(userRole));
 
         if (patients.isEmpty()) {
             throw new NotFoundException("Danh sách bệnh nhân trống");
@@ -89,18 +90,28 @@ public class AccountService {
 
     public List<AccountBasic> getManagerAccount() {
         return accountRepo
-                .findByRoles(roleService.findByRoleName(AccountRole.ROLE_MANAGER))
+                .findByRoles(List.of(roleService.findByRoleName(AccountRole.ROLE_MANAGER)))
                 .stream()
                 .map(account -> modelMapper.map(account, AccountBasic.class))
                 .collect(Collectors.toList());
     }
 
     public List<AccountBasic> getDoctorAccounts() {
-        List<Account> doctors = accountRepo.findByRoles(roleService.findByRoleName(AccountRole.ROLE_DOCTOR));
+        List<Account> doctors = accountRepo.findByRoles(List.of(roleService.findByRoleName(AccountRole.ROLE_DOCTOR)));
         return doctors.stream()
                 .map(AccountBasic::new)
                 .collect(Collectors.toList());
     }
+
+    public List<AccountBasic> searchDoctors(String keyword) throws NotFoundException {
+        String lowerKeyword = keyword.trim().toLowerCase();
+        return getDoctorAccounts().stream()
+                .filter(account -> account.getFullName().toLowerCase().contains(lowerKeyword)
+                        || account.getEmail().toLowerCase().contains(lowerKeyword))
+                .collect(Collectors.toList());
+    }
+
+
 
     public ProfileResponse getUserProfile(Authentication authentication) {
         Account account = accountRepo.findByEmail(authentication.getName());

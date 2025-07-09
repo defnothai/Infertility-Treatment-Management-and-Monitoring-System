@@ -10,6 +10,6 @@ public class DoctorRequest {
     private EmploymentStatus status;
     private String achievements;
     private String description;
-    private String slug;
     private String imgUrl;
+    private String email;
 }

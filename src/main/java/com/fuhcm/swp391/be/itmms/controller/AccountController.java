@@ -70,4 +70,16 @@ public class AccountController {
                         doctorAccounts)
         );
     }
+
+    @GetMapping("/api/manage/doctors/search")
+    public ResponseEntity<?> searchDoctors(@RequestParam("keyword") String keyword) throws NotFoundException {
+        List<AccountBasic> results = accountService.searchDoctors(keyword);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                        "SEARCH_SUCCESS",
+                        "Tìm kiếm tài khoản bác sĩ thành công",
+                        results)
+        );
+    }
+
 }
