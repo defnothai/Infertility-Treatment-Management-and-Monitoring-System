@@ -3,6 +3,7 @@ package com.fuhcm.swp391.be.itmms.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
+import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
@@ -127,6 +128,10 @@ public class Account {
     @JsonIgnore
     private List<Consultation>  consultations;
 
+    @OneToOne(mappedBy = "account")
+    @JsonIgnore
+    private Doctor doctor;
+  
     @OneToMany(mappedBy = "doctor")
     private List<Ultrasound> ultrasounds;
 

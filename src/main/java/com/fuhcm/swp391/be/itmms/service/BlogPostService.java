@@ -26,7 +26,7 @@ public class BlogPostService {
     private AccountRepository accountRepository;
 
     public List<BlogPostResponse> getBlogPosts() {
-        List<BlogPostResponse>  blogPostResponses = new ArrayList<>();
+        List<BlogPostResponse> blogPostResponses = new ArrayList<>();
         List<BlogPost> blogPosts = blogPostRepository.findAll();
         for (BlogPost blogPost : blogPosts) {
             blogPostResponses.add(new BlogPostResponse(blogPost));
@@ -50,7 +50,7 @@ public class BlogPostService {
         return new BlogPostResponse(blogPost);
     }
 
-    public BlogPostResponse updateBlog(Long id, String status, Authentication authentication) {
+    public BlogPostResponse updateBlog(Long id, String status, Authentication authentication, String note) {
         BlogPost blogPost = blogPostRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Blog not found"));
         Account approvedBy = accountRepository.findByEmail(authentication.getName());
@@ -61,6 +61,7 @@ public class BlogPostService {
             blogPost.setStatus(BlogStatus.APPROVED);
         } else if(status.equalsIgnoreCase(BlogStatus.REJECTED.toString())){
             blogPost.setStatus(BlogStatus.REJECTED);
+            blogPost.setNote(note);
         }
         blogPost.setHandler(approvedBy);
         blogPost.setHandleAt(LocalDate.now());

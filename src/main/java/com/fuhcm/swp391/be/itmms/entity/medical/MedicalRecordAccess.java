@@ -38,6 +38,12 @@ public class MedicalRecordAccess {
     private Account account;
 
     @ManyToOne
+    @JoinColumn(name = "GrantedTo", referencedColumnName = "Id")
+    private Account grantedTo;
+
+    @ManyToOne
     @JoinColumn(name = "MedicalRecordID", referencedColumnName = "Id")
     private MedicalRecord medicalRecord;
+
+
 }

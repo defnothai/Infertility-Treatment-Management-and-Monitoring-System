@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.time.LocalTime;
 
@@ -42,10 +43,16 @@ public class Appointment {
     private String note;
 
     @Column(name = "CreateAt", nullable = false)
-    private LocalDate createAt;
+    private LocalDateTime createAt;
 
     @Column(name = "PatientName", nullable = false, length = 20)
     private String patientName;
+
+    @Column(name = "PhoneNumber", nullable = false, length = 15)
+    private String phoneNumber;
+
+    @Column(name = "Message", length = 1000)
+    private String message;
 
     @ManyToOne
     @JoinColumn(name = "Schedule_Id", referencedColumnName = "Id")

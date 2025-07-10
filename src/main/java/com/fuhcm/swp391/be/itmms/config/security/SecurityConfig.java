@@ -1,6 +1,8 @@
 package com.fuhcm.swp391.be.itmms.config.security;
 
 import com.fuhcm.swp391.be.itmms.service.CustomOAuth2SuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -24,10 +26,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
-    private final JWTFilter jwtFilter;
-    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
-    private final PasswordEncoder passwordEncoder;
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private JWTFilter jwtFilter;
+    private CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
+
+    private PasswordEncoder passwordEncoder;
 
 
     public SecurityConfig(@Lazy UserDetailsService userDetailsService,
@@ -58,17 +62,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        System.out.println("Filter í running");
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
                         .requestMatchers(PUBLIC_API).permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         // USER role
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasAnyRole("MANAGER", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "api/user/appointments/available-doctors").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/appointments").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/invoices/**").hasAnyRole("USER", "STAFF")
@@ -107,7 +116,7 @@ public class SecurityConfig {
                 )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 
