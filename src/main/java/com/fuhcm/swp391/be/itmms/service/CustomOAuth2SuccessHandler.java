@@ -1,8 +1,10 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fuhcm.swp391.be.itmms.config.security.PasswordEncoder;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
+import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.dto.response.LoginResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
@@ -21,10 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -45,6 +44,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -57,7 +59,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String name = oAuth2User.getAttribute("name");
 
         String token = jwtService.generateJWT(email);
-
         Account account = accountRepo.findByEmail(email);
         if(account != null) {
             List<Role> role = account.getRoles();
@@ -65,7 +66,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         } else {
             account = new Account();
             account.setEmail(email);
-            account.setPassword("12345678");
+            account.setPassword(passwordEncoder.bCryptPasswordEncoder().encode("0123456789"));
             account.setCreatedAt(LocalDateTime.now());
             account.setFullName(name);
             Role roleUser = roleRepo.findByRoleName(AccountRole.ROLE_USER)
@@ -73,6 +74,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             System.out.println("ROLE = " + roleUser);
             account.setRoles(List.of(roleUser));
             account.setStatus(AccountStatus.ENABLED);
+            account.setGender(Gender.MALE);
             accountService.register(account);
             System.out.println("Registed successfully");
         }

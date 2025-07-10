@@ -42,6 +42,10 @@ public class BlogPost {
     @Enumerated(EnumType.STRING)
     private BlogStatus status;
 
+    @Column(name = "Note", nullable = true, length = 1000)
+    @Nationalized
+    private String note;
+
     @Column(name = "HandledAt", nullable = true)
     private LocalDate handleAt;
 
