@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.medical;
 
+import com.fuhcm.swp391.be.itmms.constant.AccessRole;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,9 @@ public class MedicalRecordAccess {
 
     @Column(name = "DayEnd", nullable = true)
     private LocalDate dayEnd;
+
+    @Column(name = "AccessRole", nullable = false)
+    private AccessRole role;
 
     @ManyToOne
     @JoinColumn(name = "GrantedBy", referencedColumnName = "Id")

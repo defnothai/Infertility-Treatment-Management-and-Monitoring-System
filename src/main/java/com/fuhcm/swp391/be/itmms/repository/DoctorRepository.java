@@ -11,11 +11,10 @@ import java.util.Optional;
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
-    Doctor findByAccount(Account account);
 
     @Query("SELECT d FROM Doctor d WHERE d.account.email = :email")
     Optional<Doctor> findByAccountEmail(String email);
 
 
-
+    Doctor findByAccount(Account account);
 }

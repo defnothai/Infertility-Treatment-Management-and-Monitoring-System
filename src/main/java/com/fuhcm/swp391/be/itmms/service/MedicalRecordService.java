@@ -1,6 +1,8 @@
 package com.fuhcm.swp391.be.itmms.service;
 
+import com.fuhcm.swp391.be.itmms.constant.AccessRole;
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
+import com.fuhcm.swp391.be.itmms.dto.response.EmploymentMedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.MedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.UserMedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
@@ -79,6 +81,7 @@ public class MedicalRecordService {
             access.setAccount(currentAccount);
             access.setMedicalRecord(medicalRecord);
             access.setDayStart(LocalDate.now());
+            access.setRole(AccessRole.MAIN_DOCTOR);
             access.setDayEnd(null);
 
             access = medicalRecordAccessRepository.save(access);
@@ -87,7 +90,6 @@ public class MedicalRecordService {
         }
 
         MedicalRecordResponse response = modelMapper.map(medicalRecord, MedicalRecordResponse.class);
-
         response.setFullName(user.getAccount().getFullName());
         response.setGender(user.getAccount().getGender());
         response.setPhoneNumber(user.getAccount().getPhoneNumber());
@@ -129,17 +131,20 @@ public class MedicalRecordService {
         if (medicalRecord == null) {
             throw new NotFoundException("Bạn chưa có hồ sơ bệnh án");
         }
-        List<MedicalRecordAccess> access = medicalRecord
-                .getMedicalRecordAccess()
-                .stream()
-                .filter(medicalRecordAccess -> medicalRecordAccess.getDayStart().equals(medicalRecord.getCreatedAt()) &&
-                        medicalRecordAccess.getDayEnd() == null)
-                .toList();
-        if (access.isEmpty()) {
-            throw new NotFoundException("Hồ sơ bệnh án đang xử lý");
+        MedicalRecordAccess access = medicalRecordAccessRepository
+                .findFirstByMedicalRecord_IdAndRoleAndDayEndIsNullOrderByDayStartDesc(
+                        medicalRecord.getId(),
+                        AccessRole.MAIN_DOCTOR
+                ).orElseThrow(() -> new NotFoundException("Hồ sơ chưa được tiếp nhận"));
+
+        Account doctorAccount = access.getAccount();
+        if (doctorAccount == null) {
+            throw new NotFoundException(doctorAccount.toString());
         }
-        Account doctorAccount = access.getFirst().getAccount();
         Doctor doctor = doctorRepository.findByAccount(doctorAccount);
+        if (doctor == null) {
+            throw new NotFoundException(doctorAccount.getId().toString());
+        }
         UserMedicalRecordResponse response = new UserMedicalRecordResponse();
         response.setId(medicalRecord.getId());
         response.setDoctorFullName(doctorAccount.getFullName());
@@ -151,6 +156,26 @@ public class MedicalRecordService {
         response.setInitLabTestResults(labTestResultService.getInitLabTestResults(medicalRecord.getId()));
         response.setInitUltrasounds(ultrasoundService.getInitialUltrasoundsByMedicalRecordId(medicalRecord.getId()));
         return response;
+    }
+
+    public List<EmploymentMedicalRecordResponse> getAllMedicalRecordsForEmployment() {
+        return medicalRecordRepository.findAll().stream()
+                .filter(medicalRecord -> medicalRecord.getUser() != null)
+                .map(medicalRecord -> {
+                    EmploymentMedicalRecordResponse dto = new EmploymentMedicalRecordResponse();
+                    dto.setMedicalRecordId(medicalRecord.getId());
+
+                    User user = medicalRecord.getUser();
+                    Account account = user.getAccount();
+
+                    dto.setFullName(account.getFullName());
+                    dto.setGender(account.getGender());
+                    dto.setDob(user.getDob());
+                    dto.setPhoneNumber(account.getPhoneNumber());
+                    dto.setAccountId(account.getId());
+
+                    return dto;
+                }).toList();
     }
 
 
