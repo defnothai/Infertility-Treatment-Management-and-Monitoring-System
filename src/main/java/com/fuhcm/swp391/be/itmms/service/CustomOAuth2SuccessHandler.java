@@ -59,11 +59,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String name = oAuth2User.getAttribute("name");
 
         String token = jwtService.generateJWT(email);
-        Account account = null;
-        Optional<Account> accountOpt = accountRepo.findByEmail(email);
-        if(accountOpt.isPresent()) {
-            account = accountOpt.get();
-        }
+        Account account = accountRepo.findByEmail(email);
         if(account != null) {
             List<Role> role = account.getRoles();
             System.out.println("Registed");

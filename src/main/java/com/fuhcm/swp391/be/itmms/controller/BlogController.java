@@ -77,8 +77,9 @@ public class BlogController {
     public ResponseEntity updatePost(
             @RequestParam("id") @Min(1) Long id,
             @RequestParam("status") @NotBlank String status,
+            @RequestParam("note") String note,
             Authentication authentication) {
-        BlogPostResponse blogPost = blogPostService.updateBlog(id, status, authentication);
+        BlogPostResponse blogPost = blogPostService.updateBlog(id, status, authentication, note);
         if(blogPost == null){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ResponseFormat<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),

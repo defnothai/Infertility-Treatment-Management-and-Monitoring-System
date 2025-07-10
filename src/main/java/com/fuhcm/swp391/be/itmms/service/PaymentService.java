@@ -8,9 +8,8 @@ import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.InvoiceRepository;
-import com.fuhcm.swp391.be.itmms.util.VNPayUtil;
+import com.fuhcm.swp391.be.itmms.utils.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

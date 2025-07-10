@@ -43,8 +43,9 @@ public class AppointmentController {
     }
 
     @PutMapping("/confirm-appointment")
-    public ResponseEntity<ApiResponse<?>> updateAppointment(HttpServletRequest request , Authentication authentication, @RequestParam("date") LocalDate date) {
-        boolean check = appointmentService.updateAppointment(request, authentication, date);
+    public ResponseEntity<ApiResponse<?>> updateAppointment(HttpServletRequest request ,
+                                                            @RequestParam("date") LocalDate date) {
+        boolean check = appointmentService.updateAppointment(request, date);
         if(check){
             return ResponseEntity.ok(new ApiResponse<>(true, "Update thanh cong", null));
         }

@@ -7,9 +7,11 @@ import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,16 +34,16 @@ public class AdminAccountController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<?>> createNewAccount(@Valid @RequestBody AccountCreateRequest request){
-        Account account = accountService.createNewAccount(request);
+    public ResponseEntity<ApiResponse<?>> createNewAccount(@Valid @RequestBody AccountCreateRequest request, Authentication authentication){
+        Account account = accountService.createNewAccount(request, authentication);
         if(account != null){
             return ResponseEntity.ok(new ApiResponse<>(true, "Tạo tài khoản thành công", account));
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Tạo tài khoản thất bại", null));
     }
 
-    @PatchMapping("/delete/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteAccount(@Valid @PathVariable long id){
+    @PatchMapping("/delete")
+    public ResponseEntity<ApiResponse<?>> deleteAccount(@Valid @RequestParam("id") @Min(1) Long id){
         boolean success = accountService.deleteAccount(id);
         if(success){
             return ResponseEntity.ok(new ApiResponse<>(true, "Xóa tài khoản thành công", null));

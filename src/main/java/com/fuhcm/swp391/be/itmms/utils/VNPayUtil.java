@@ -1,4 +1,4 @@
-package com.fuhcm.swp391.be.itmms.util;
+package com.fuhcm.swp391.be.itmms.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.dto.response;
 
 
+import com.fuhcm.swp391.be.itmms.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,11 @@ public class DoctorResponse {
     public DoctorResponse(Long id, String fullName){
         this.id = id;
         this.fullName = fullName;
+    }
+
+    public DoctorResponse(Account account){
+        this.id = account.getDoctor().getId();
+        this.fullName = account.getFullName();
+        this.position = account.getDoctor().getPosition();
     }
 }

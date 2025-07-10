@@ -17,11 +17,12 @@ public class BlogPostResponse {
     private String content;
     private LocalDate createdAt;
     private BlogStatus status;
+    private String note;
     private LocalDate handleAt;
     private LocalDate deletedAt;
     private AccountBasic deletedBy;
     private AccountBasic approvedBy;
-    private AccountBasic createdBy;
+    private DoctorResponse createdBy;
 
 
 
@@ -31,6 +32,7 @@ public class BlogPostResponse {
         this.content = blog.getContent();
         this.createdAt = blog.getCreatedAt();
         this.status = blog.getStatus();
+        this.note = blog.getNote();
         this.handleAt = blog.getHandleAt();
         this.deletedAt = blog.getDeletedAt();
         if(blog.getDeletedBy() != null){
@@ -43,8 +45,6 @@ public class BlogPostResponse {
         } else {
             this.approvedBy = null;
         }
-        this.createdBy = new AccountBasic(blog.getCreatedBy());
-
-
+        this.createdBy = new DoctorResponse(blog.getCreatedBy());
     }
 }

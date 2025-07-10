@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByTime(LocalDate date);
 
-    List<Appointment> findByDoctorIdAndTimeAndStatusNot(Long id, LocalTime time, AppointmentStatus status);
+    List<Appointment> findByDoctorIdAndTimeAndStatusNot(Long id, LocalDate time, AppointmentStatus status);
+
 
     boolean existsByUserIdAndTime(Long id, LocalDate date);
 
@@ -27,4 +29,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Optional<List<Appointment>> findByDoctorId(Long id);
 
     Optional<Appointment> findByUserIdAndTime(Long id, LocalDate date);
+
+    List<Appointment> findByStatusAndCreateAtBefore(AppointmentStatus appointmentStatus, LocalDateTime oneMinuteAgo);
+
+    boolean existsByUserIdAndTimeAndStatusIsNot(Long id, LocalDate date, AppointmentStatus appointmentStatus);
+
+    List<Appointment> findByStatusAndTimeLessThanEqual(AppointmentStatus appointmentStatus, LocalDate now);
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -39,11 +40,11 @@ public class AppointmentService {
     @Autowired
     private JWTService jwtService;
 
-
     @Autowired
     private JWTFilter jwtFilter;
 
-    public Appointment createNewAppointment(@Valid AppointmentRequest appointmentRequest, @Valid Authentication authentication) {
+    public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
+                                            Authentication authentication) {
         Account bookBy = accountService.getAuthenticatedUser(authentication);
 
         validation.validateAppointmentRequest(appointmentRequest);
@@ -73,19 +74,18 @@ public class AppointmentService {
         appointment.setEndTime(appointmentRequest.getTime().plusMinutes(30));
         appointment.setStatus(AppointmentStatus.UNPAID);
         appointment.setPatientName(appointmentRequest.getPatientName());
-        appointment.setCreateAt(LocalDate.now());
+        appointment.setCreateAt(LocalDateTime.now());
         appointment.setPhoneNumber(appointmentRequest.getPhoneNumber());
         appointment.setMessage(appointmentRequest.getMessage());
-        appointment.setTreatmentPlan(null);
         appointment.setSchedule(schedule);
         return appointment;
     }
 
     public boolean hasAppointmentToday(Long id, LocalDate date) {
-        return appointmentRepository.existsByUserIdAndTime(id, date);
+        return appointmentRepository.existsByUserIdAndTimeAndStatusIsNot(id, date, AppointmentStatus.NOT_PAID);
     }
 
-    public boolean updateAppointment(HttpServletRequest request, Authentication authentication, LocalDate date) {
+    public boolean updateAppointment(HttpServletRequest request, LocalDate date) {
         Account account = jwtService.extractAccount(jwtFilter.getToken(request));
         Appointment appointment = appointmentRepository.findByUserIdAndTime(account.getId(), date)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));

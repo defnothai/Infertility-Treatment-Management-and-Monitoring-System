@@ -1,6 +1,6 @@
 package com.fuhcm.swp391.be.itmms.config.payment;
 
-import com.fuhcm.swp391.be.itmms.util.VNPayUtil;
+import com.fuhcm.swp391.be.itmms.utils.VNPayUtil;
 import org.springframework.context.annotation.Configuration;
 
 import java.text.SimpleDateFormat;
