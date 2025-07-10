@@ -22,6 +22,7 @@ public class MedicalRecordResponse {
     private String diagnosis;
     private String symptoms;
     private List<LabTestResultResponse> initLabTestResults;
+    private List<UltrasoundResponse> initUltrasounds;
 
 
 }

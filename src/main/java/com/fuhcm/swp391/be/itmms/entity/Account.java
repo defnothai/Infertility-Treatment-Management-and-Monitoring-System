@@ -130,4 +130,10 @@ public class Account {
     @OneToOne(mappedBy = "account")
     @JsonIgnore
     private Doctor doctor;
+  
+    @OneToMany(mappedBy = "doctor")
+    private List<Ultrasound> ultrasounds;
+
+    @OneToMany(mappedBy = "createdBy")
+    private List<HospitalAchievement> achievements;
 }

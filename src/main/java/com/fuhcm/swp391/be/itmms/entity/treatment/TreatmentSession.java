@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.entity.treatment;
 
-import com.fuhcm.swp391.be.itmms.entity.Prescription;
+import com.fuhcm.swp391.be.itmms.entity.prescription.Prescription;
+import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -50,4 +50,11 @@ public class TreatmentSession {
     @ManyToOne
     @JoinColumn(name = "PrescriptionID", referencedColumnName = "Id")
     private Prescription prescription;
+
+    @OneToMany(mappedBy = "session")
+    private List<Ultrasound> ultrasounds;
+
+    @OneToMany(mappedBy = "session")
+    private List<Prescription> prescriptions;
+
 }

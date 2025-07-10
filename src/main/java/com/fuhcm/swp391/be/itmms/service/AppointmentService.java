@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.service;
 
+
 import com.fuhcm.swp391.be.itmms.config.security.JWTFilter;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
@@ -18,8 +19,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
+import lombok.RequiredArgsConstructor;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AppointmentService {
 
     @Autowired
@@ -99,5 +104,21 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentRepository.findByDoctorId(account.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
         return appointments;
+    }
+
+    public List<AppointmentResponse> getAllAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+
+        return appointments.stream().map(appt -> new AppointmentResponse(
+                appt.getId(),
+                appt.getTime(),
+                appt.getStartTime(),
+                appt.getEndTime(),
+                appt.getStatus(),
+                appt.getNote(),
+                appt.getCreateAt(),
+                appt.getPatientName(),
+                appt.getUser() != null ? appt.getUser().getId() : null
+        )).collect(Collectors.toList());
     }
 }

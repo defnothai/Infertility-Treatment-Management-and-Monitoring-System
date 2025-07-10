@@ -14,7 +14,11 @@ import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.error.exception.ConfirmPasswordNotMatchException;
 import com.fuhcm.swp391.be.itmms.error.exception.EmailAlreadyExistsException;
 import com.fuhcm.swp391.be.itmms.repository.AuthenticationRepository;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +36,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Data
 public class AuthenticationService {
 
     private final AuthenticationRepository authenticationRepository;
@@ -48,7 +53,7 @@ public class AuthenticationService {
     public AuthenticationService(AuthenticationRepository authenticationRepository,
                                  JWTService jwtService,
                                  AuthenticationManager authenticationManager,
-                                 ModelMapperConfig modelMapperConfig,
+                                 ModelMapper modelMapper,
                                  EmailService emailService,
                                  @Lazy ConfirmTokenRegisterService confirmTokenRegisterService,
                                  PasswordEncoder passwordEncoder,
@@ -56,7 +61,7 @@ public class AuthenticationService {
         this.authenticationRepository = authenticationRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
-        this.modelMapper = modelMapperConfig.modelMapper();
+        this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.confirmTokenRegisterService = confirmTokenRegisterService;
         this.passwordEncoder = passwordEncoder;

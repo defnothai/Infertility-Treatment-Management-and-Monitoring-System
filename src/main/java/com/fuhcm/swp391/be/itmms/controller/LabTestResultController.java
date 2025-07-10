@@ -9,6 +9,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTest;
 import com.fuhcm.swp391.be.itmms.service.LabTestResultService;
 import javassist.NotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +97,22 @@ public class LabTestResultController {
                 )
         );
     }
+
+    @PostMapping("/api/medical-record/{recordId}/treatment-sessions/{sessionId}/lab-test-results")
+    public ResponseEntity<?> sendFollowUpLabTestResultsRequest(
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sessionId") Long sessionId,
+            @RequestBody LabTestResultRequest request) throws NotFoundException, BadRequestException {
+        List<LabTestResultResponse> response = labTestResultService.sendFollowUpLabTestResultsRequest(recordId, sessionId, request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseFormat<>(
+                        HttpStatus.CREATED.value(),
+                        "CREATE_SUCCESS",
+                        "Tạo danh sách xét nghiệm thành công",
+                        response
+                ));
+    }
+
 
 
 

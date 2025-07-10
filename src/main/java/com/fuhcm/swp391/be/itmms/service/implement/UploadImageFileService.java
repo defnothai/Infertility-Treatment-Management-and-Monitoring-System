@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -64,5 +66,13 @@ public class UploadImageFileService implements UploadImageFile {
             log.error("Error when delete file: {}", e.getMessage());
         }
 
+    }
+
+    public List<String> uploadImages(List<MultipartFile> files) throws IOException {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadImage(file));
+        }
+        return urls;
     }
 }
