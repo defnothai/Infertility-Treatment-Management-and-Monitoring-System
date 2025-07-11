@@ -85,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         // USER role
-                        .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasAnyRole("MANAGER", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "api/user/appointments/available-doctors").hasRole("USER")

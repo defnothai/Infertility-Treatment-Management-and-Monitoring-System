@@ -7,9 +7,7 @@ import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
 import com.fuhcm.swp391.be.itmms.dto.request.AccountCreateRequest;
-import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
-import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.repository.*;
@@ -129,19 +127,37 @@ public class AccountService {
 
     public ProfileResponse getUserProfile(Authentication authentication) {
         Account account = accountRepo.findByEmail(authentication.getName());
-        if(account == null){
+        if(account == null) {
             return null;
-        } else {
-            ProfileResponse profileResponse = new ProfileResponse();
+        } else if(account.getRoles().getFirst().getRoleName().equals(AccountRole.ROLE_USER)) {
             User user = account.getUser();
-            profileResponse.setUserName(account.getFullName());
-            profileResponse.setDateOfBirth(user.getDob());
-            profileResponse.setGender(account.getGender());
-            profileResponse.setIdentityNumber((user.getIdentityNumber()));
-            profileResponse.setNationality(user.getNationality());
-            profileResponse.setInsuranceNumber(user.getInsuranceNumber());
-            profileResponse.setAddress(user.getAddress());
-            return profileResponse;
+            return new UserProfileResponse(
+                    account.getFullName(),
+                    account.getEmail(),
+                    account.getPhoneNumber(),
+                    user.getDob(),
+                    account.getGender().toString(),
+                    user.getIdentityNumber(),
+                    user.getNationality(),
+                    user.getInsuranceNumber(),
+                    user.getAddress()
+            );
+        } else if(account.getRoles().getFirst().getRoleName().equals(AccountRole.ROLE_DOCTOR)) {
+            Doctor doctor = account.getDoctor();
+            return new DoctorProfileResponse(
+                    account.getFullName(),
+                    account.getEmail(),
+                    account.getPhoneNumber(),
+                    doctor.getExpertise(),
+                    doctor.getPosition(),
+                    doctor.getAchievements()
+            );
+        } else {
+            return new StaffProfileResponse(
+                    account.getFullName(),
+                    account.getEmail(),
+                    account.getPhoneNumber()
+            );
         }
     }
 

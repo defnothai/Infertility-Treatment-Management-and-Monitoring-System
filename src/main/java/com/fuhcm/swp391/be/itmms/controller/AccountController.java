@@ -1,18 +1,18 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
-import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
-import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
+import com.fuhcm.swp391.be.itmms.dto.response.*;
+import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
 import javassist.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 import java.util.List;
@@ -21,6 +21,9 @@ import java.util.List;
 public class AccountController {
 
     private final AccountService accountService;
+
+    @Autowired
+    private AccountRepository accountRepo;
 
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
@@ -51,8 +54,8 @@ public class AccountController {
 
     @GetMapping("/api/user/profile")
     public ResponseEntity getUserProfile(Authentication authentication) throws NotFoundException {
-        ProfileResponse profileResponse = accountService.getUserProfile(authentication);
-        if(profileResponse == null){
+        ProfileResponse profile = accountService.getUserProfile(authentication);
+        if(profile == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseFormat<>(HttpStatus.NOT_FOUND.value(),
                             "FETCH_DATA_FAIL",
@@ -62,7 +65,7 @@ public class AccountController {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
                 "FETCH_DATA_SUCCESS",
                 "Lấy thông tin profile thành công",
-                profileResponse));
+                profile));
     }
 
     @GetMapping("/api/manage/doctors")
