@@ -49,30 +49,31 @@ public class JWTFilter extends OncePerRequestFilter {
         return authHeader.substring(7);
     }
 
-    private final List<String> PUBLIC_API = List.of(
-            "POST:/api/auth/register/**",
-            "GET:/api/auth/register/**",
-            "POST:/api/auth/login",
-            "POST:/api/auth/forgot-password",
-            "POST:/api/auth/reset-password",
-            "GET:/api/home/**",
-            "GET:/api/list/**",
-            "GET:/api/payment/vn-pay-callback"
-    );
+//    private final List<String> PUBLIC_API = List.of(
+//            "POST:/api/auth/register/**",
+//            "GET:/api/auth/register/**",
+//            "POST:/api/auth/login",
+//            "POST:/api/auth/forgot-password",
+//            "POST:/api/auth/reset-password",
+//            "GET:/api/home/**",
+//            "GET:/api/list/**",
+//            "GET:/api/payment/vn-pay-callback",
+//            "GET:/oauth2/**"
+//    );
 
-    public boolean isPublicAPI(String uri, String method) {
-        AntPathMatcher matcher = new AntPathMatcher();
-
-        return PUBLIC_API.stream().anyMatch(pattern -> {
-            String[] parts = pattern.split(":", 2);
-            if (parts.length != 2) return false;
-
-            String allowedMethod = parts[0];
-            String allowedUri = parts[1];
-
-            return method.equalsIgnoreCase(allowedMethod) && matcher.match(allowedUri, uri);
-        });
-    }
+//    public boolean isPublicAPI(String uri, String method) {
+//        AntPathMatcher matcher = new AntPathMatcher();
+//
+//        return PUBLIC_API.stream().anyMatch(pattern -> {
+//            String[] parts = pattern.split(":", 2);
+//            if (parts.length != 2) return false;
+//
+//            String allowedMethod = parts[0];
+//            String allowedUri = parts[1];
+//
+//            return method.equalsIgnoreCase(allowedMethod) && matcher.match(allowedUri, uri);
+//        });
+//    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -103,10 +104,10 @@ public class JWTFilter extends OncePerRequestFilter {
             }
         }
         
-        if (!isPublicAPI(request.getRequestURI(), request.getMethod()) &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
-            throw new AuthenticationException("Token missing or invalid for protected API");
-        }
+//        if (!isPublicAPI(request.getRequestURI(), request.getMethod()) &&
+//                SecurityContextHolder.getContext().getAuthentication() == null) {
+//            throw new AuthenticationException("Token missing or invalid for protected API");
+//        }
         filterChain.doFilter(request, response);
     }
 }

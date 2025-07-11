@@ -35,4 +35,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     boolean existsByUserIdAndTimeAndStatusIsNot(Long id, LocalDate date, AppointmentStatus appointmentStatus);
 
     List<Appointment> findByStatusAndTimeLessThanEqual(AppointmentStatus appointmentStatus, LocalDate now);
+
+    Appointment findTopByUserOrderByCreateAtDesc(Account account);
 }
