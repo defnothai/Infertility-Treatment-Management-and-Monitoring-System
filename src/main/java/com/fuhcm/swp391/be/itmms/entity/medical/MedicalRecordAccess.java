@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.entity.medical;
 
 import com.fuhcm.swp391.be.itmms.constant.AccessRole;
+import com.fuhcm.swp391.be.itmms.constant.PermissionLevel;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,11 +32,16 @@ public class MedicalRecordAccess {
     private LocalDate dayEnd;
 
     @Column(name = "AccessRole", nullable = false)
+    @Enumerated(EnumType.STRING)
     private AccessRole role;
+
+    @Column(name = "PermissionLevel", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PermissionLevel level;
 
     @ManyToOne
     @JoinColumn(name = "GrantedBy", referencedColumnName = "Id")
-    private Account account;
+    private Account grantedBy;
 
     @ManyToOne
     @JoinColumn(name = "GrantedTo", referencedColumnName = "Id")

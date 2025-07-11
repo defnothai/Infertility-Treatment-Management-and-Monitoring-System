@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.AccessRole;
+import com.fuhcm.swp391.be.itmms.constant.PermissionLevel;
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
 import com.fuhcm.swp391.be.itmms.dto.response.EmploymentMedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.MedicalRecordResponse;
@@ -19,6 +20,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,6 +38,8 @@ public class MedicalRecordService {
     private final ModelMapper modelMapper;
     private final UltrasoundService ultrasoundService;
     private final DoctorRepository doctorRepository;
+    private final MedicalRecordAccessService medicalRecordAccessService;
+
 
     public MedicalRecordService(MedicalRecordRepository medicalRecordRepository,
                                 UserRepository userRepository,
@@ -45,7 +49,8 @@ public class MedicalRecordService {
                                 @Lazy LabTestResultService labTestResultService,
                                 ModelMapper modelMapper,
                                 UltrasoundService ultrasoundService,
-                                DoctorRepository doctorRepository) {
+                                DoctorRepository doctorRepository,
+                                MedicalRecordAccessService medicalRecordAccessService) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.userRepository = userRepository;
         this.medicalRecordAccessRepository = medicalRecordAccessRepository;
@@ -55,6 +60,7 @@ public class MedicalRecordService {
         this.modelMapper = modelMapper;
         this.ultrasoundService = ultrasoundService;
         this.doctorRepository = doctorRepository;
+        this.medicalRecordAccessService = medicalRecordAccessService;
     }
 
     public MedicalRecord findById(Long id) throws NotFoundException {
@@ -67,8 +73,13 @@ public class MedicalRecordService {
     public MedicalRecordResponse getMedicalRecord(Long accountId) throws NotFoundException {
         Account account = accountService.findById(accountId);
         User user = userRepository.findByAccount(account).orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin bệnh nhân"));
-
+        Account currentAccount = authenticationService.getCurrentAccount();
         MedicalRecord medicalRecord = medicalRecordRepository.findByUser(user);
+        if (medicalRecord != null) {
+            if (!medicalRecordAccessService.canView(medicalRecord)) {
+                throw new NotFoundException("Bạn không thể truy cập vào hồ sơ này");
+            }
+        }
         if (medicalRecord == null) {
             medicalRecord = new MedicalRecord();
             medicalRecord.setUser(user);
@@ -76,9 +87,10 @@ public class MedicalRecordService {
             medicalRecord.setSymptoms("");
             medicalRecord.setCreatedAt(LocalDate.now());
 
-            Account currentAccount = authenticationService.getCurrentAccount();
             MedicalRecordAccess access = new MedicalRecordAccess();
-            access.setAccount(currentAccount);
+            access.setGrantedTo(currentAccount);
+            access.setGrantedBy(currentAccount);
+            access.setLevel(PermissionLevel.FULL_ACCESS);
             access.setMedicalRecord(medicalRecord);
             access.setDayStart(LocalDate.now());
             access.setRole(AccessRole.MAIN_DOCTOR);
@@ -104,11 +116,14 @@ public class MedicalRecordService {
         return response;
     }
 
+
     @Transactional
     public UpdateDiagnosisSymptom updateDiagnosisAndSymptoms(Long medicalRecordId, UpdateDiagnosisSymptom request) throws NotFoundException {
         MedicalRecord medicalRecord = medicalRecordRepository.findById(medicalRecordId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy hồ sơ bệnh án"));
-
+        if (!medicalRecordAccessService.canUpdate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể cập nhật hồ sơ này");
+        }
         medicalRecord.setDiagnosis(request.getDiagnosis());
         medicalRecord.setSymptoms(request.getSymptoms());
 
@@ -137,14 +152,8 @@ public class MedicalRecordService {
                         AccessRole.MAIN_DOCTOR
                 ).orElseThrow(() -> new NotFoundException("Hồ sơ chưa được tiếp nhận"));
 
-        Account doctorAccount = access.getAccount();
-        if (doctorAccount == null) {
-            throw new NotFoundException(doctorAccount.toString());
-        }
+        Account doctorAccount = access.getGrantedTo();
         Doctor doctor = doctorRepository.findByAccount(doctorAccount);
-        if (doctor == null) {
-            throw new NotFoundException(doctorAccount.getId().toString());
-        }
         UserMedicalRecordResponse response = new UserMedicalRecordResponse();
         response.setId(medicalRecord.getId());
         response.setDoctorFullName(doctorAccount.getFullName());

@@ -4,5 +4,6 @@ public enum AccessRole {
 
     MAIN_DOCTOR,
     ASSISTANT_DOCTOR,
+    STAFF
 
 }

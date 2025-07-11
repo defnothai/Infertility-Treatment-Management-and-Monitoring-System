@@ -104,9 +104,13 @@ public class Account {
     @JsonIgnore
     private List<Service> services;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "grantedBy")
     @JsonIgnore
-    private List<MedicalRecordAccess> medicalRecordAccess;
+    private List<MedicalRecordAccess> grantedRecords;
+
+    @OneToMany(mappedBy = "grantedTo")
+    @JsonIgnore
+    private List<MedicalRecordAccess> receivedRecords;
 
     @OneToMany(mappedBy = "account")
     @JsonIgnore
@@ -131,7 +135,7 @@ public class Account {
     @OneToOne(mappedBy = "account")
     @JsonIgnore
     private Doctor doctor;
-  
+
     @OneToMany(mappedBy = "doctor")
     private List<Ultrasound> ultrasounds;
 

@@ -5,6 +5,7 @@ import com.fuhcm.swp391.be.itmms.dto.request.PrescriptionRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.PrescriptionUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.MedicationPrescriptionResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.PrescriptionResponse;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.prescription.Medication;
 import com.fuhcm.swp391.be.itmms.entity.prescription.MedicationPrescription;
 import com.fuhcm.swp391.be.itmms.entity.prescription.Prescription;
@@ -15,6 +16,7 @@ import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,10 +31,16 @@ public class PrescriptionService {
     private final TreatmentSessionRepository sessionRepository;
     private final MedicationRepository medicationRepository;
     private final ModelMapper modelMapper;
+    private final MedicalRecordAccessService medicalRecordAccessService;
 
     public PrescriptionResponse createPrescription(PrescriptionRequest request) throws NotFoundException {
         TreatmentSession session = sessionRepository.findById(request.getSessionId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
+
+        MedicalRecord medicalRecord = session.getProgress().getPlan().getMedicalRecord();
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
 
         Prescription prescription = new Prescription();
         prescription.setSession(session);
@@ -68,6 +76,10 @@ public class PrescriptionService {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn thuốc"));
 
+        MedicalRecord medicalRecord = prescription.getSession().getProgress().getPlan().getMedicalRecord();
+        if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         prescription.setNotes(request.getNotes());
 
         for (MedicationPrescription oldMed : prescription.getMedicationPrescriptions()) {

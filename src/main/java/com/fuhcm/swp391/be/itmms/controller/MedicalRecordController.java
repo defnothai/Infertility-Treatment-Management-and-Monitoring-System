@@ -64,7 +64,4 @@ public class MedicalRecordController {
                 "Lấy dữ liệu thành công", list));
     }
 
-
-
-
 }

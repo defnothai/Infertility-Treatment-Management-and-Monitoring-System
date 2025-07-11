@@ -22,6 +22,8 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,10 +45,15 @@ public class LabTestResultService {
     private final RoleService roleService;
     private final TreatmentSessionRepository treatmentSessionRepository;
     private final LabTestRepository labTestRepository;
+    private final MedicalRecordAccessService medicalRecordAccessService;
 
     @Transactional
     public List<LabTestResultResponse> sendInitLabTestRequest(Long recordId,
                                                               LabTestResultRequest labTestResultRequest) throws NotFoundException {
+        MedicalRecord medicalRecord = medicalRecordService.findById(recordId);
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         List<LabTestResultResponse> responses = new ArrayList<>();
 
         for (Long testId : labTestResultRequest.getTestIds()) {
@@ -145,6 +152,7 @@ public class LabTestResultService {
         LabTestResult labTestResult = labTestResultRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Kết quả xét nghiệm không tồn tại"));
 
+
         labTestResult.setResultSummary(request.getResultSummary());
         labTestResult.setResultDetails(request.getResultDetails());
         labTestResult.setStatus(request.getStatus());
@@ -225,7 +233,9 @@ public class LabTestResultService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
 
         MedicalRecord medicalRecord = medicalRecordService.findById(recordId);
-
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         Account staff = this.findLeastBusyStaff(LocalDate.now());
 
         List<LabTest> tests = labTestRepository.findAllById(request.getTestIds());

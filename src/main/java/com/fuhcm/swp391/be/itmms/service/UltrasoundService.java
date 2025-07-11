@@ -15,6 +15,7 @@ import com.fuhcm.swp391.be.itmms.repository.UltrasoundRepository;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class UltrasoundService {
     private final AccountRepository accountRepository;
     private final MedicalRecordRepository medicalRecordRepository;
     private final TreatmentSessionRepository treatmentSessionRepository;
+    private final MedicalRecordAccessService medicalRecordAccessService;
 
     public List<UltrasoundResponse> getInitialUltrasoundsByMedicalRecordId(Long medicalRecordId) {
         List<Ultrasound> ultrasounds = ultrasoundRepository.findByMedicalRecordIdAndTypeAndIsActiveTrue(
@@ -50,6 +52,11 @@ public class UltrasoundService {
     }
 
     public UltrasoundResponse createInitUltrasound(UltrasoundRequest request, Authentication authentication) {
+        MedicalRecord medicalRecord = medicalRecordRepository.findById(request.getMedicalRecordId())
+                .orElseThrow(() -> new RuntimeException("Hồ sơ bệnh án không tồn tại"));
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         Ultrasound ultrasound = new Ultrasound();
         ultrasound.setDate(LocalDate.now());
         ultrasound.setResult(request.getResult());
@@ -58,8 +65,6 @@ public class UltrasoundService {
         ultrasound.setImageUrls(String.join(";", request.getImageUrls()));
 
         Account doctor = accountRepository.findByEmail(authentication.getName());
-        MedicalRecord medicalRecord = medicalRecordRepository.findById(request.getMedicalRecordId())
-                .orElseThrow(() -> new RuntimeException("Hồ sơ bệnh án không tồn tại"));
 
         ultrasound.setDoctor(doctor);
         ultrasound.setMedicalRecord(medicalRecord);
@@ -71,11 +76,14 @@ public class UltrasoundService {
     }
 
     public UltrasoundResponse updateUltrasound(Long id, UltrasoundRequest request) {
-        Ultrasound ultrasound = ultrasoundRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bản ghi siêu âm không tồn tại"));
-
         MedicalRecord medicalRecord = medicalRecordRepository.findById(request.getMedicalRecordId())
                 .orElseThrow(() -> new RuntimeException("Hồ sơ bệnh án không tồn tại"));
+
+        if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
+        Ultrasound ultrasound = ultrasoundRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bản ghi siêu âm không tồn tại"));
 
         ultrasound.setResult(request.getResult());
         ultrasound.setImageUrls(String.join(";", request.getImageUrls()));
@@ -91,18 +99,25 @@ public class UltrasoundService {
     public void deleteUltrasound(Long id) {
         Ultrasound ultrasound = ultrasoundRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bản ghi siêu âm không tồn tại"));
-
+        MedicalRecord medicalRecord = ultrasound.getMedicalRecord();
+        if (medicalRecord != null && !medicalRecordAccessService.canDelete(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         ultrasound.setActive(false);
         ultrasoundRepository.save(ultrasound);
     }
 
     @Transactional
     public UltrasoundResponse createFollowUpUltrasound(Long sessionId, UltrasoundRequest request, Authentication authentication) throws NotFoundException {
-        TreatmentSession session = treatmentSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
-
         MedicalRecord medicalRecord = medicalRecordRepository.findById(request.getMedicalRecordId())
                 .orElseThrow(() -> new NotFoundException("Medical record not found"));
+
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
+
+        TreatmentSession session = treatmentSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin buổi khám"));
 
         Account doctor = accountRepository.findByEmail(authentication.getName());
 
