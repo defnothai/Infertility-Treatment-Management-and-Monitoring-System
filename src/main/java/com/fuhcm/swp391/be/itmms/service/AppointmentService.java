@@ -3,12 +3,14 @@ package com.fuhcm.swp391.be.itmms.service;
 import com.fuhcm.swp391.be.itmms.config.security.JWTFilter;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
-import com.fuhcm.swp391.be.itmms.validator.Validation;
+import com.fuhcm.swp391.be.itmms.validation.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,9 @@ public class AppointmentService {
 
     @Autowired
     private JWTFilter jwtFilter;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -78,6 +83,8 @@ public class AppointmentService {
         appointment.setPhoneNumber(appointmentRequest.getPhoneNumber());
         appointment.setMessage(appointmentRequest.getMessage());
         appointment.setSchedule(schedule);
+        appointment.setGender(appointmentRequest.getGender());
+        appointment.setDob(appointmentRequest.getDob());
         return appointment;
     }
 
@@ -99,5 +106,17 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentRepository.findByDoctorId(account.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
         return appointments;
+    }
+
+    public AppointmentResponse getLastAppointment(Authentication authentication) {
+        AppointmentResponse appointmentResponse;
+        Account account = accountRepository.findByEmail(authentication.getName());
+        Appointment appointment = appointmentRepository.findTopByUserOrderByCreateAtDesc(account);
+        if(appointment == null) {
+            appointmentResponse = null;
+        } else {
+            appointmentResponse = new AppointmentResponse(appointment);
+        }
+        return appointmentResponse;
     }
 }

@@ -1,13 +1,18 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
+import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RestController
 public class AccountController {
@@ -55,5 +60,15 @@ public class AccountController {
                 "FETCH_DATA_SUCCESS",
                 "Lấy thông tin profile thành công",
                 profileResponse));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/api/user/appointments/available-doctors")
+    public ResponseEntity<ApiResponse<?>> getAvailableDoctors() {
+        Set<AccountResponse> availableDoctors = accountService.getAvailableDoctors();
+        if(availableDoctors == null ||  availableDoctors.isEmpty()){
+            return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách doctor thất bại", null));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách doctor thành công",  availableDoctors));
     }
 }

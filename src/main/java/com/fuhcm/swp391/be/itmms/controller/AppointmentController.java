@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.service.AppointmentService;
 import com.fuhcm.swp391.be.itmms.service.ScheduleService;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +52,16 @@ public class AppointmentController {
             return ResponseEntity.ok(new ApiResponse<>(true, "Update thanh cong", null));
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Update khong thanh cong", null));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/last-appointment")
+    public ResponseEntity<ApiResponse<?>> getLastAppointment(Authentication authentication) {
+        AppointmentResponse appointmentResponse = appointmentService.getLastAppointment(authentication);
+        if(appointmentResponse == null){
+            return ResponseEntity.ok(new ApiResponse<>(true, "Khoong có appointment gần nhất", appointmentResponse));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Appointment found", appointmentResponse));
     }
 
 }

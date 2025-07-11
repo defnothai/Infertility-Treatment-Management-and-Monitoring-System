@@ -11,6 +11,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.AccountBasic;
 import com.fuhcm.swp391.be.itmms.dto.response.AccountResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ProfileResponse;
 import com.fuhcm.swp391.be.itmms.entity.*;
+import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.repository.*;
 import jakarta.validation.Valid;
 import javassist.NotFoundException;
@@ -209,7 +210,8 @@ public class AccountService {
         List<Schedule> allSchedules = scheduleRepo.findByWorkDateBetween(current, toDate);
         for (Schedule schedule : allSchedules) {
             Long doctorId = schedule.getAssignTo().getId();
-            if(doctorRepo.findByAccountIdAndStatus(doctorId, EmploymentStatus.ACTIVE)){
+            Doctor doctor = doctorRepo.findByAccountIdAndStatus(doctorId, EmploymentStatus.ACTIVE);
+            if(doctor != null){
                 Shift shift = schedule.getShift();
                 List<LocalTime> allSlots = shiftService.generateSlot(shift.getStartTime(), shift.getEndTime(), Duration.ofMinutes(30));
                 List<Appointment> appointments = appointmentRepo.findByDoctorIdAndTimeAndStatusNot(doctorId, schedule.getWorkDate(), AppointmentStatus.NOT_PAID);

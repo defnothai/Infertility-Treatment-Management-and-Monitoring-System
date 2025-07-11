@@ -12,5 +12,5 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     Doctor findByAccount(Account account);
 
-    boolean findByAccountIdAndStatus(Long doctorId, EmploymentStatus employmentStatus);
+    Doctor findByAccountIdAndStatus(Long doctorId, EmploymentStatus employmentStatus);
 }
