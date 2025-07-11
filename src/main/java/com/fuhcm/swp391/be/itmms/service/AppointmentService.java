@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -83,8 +84,6 @@ public class AppointmentService {
         appointment.setPhoneNumber(appointmentRequest.getPhoneNumber());
         appointment.setMessage(appointmentRequest.getMessage());
         appointment.setSchedule(schedule);
-        appointment.setGender(appointmentRequest.getGender());
-        appointment.setDob(appointmentRequest.getDob());
         return appointment;
     }
 
@@ -106,6 +105,21 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentRepository.findByDoctorId(account.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
         return appointments;
+    }
+
+    public List<AppointmentResponse> getAllAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        return appointments.stream().map(appt -> new AppointmentResponse(
+                appt.getId(),
+                appt.getTime(),
+                appt.getStartTime(),
+                appt.getEndTime(),
+                appt.getStatus(),
+                appt.getNote(),
+                appt.getCreateAt(),
+                appt.getPatientName(),
+                appt.getUser() != null ? appt.getUser().getId() : null
+        )).collect(Collectors.toList());
     }
 
     public AppointmentResponse getLastAppointment(Authentication authentication) {

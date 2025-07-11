@@ -18,6 +18,7 @@ public class MedicalRecordController {
         this.medicalRecordService = medicalRecordService;
     }
 
+    // api get medical record dành cho bác sĩ
     @GetMapping("/api/medical-record/{accountId}")
     public ResponseEntity getMedicalRecord(@PathVariable("accountId") Long accountId) throws NotFoundException {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
@@ -42,6 +43,12 @@ public class MedicalRecordController {
         );
     }
 
-
-
+    // api get medical record dành cho bệnh nhân
+    @GetMapping("/api/medical-record/me")
+    public ResponseEntity getMedicalRecord() throws NotFoundException {
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy hồ sơ thành công",
+                medicalRecordService.getUserMedicalRecord()));
+    }
 }

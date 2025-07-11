@@ -8,6 +8,7 @@ import com.fuhcm.swp391.be.itmms.error.exception.EmailNotFoundException;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -90,4 +91,14 @@ public class GlobalException {
         res.setError("UNAUTHORIZED");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseFormat<Object>> handleAccessDeniedException(AccessDeniedException ex) {
+        ResponseFormat<Object> res = new ResponseFormat<>();
+        res.setStatusCode(HttpStatus.FORBIDDEN.value());
+        res.setMessage(ex.getMessage());
+        res.setError("ACCESS_DENIED");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
+    }
+
 }
