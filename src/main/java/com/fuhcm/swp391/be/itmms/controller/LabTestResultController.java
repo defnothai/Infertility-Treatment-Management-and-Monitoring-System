@@ -1,12 +1,10 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
-import com.fuhcm.swp391.be.itmms.dto.LabTestDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultForStaffRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
-import com.fuhcm.swp391.be.itmms.entity.lab.LabTest;
 import com.fuhcm.swp391.be.itmms.service.LabTestResultService;
 import javassist.NotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -73,6 +71,18 @@ public class LabTestResultController {
                         "UPDATE_SUCCESS",
                         "Cập nhật kết quả xét nghiệm thành công",
                         response
+                )
+        );
+    }
+
+    @GetMapping("/api/lab-test-result/{id}/staff")
+    public ResponseEntity getLabTestResultById(@PathVariable Long id) {
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Tìm kiếm kết quả xét nghiệm thành công",
+                        labTestResultService.getLabTestResultInfoById(id)
                 )
         );
     }

@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
+import com.fuhcm.swp391.be.itmms.dto.response.EmploymentMedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.MedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.MedicalRecordService;
@@ -8,6 +9,8 @@ import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class MedicalRecordController {
@@ -51,4 +54,17 @@ public class MedicalRecordController {
                 "Lấy hồ sơ thành công",
                 medicalRecordService.getUserMedicalRecord()));
     }
+
+    // danh sách medical record dành cho manager
+    @GetMapping("/api/manage/medical-record")
+    public ResponseEntity getMedicalRecordsForEmployment() {
+        List<EmploymentMedicalRecordResponse> list = medicalRecordService.getAllMedicalRecordsForEmployment();
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy dữ liệu thành công", list));
+    }
+
+
+
+
 }

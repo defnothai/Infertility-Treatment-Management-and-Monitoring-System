@@ -192,6 +192,33 @@ public class LabTestResultService {
         }).toList();
     }
 
+    public LabTestResultForStaffResponse getLabTestResultInfoById(Long id) {
+        LabTestResult result = labTestResultRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kết quả xét nghiệm"));
+
+        LabTestResultForStaffResponse response = new LabTestResultForStaffResponse();
+        response.setId(result.getId());
+        response.setTestDate(result.getTestDate());
+        response.setResultSummary(result.getResultSummary());
+        response.setResultDetails(result.getResultDetails());
+        response.setStatus(result.getStatus());
+        response.setNotes(result.getNotes());
+
+        if (result.getTest() != null) {
+            response.setLabTestName(result.getTest().getName());
+        }
+
+        if (result.getMedicalRecord() != null && result.getMedicalRecord().getUser() != null) {
+            var user = result.getMedicalRecord().getUser();
+            response.setPatientFullName(user.getAccount().getFullName());
+            response.setPatientDob(user.getDob().toString());
+            response.setPatientPhoneNumber(user.getAccount().getPhoneNumber());
+            response.setPatientGender(user.getAccount().getGender());
+        }
+
+        return response;
+    }
+
     @Transactional
     public List<LabTestResultResponse> sendFollowUpLabTestResultsRequest(Long recordId, Long sessionId, LabTestResultRequest request) throws NotFoundException, BadRequestException {
         TreatmentSession session = treatmentSessionRepository.findById(sessionId)

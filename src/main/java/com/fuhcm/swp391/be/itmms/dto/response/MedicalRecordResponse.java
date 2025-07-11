@@ -24,5 +24,4 @@ public class MedicalRecordResponse {
     private List<LabTestResultResponse> initLabTestResults;
     private List<UltrasoundResponse> initUltrasounds;
 
-
 }

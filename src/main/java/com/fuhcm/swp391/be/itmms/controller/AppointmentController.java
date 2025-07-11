@@ -4,13 +4,12 @@ package com.fuhcm.swp391.be.itmms.controller;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.service.AppointmentService;
-import com.fuhcm.swp391.be.itmms.service.ScheduleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,13 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
-import com.fuhcm.swp391.be.itmms.service.AppointmentService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
@@ -72,7 +64,7 @@ public class AppointmentController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Appointment found", appointmentResponse));
     }
 
-    @GetMapping
+    @GetMapping("/test")
     public ResponseEntity getAllAppointments() {
         return ResponseEntity.ok(
                 new ResponseFormat<>(
@@ -83,4 +75,5 @@ public class AppointmentController {
                 )
         );
     }
+
 }

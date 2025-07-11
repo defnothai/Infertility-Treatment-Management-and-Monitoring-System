@@ -45,6 +45,7 @@ public class ServiceDetailsService {
         ServiceDetails serviceDetails = findByServiceId(serviceId);
         ServiceDetailsResponse response = modelMapper.map(serviceDetails, ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
+        response.setServiceName(serviceDetails.getService().getServiceName());
         return response;
     }
 
@@ -55,6 +56,7 @@ public class ServiceDetailsService {
         serviceDetails.setService(serviceService.findById(serviceId));
         ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
+        response.setServiceName(serviceDetails.getService().getServiceName());
         return response;
     }
 
@@ -63,11 +65,10 @@ public class ServiceDetailsService {
                                                ServiceDetailsRequest serviceDetailsRequest) throws NotFoundException {
         ServiceDetails serviceDetails = this.findById(id);
         modelMapper.map(serviceDetailsRequest, serviceDetails);
-
-
         serviceDetails.setId(id);
         ServiceDetailsResponse response = modelMapper.map(serviceDetailsRepository.save(serviceDetails), ServiceDetailsResponse.class);
         response.setSlug(serviceDetails.getService().getSlug());
+        response.setServiceName(serviceDetails.getService().getServiceName());
         return response;
     }
 }

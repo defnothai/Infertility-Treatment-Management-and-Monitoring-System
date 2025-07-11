@@ -8,6 +8,7 @@ import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
 import com.fuhcm.swp391.be.itmms.entity.service.Service;
+import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -136,4 +137,5 @@ public class Account {
 
     @OneToMany(mappedBy = "createdBy")
     private List<HospitalAchievement> achievements;
+
 }

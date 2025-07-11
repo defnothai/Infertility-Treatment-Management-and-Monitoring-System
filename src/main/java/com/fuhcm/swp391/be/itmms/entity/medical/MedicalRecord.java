@@ -54,4 +54,6 @@ public class MedicalRecord {
 
     @OneToMany(mappedBy = "medicalRecord")
     private List<Ultrasound> ultrasounds;
+
+
 }

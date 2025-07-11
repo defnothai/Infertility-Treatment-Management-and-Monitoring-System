@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.UltrasoundRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.ImageUrlListResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.service.UltrasoundService;
@@ -72,6 +73,19 @@ public class UltrasoundController {
                         "Tạo kết quả siêu âm FOLLOW_UP thành công",
                         response
                 ));
+    }
+
+    @GetMapping("/api/ultrasounds/images/{id}")
+    public ResponseEntity getImageUrls(@PathVariable Long id) throws NotFoundException {
+        ImageUrlListResponse response = ultrasoundService.getImageUrlsById(id);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy thành công ảnh siêu âm",
+                        response
+                )
+        );
     }
 
 

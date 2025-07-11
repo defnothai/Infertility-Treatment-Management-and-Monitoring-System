@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.treatment;
 
+import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.prescription.Prescription;
 import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
