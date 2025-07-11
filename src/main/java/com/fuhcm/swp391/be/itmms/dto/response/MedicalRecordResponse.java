@@ -1,12 +1,16 @@
 package com.fuhcm.swp391.be.itmms.dto.response;
 
 import com.fuhcm.swp391.be.itmms.constant.Gender;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MedicalRecordResponse {
 
     private Long id;

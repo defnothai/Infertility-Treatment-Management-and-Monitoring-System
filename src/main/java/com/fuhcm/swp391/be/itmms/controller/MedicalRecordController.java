@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
 import com.fuhcm.swp391.be.itmms.dto.response.EmploymentMedicalRecordResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.ManagerMedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.MedicalRecordResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.service.MedicalRecordService;
@@ -62,6 +63,19 @@ public class MedicalRecordController {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
                 "FETCH_SUCCESS",
                 "Lấy dữ liệu thành công", list));
+    }
+
+    // chi tiết medical record cho manager
+    @GetMapping("/api/manage/medical-record/{accountId}")
+    public ResponseEntity getManagerMedicalRecord(@PathVariable Long accountId) throws NotFoundException {
+        ManagerMedicalRecordResponse response = medicalRecordService.getManagerMedicalRecord(accountId);
+        ResponseFormat<ManagerMedicalRecordResponse> result = new ResponseFormat<>(
+                200,
+                "FETCH_SUCCESS",
+                "Lấy thông tin hồ sơ bệnh án thành công",
+                response
+        );
+        return ResponseEntity.ok(result);
     }
 
 }

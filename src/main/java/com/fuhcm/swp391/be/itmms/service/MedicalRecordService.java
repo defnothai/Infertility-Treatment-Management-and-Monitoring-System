@@ -3,9 +3,7 @@ package com.fuhcm.swp391.be.itmms.service;
 import com.fuhcm.swp391.be.itmms.constant.AccessRole;
 import com.fuhcm.swp391.be.itmms.constant.PermissionLevel;
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
-import com.fuhcm.swp391.be.itmms.dto.response.EmploymentMedicalRecordResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.MedicalRecordResponse;
-import com.fuhcm.swp391.be.itmms.dto.response.UserMedicalRecordResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MedicalRecordService {
@@ -187,6 +186,36 @@ public class MedicalRecordService {
                 }).toList();
     }
 
+    public ManagerMedicalRecordResponse getManagerMedicalRecord(Long accountId) throws NotFoundException {
+        Account account = accountService.findById(accountId);
+        User user = account.getUser();
+        if (user == null || user.getMedicalRecord() == null) {
+            throw new NotFoundException("Không tìm thấy thông tin bệnh nhân hay hồ sơ bệnh án");
+        }
+        MedicalRecord medicalRecord = user.getMedicalRecord();
+        Optional<MedicalRecordAccess> accessOpt =
+                medicalRecordAccessRepository.findByMedicalRecordAndRole(medicalRecord, AccessRole.MAIN_DOCTOR);
+        DoctorResponse doctorResponse = null;
+        if (accessOpt.isPresent()) {
+            Account doctorAccount = accessOpt.get().getGrantedTo();
+            if (doctorAccount != null && doctorAccount.getDoctor() != null) {
+                doctorResponse = new DoctorResponse(doctorAccount);
+                modelMapper.map(doctorAccount.getDoctor(), doctorResponse);
+            }
+        }
+
+        MedicalRecordResponse medicalRecordResponse = new MedicalRecordResponse();
+        modelMapper.map(medicalRecord, medicalRecordResponse);
+
+        if (user != null) {
+            Account userAcc = user.getAccount();
+            if (userAcc != null) {
+                modelMapper.map(userAcc, medicalRecordResponse);
+            }
+            modelMapper.map(user, medicalRecordResponse);
+        }
+        return new ManagerMedicalRecordResponse(medicalRecordResponse, doctorResponse);
+    }
 
 
 }
