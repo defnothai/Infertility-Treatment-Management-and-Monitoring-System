@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.UltrasoundType;
 import com.fuhcm.swp391.be.itmms.dto.request.UltrasoundRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.ImageUrlListResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,7 +126,16 @@ public class UltrasoundService {
         return response;
     }
 
+    public ImageUrlListResponse getImageUrlsById(Long id) throws NotFoundException {
+        Ultrasound ultrasound = ultrasoundRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy bản ghi siêu âm"));
 
+        List<String> imageUrlList = Arrays.stream(ultrasound.getImageUrls().split(";"))
+                .map(String::trim)
+                .filter(url -> !url.isEmpty())
+                .toList();
+        return new ImageUrlListResponse(imageUrlList);
+    }
 
 }
 

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -18,7 +19,7 @@ public class AppointmentResponse {
     private LocalTime endTime;
     private AppointmentStatus status;
     private String note;
-    private LocalDate createAt;
+    private LocalDateTime createAt;
     private String patientName;
     private Long accountPatientId;
 }

@@ -22,10 +22,10 @@ public class DoctorResponse {
     private String slug;
     private String imgUrl;
 
-    public DoctorResponse(String fullName, String position, String achievement, String imgUrl, String slug) {
+    public DoctorResponse(String fullName, String position, String achievements, String imgUrl, String slug) {
         this.fullName = fullName;
         this.position = position;
-        this.achievement = achievement;
+        this.achievements = achievements;
         this.imgUrl = imgUrl;
         this.slug = slug;
     }

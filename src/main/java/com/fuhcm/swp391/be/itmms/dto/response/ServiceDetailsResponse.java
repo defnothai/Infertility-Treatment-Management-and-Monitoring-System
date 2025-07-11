@@ -12,6 +12,8 @@ public class ServiceDetailsResponse {
 
     private Long id;
 
+    private String serviceName;
+
     @Lob
     private String concept;
 
