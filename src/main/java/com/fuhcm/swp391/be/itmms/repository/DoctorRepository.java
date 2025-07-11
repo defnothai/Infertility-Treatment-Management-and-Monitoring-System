@@ -16,7 +16,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     Doctor findByAccount(Account account);
 
     Doctor findByAccountIdAndStatus(Long doctorId, EmploymentStatus employmentStatus);
-    boolean findByAccountIdAndStatus(Long doctorId, EmploymentStatus employmentStatus);
     @Query("SELECT d FROM Doctor d WHERE d.account.email = :email")
     Optional<Doctor> findByAccountEmail(String email);
 }
