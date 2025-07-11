@@ -8,8 +8,10 @@ import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.dto.response.LoginResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
+import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.RoleRepository;
+import com.fuhcm.swp391.be.itmms.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +49,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserRepository userRepo;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -75,6 +80,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             account.setRoles(List.of(roleUser));
             account.setStatus(AccountStatus.ENABLED);
             account.setGender(Gender.MALE);
+            User user = new User();
+            user.setAccount(account);
+            userRepo.save(user);
             accountService.register(account);
             System.out.println("Registed successfully");
         }

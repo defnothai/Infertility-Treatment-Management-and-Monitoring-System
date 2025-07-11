@@ -44,21 +44,20 @@ public class SecurityConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
-    private static final String[] PUBLIC_API = {
-            "/api/auth/register",
-            "/api/auth/login",
-            "/api/auth/register/resend-verification-email",
-            "/api/auth/forgot-password",
-            "/api/auth/reset-password",
-            "/api/auth/register/confirm-email",
-            "/oauth2/**",
-            "/oauth2/authorization/**",
-            "/api/home/**",
-            "/api/doctors/**",
-            "/api/services/**",
-            "/api/list/**",
-            "/api/manager/**"
-    };
+//    private static final String[] PUBLIC_API = {
+//            "/api/auth/register",
+//            "/api/auth/login",
+//            "/api/auth/register/resend-verification-email",
+//            "/api/auth/forgot-password",
+//            "/api/auth/reset-password",
+//            "/api/auth/register/confirm-email",
+//            "/oauth2/**",
+//            "/api/home/**",
+//            "/api/doctors/**",
+//            "/api/services/**",
+//            "/api/list/**",
+//            "/api/manager/**"
+//    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -66,15 +65,27 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register/resend-verification-email").permitAll()
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/auth/reset-password").permitAll()
+                        .requestMatchers("/api/auth/register/confirm-email").permitAll()
+                        .requestMatchers("/api/home/**").permitAll()
+                        .requestMatchers("/api/doctors/**").permitAll()
+                        .requestMatchers("/api/services/**").permitAll()
+                        .requestMatchers("/api/list/**").permitAll()
+                        .requestMatchers("/api/manager/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
-                        .requestMatchers(PUBLIC_API).permitAll()
+                        .requestMatchers("/o/oauth2/v2/auth").permitAll()
+                        //.requestMatchers(PUBLIC_API).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         // USER role
-                        .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasAnyRole("MANAGER", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "api/user/appointments/available-doctors").hasRole("USER")
@@ -116,7 +127,7 @@ public class SecurityConfig {
                 )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

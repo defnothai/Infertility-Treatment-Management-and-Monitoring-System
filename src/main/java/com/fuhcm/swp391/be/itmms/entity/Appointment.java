@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
+import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -53,6 +54,13 @@ public class Appointment {
 
     @Column(name = "Message", length = 1000)
     private String message;
+
+    @Column(name = "Gender")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    @Column(name = "DayOfBirth")
+    private LocalDate dob;
 
     @ManyToOne
     @JoinColumn(name = "Schedule_Id", referencedColumnName = "Id")

@@ -1,15 +1,16 @@
 package com.fuhcm.swp391.be.itmms.service;
 
-
 import com.fuhcm.swp391.be.itmms.config.security.JWTFilter;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
-import com.fuhcm.swp391.be.itmms.validator.Validation;
+import com.fuhcm.swp391.be.itmms.validation.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
-import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class AppointmentService {
 
     @Autowired
@@ -47,6 +45,9 @@ public class AppointmentService {
 
     @Autowired
     private JWTFilter jwtFilter;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -108,7 +109,6 @@ public class AppointmentService {
 
     public List<AppointmentResponse> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
-
         return appointments.stream().map(appt -> new AppointmentResponse(
                 appt.getId(),
                 appt.getTime(),
@@ -120,5 +120,17 @@ public class AppointmentService {
                 appt.getPatientName(),
                 appt.getUser() != null ? appt.getUser().getId() : null
         )).collect(Collectors.toList());
+    }
+
+    public AppointmentResponse getLastAppointment(Authentication authentication) {
+        AppointmentResponse appointmentResponse;
+        Account account = accountRepository.findByEmail(authentication.getName());
+        Appointment appointment = appointmentRepository.findTopByUserOrderByCreateAtDesc(account);
+        if(appointment == null) {
+            appointmentResponse = null;
+        } else {
+            appointmentResponse = new AppointmentResponse(appointment);
+        }
+        return appointmentResponse;
     }
 }

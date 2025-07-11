@@ -1,4 +1,4 @@
-package com.fuhcm.swp391.be.itmms.validator;
+package com.fuhcm.swp391.be.itmms.validation;
 
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import lombok.Data;
