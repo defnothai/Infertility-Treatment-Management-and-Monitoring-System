@@ -22,6 +22,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,7 +92,7 @@ public class MedicalRecordService {
             access.setGrantedBy(currentAccount);
             access.setLevel(PermissionLevel.FULL_ACCESS);
             access.setMedicalRecord(medicalRecord);
-            access.setDayStart(LocalDate.now());
+            access.setDayStart(LocalDateTime.now());
             access.setRole(AccessRole.MAIN_DOCTOR);
             access.setDayEnd(null);
 

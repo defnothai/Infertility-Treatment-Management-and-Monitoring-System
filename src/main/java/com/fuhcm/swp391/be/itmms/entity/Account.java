@@ -6,6 +6,7 @@ import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
 import com.fuhcm.swp391.be.itmms.entity.service.Service;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
@@ -141,5 +142,14 @@ public class Account {
 
     @OneToMany(mappedBy = "createdBy")
     private List<HospitalAchievement> achievements;
+
+    @OneToMany(mappedBy = "updatedBy")
+    @JsonIgnore
+    private List<MedicalRecordAccess> updatedAccessRecords;
+
+    @OneToMany(mappedBy = "revokedBy")
+    @JsonIgnore
+    private List<MedicalRecordAccess> revokedAccessRecords;
+
 
 }

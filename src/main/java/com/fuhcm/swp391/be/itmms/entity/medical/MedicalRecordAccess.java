@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -26,10 +27,10 @@ public class MedicalRecordAccess {
     private Long id;
 
     @Column(name = "DayStart", nullable = false)
-    private LocalDate dayStart;
+    private LocalDateTime dayStart;
 
     @Column(name = "DayEnd", nullable = true)
-    private LocalDate dayEnd;
+    private LocalDateTime dayEnd;
 
     @Column(name = "AccessRole", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -46,6 +47,20 @@ public class MedicalRecordAccess {
     @ManyToOne
     @JoinColumn(name = "GrantedTo", referencedColumnName = "Id")
     private Account grantedTo;
+
+    @ManyToOne
+    @JoinColumn(name = "RevokedBy")
+    private Account revokedBy;
+
+    @Column(name = "RevokedAt")
+    private LocalDateTime revokedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "UpdatedBy")
+    private Account updatedBy;
+
+    @Column(name = "UpdatedAt")
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "MedicalRecordID", referencedColumnName = "Id")

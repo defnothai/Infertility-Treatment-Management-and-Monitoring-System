@@ -63,5 +63,14 @@ public class MedicalRecordAccessController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/{accessId}")
+    public ResponseEntity<ResponseFormat<Void>> revokeMedicalRecordAccess(@PathVariable Long accessId) throws NotFoundException {
+        medicalRecordAccessService.revokeAccess(accessId);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(200, "DELETE_SUCCESS", "Thu hồi quyền truy cập thành công", null)
+        );
+    }
+
+
 }
 
