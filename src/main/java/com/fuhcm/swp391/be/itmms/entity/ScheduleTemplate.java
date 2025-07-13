@@ -24,18 +24,24 @@ public class ScheduleTemplate {
     @Column(name = "DayOfWeek", nullable = false)
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "RoomNumber", nullable = false)
-    private int roomNumber;
+//    @Column(name = "RoomNumber", nullable = false)
+//    private int roomNumber;
 
-    @Column(name = "MaxCapacity", nullable = false)
-    private int maxCapacity;
+//    @Column(name = "MaxCapacity", nullable = false)
+//    private int maxCapacity;
+
+    @Column(name = "MaxStaffs",  nullable = false)
+    private int maxStaffs;
+
+    @Column(name = "MaxDoctors",  nullable = false)
+    private int maxDoctors;
 
     @ManyToOne
     @JoinColumn(name = "ShiftID", referencedColumnName = "Id")
     private Shift shift;
 
-    @ManyToOne
-    @JoinColumn(name = "AssignTo", referencedColumnName = "Id")
-    @JsonIgnore
-    private Account account;
+//    @ManyToOne
+//    @JoinColumn(name = "AssignTo", referencedColumnName = "Id")
+//    @JsonIgnore
+//    private Account account;
 }

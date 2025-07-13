@@ -18,7 +18,7 @@ public class AccountResponse {
     private AccountStatus status;
     private String phoneNumber;
     private Gender gender;
-    private Account createdBy;
+    private Long createdBy;
 
     public AccountResponse(Account account) {
         this.id = account.getId();
@@ -28,8 +28,13 @@ public class AccountResponse {
         this.status = account.getStatus();
         this.phoneNumber = account.getPhoneNumber();
         this.gender = account.getGender();
-        this.createdBy = account.getCreatedBy();
+        if(account.getCreatedBy() != null){
+            this.createdBy = account.getCreatedBy().getId();
+        } else {
+            this.createdBy = null;
+        }
     }
+
 
     public AccountResponse(Long id, String fullName){
         this.id = id;

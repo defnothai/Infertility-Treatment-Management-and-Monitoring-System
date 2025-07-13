@@ -3,10 +3,7 @@ package com.fuhcm.swp391.be.itmms.dto.request;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
@@ -23,16 +20,16 @@ public class AccountCreateRequest {
     @Size(min = 8, message = "Mật khẩu ít nhất 8 ký tự")
     private String password;
 
-    @NotBlank(message = "Status không được để trống")
+    @NotNull(message = "Status không được để trống")
     private AccountStatus status;
 
     @Pattern(regexp = "(84|0[3|5|7|8|9])+(\\d{8})", message = "Số điện thoại không hợp lệ")
     @NotBlank(message = "Số điện thoại không được để trống")
     private String phoneNumber;
 
-    @NotBlank(message = "Gender không được để trống")
+    @NotNull(message = "Gender không được để trống")
     private Gender gender;
 
-    @NotBlank(message = "Role không được để trống")
+    @NotNull(message = "Role không được để trống")
     private AccountRole roles;
 }
