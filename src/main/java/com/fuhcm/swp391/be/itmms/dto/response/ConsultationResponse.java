@@ -14,6 +14,7 @@ public class ConsultationResponse {
     private String phoneNumber;
     private String email;
     private String message;
+    private String status;
 
     public ConsultationResponse(String patientName, String phoneNumber, String email, String message) {
         this.patientName = patientName;
@@ -28,5 +29,6 @@ public class ConsultationResponse {
         this.phoneNumber = consultation.getPhoneNumber();
         this.email = consultation.getEmail();
         this.message = consultation.getMsg();
+        this.status = consultation.getStatus().toString();
     }
 }

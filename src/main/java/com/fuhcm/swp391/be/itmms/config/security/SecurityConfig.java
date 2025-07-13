@@ -68,6 +68,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                                .requestMatchers("/api/application").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register/resend-verification-email").permitAll()
@@ -80,7 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/list/**").permitAll()
                         .requestMatchers("/api/manager/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
-                        .requestMatchers("/o/oauth2/v2/auth").permitAll()
+                        .requestMatchers("/o/oauth2/v2/auth/**").permitAll()
                         //.requestMatchers(PUBLIC_API).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
@@ -102,9 +103,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/schedules/manage/**").hasAnyRole("DOCTOR", "ADMIN")
 
                         //STAFF role
-                        .requestMatchers(HttpMethod.GET, "/api/consultation").hasRole("STAFF")
-                        .requestMatchers(HttpMethod.PUT, "/api/consultation").hasAnyRole("STAFF")
-                        .requestMatchers(HttpMethod.DELETE, "/api/consultation").hasAnyRole("STAFF")
+                                .requestMatchers("/api/consultation").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/consultation").hasRole("STAFF")
+//                        .requestMatchers(HttpMethod.PUT, "/api/consultation").hasAnyRole("STAFF")
+//                        .requestMatchers(HttpMethod.DELETE, "/api/consultation").hasAnyRole("STAFF")
 
                         //MANAGER role
                         .requestMatchers(HttpMethod.GET, "/api/blogs").hasRole("MANAGER")

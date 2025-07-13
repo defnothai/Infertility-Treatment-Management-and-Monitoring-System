@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Staff {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
