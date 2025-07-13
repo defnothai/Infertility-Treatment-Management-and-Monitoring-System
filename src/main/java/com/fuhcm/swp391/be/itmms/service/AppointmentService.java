@@ -4,6 +4,7 @@ import com.fuhcm.swp391.be.itmms.config.security.JWTFilter;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.EmailDetailReminder;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
@@ -48,6 +49,10 @@ public class AppointmentService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private ReminderService reminderService;
+    @Autowired
+    private EmailService emailService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -68,6 +73,12 @@ public class AppointmentService {
 
         Schedule schedule = scheduleService.findSchedule(doctor.getId(), workDate, shift.getId().intValue());
         Appointment appointment = buildAppointment(appointmentRequest, bookBy, doctor, schedule);
+
+        // tạo reminder
+        reminderService.createRemindersForAppointment(appointment);
+        // gửi mail
+        EmailDetailReminder emailDetailReminder = reminderService.buildEmailDetail(appointment);
+        emailService.sendAppointmentSuccess(emailDetailReminder);
         return appointmentRepository.save(appointment);
     }
 

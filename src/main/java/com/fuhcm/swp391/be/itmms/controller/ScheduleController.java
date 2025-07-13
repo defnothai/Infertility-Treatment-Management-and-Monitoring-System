@@ -88,6 +88,7 @@ public class ScheduleController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", availableDates));
     }
 
+    // ***
     @GetMapping("/my-available-dates")
     public ResponseEntity<ApiResponse<?>> getMyAvailableDates() {
         List<LocalDate> availableDates = scheduleService.getMyAvailableSchedules();
