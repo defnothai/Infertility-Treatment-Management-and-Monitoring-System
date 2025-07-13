@@ -117,6 +117,10 @@ public class Account {
     @JsonIgnore
     private List<Application> applications;
 
+    @OneToMany(mappedBy = "doctor")
+    @JsonIgnore
+    private List<Application> applications1;
+
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     private List<Invoice> invoices;
@@ -124,10 +128,6 @@ public class Account {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     private List<LabTestResult> labTestResults;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<ScheduleTemplate>  scheduleTemplates;
 
     @OneToMany(mappedBy = "staff")
     @JsonIgnore
@@ -143,6 +143,14 @@ public class Account {
     @OneToMany(mappedBy = "createdBy")
     private List<HospitalAchievement> achievements;
 
+    @OneToOne(mappedBy = "account")
+    @JsonIgnore
+    private Staff staff;
+
+    @OneToMany(mappedBy = "replace")
+    @JsonIgnore
+    private List<Schedule> schedule;
+  
     @OneToMany(mappedBy = "updatedBy")
     @JsonIgnore
     private List<MedicalRecordAccess> updatedAccessRecords;

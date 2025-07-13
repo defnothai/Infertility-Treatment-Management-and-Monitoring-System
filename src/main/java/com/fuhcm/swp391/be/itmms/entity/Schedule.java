@@ -31,11 +31,11 @@ public class Schedule {
     @Column(name = "WorkDate", nullable = false)
     private LocalDate workDate;
 
-    @Column(name = "RoomNumber", nullable = false, length = 5)
-    private int roomNumber;
+//    @Column(name = "RoomNumber", nullable = false, length = 5)
+//    private int roomNumber;
 
-    @Column(name = "MaxCapacity", nullable = false, length = 5)
-    private int maxCapacity;
+//    @Column(name = "MaxCapacity", nullable = false, length = 5)
+//    private int maxCapacity;
 
     @Column(name = "CreateAt", nullable = false)
     private LocalDate createAt;
@@ -64,5 +64,10 @@ public class Schedule {
     @ManyToOne
     @JoinColumn(name = "ShiftID", referencedColumnName = "Id")
     private Shift shift;
+
+    @ManyToOne
+    @JoinColumn(name = "ReplaceId", referencedColumnName = "Id")
+    @JsonIgnore
+    private Account replace;
 
 }

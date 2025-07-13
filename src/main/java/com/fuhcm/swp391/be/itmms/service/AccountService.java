@@ -207,6 +207,9 @@ public class AccountService {
         List<AccountResponse> responses = new ArrayList<>();
         List<Account> accounts = accountRepo.findAll();
         for (Account account : accounts) {
+            if(account.getRoles().getFirst().getRoleName().equals(AccountRole.ROLE_ADMIN)){
+                continue;
+            }
             responses.add(new AccountResponse(account));
         }
         return responses;

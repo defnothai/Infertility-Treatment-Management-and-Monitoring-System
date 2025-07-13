@@ -53,6 +53,6 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<DoctorReview> doctorReview;
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Application> applications;
+//    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+//    private List<Application> applications;
 }

@@ -1,12 +1,15 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fuhcm.swp391.be.itmms.constant.ApplicationStatus;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -25,20 +28,28 @@ public class Application {
     @Column(name = "Title", nullable = false)
     private String title;
 
+    @Lob
     @Column(name = "Description", nullable = false)
     private String description;
 
     @Column(name = "DateSend", nullable = false)
-    private Date dateSend;
+    private LocalDate dateSend;
 
-    @Column(name = "DateApproved", nullable = true)
-    private Date dateApproved;
+    @Column(name = "DateHandled", nullable = true)
+    private LocalDate dateHandled;
+
+    @Column(name = "Status")
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus status;
+
+    @Column(name = "LeaveDate")
+    private LocalDate leaveDate;
 
     @ManyToOne
     @JoinColumn(name = "SendBy", referencedColumnName = "Id")
-    private Doctor doctor;
+    private Account doctor;
 
     @ManyToOne
-    @JoinColumn(name = "ApprovedBy", referencedColumnName = "Id")
+    @JoinColumn(name = "Handler", referencedColumnName = "Id")
     private Account account;
 }
