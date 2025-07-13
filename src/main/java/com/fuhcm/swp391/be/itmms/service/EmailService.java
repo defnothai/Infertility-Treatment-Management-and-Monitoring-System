@@ -37,7 +37,7 @@ public class EmailService {
             messageHelper.setText(templateRegisterEmail, true);
             javaMailSender.send(messageHelper.getMimeMessage());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Gửi mail xác nhận thất bại");
         }
     }
 
@@ -56,7 +56,29 @@ public class EmailService {
             messageHelper.setText(templateRegisterEmail, true);
             javaMailSender.send(messageHelper.getMimeMessage());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Gửi mail xác nhận thất bại");
         }
     }
+
+//    @Async
+//    public void sendReminderEmail(EmailDetail emailDetail) {
+//        try {
+//            Context context = new Context();
+//            context.setVariable("fullName", emailDetail.getFullName());
+//            context.setVariable("message", emailDetail.getMessage());
+//
+//            String body = templateEngine.process("reminderEmail", context);
+//            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+//            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+//            helper.setFrom(BASE_EMAIL_ADDRESS);
+//            helper.setTo(emailDetail.getRecipient());
+//            helper.setSubject(emailDetail.getSubject());
+//            helper.setText(body, true);
+//
+//            javaMailSender.send(mimeMessage);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Gửi email nhắc nhở thất bại");
+//        }
+//    }
+
 }

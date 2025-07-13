@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.dto.response;
 
 import com.fuhcm.swp391.be.itmms.constant.Gender;
+import com.fuhcm.swp391.be.itmms.constant.PermissionLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,8 @@ public class MedicalRecordResponse {
     private String insuranceNumber;
     private String diagnosis;
     private String symptoms;
-    private List<LabTestResultResponse> initLabTestResults;
-    private List<UltrasoundResponse> initUltrasounds;
+    private List<LabTestResultResponse> initLabTestResults; // k cần dùng cho mana
+    private List<UltrasoundResponse> initUltrasounds; // k cần dùng cho mana
+    private PermissionLevel level;
 
 }

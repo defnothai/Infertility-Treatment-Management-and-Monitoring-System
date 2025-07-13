@@ -80,6 +80,13 @@ public class MedicalRecordService {
                 throw new NotFoundException("Bạn không thể truy cập vào hồ sơ này");
             }
         }
+        MedicalRecordAccess recordAccess = medicalRecord.getMedicalRecordAccess()
+                .stream().filter(medicalRecordAccess -> medicalRecordAccess.getGrantedTo().equals(currentAccount)).findFirst().orElse(null);
+        if (recordAccess == null) {
+            throw new RuntimeException("Không kiểm tra được khả năng truy cập");
+        }
+        PermissionLevel level = recordAccess.getLevel();
+
         if (medicalRecord == null) {
             medicalRecord = new MedicalRecord();
             medicalRecord.setUser(user);
@@ -110,6 +117,7 @@ public class MedicalRecordService {
         response.setIdentityNumber(user.getIdentityNumber());
         response.setNationality(user.getNationality());
         response.setInsuranceNumber(user.getInsuranceNumber());
+        response.setLevel(level);
 
         response.setInitLabTestResults(labTestResultService.getInitLabTestResults(medicalRecord.getId()));
         response.setInitUltrasounds(ultrasoundService.getInitialUltrasoundsByMedicalRecordId(medicalRecord.getId()));

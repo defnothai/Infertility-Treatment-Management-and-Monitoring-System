@@ -10,10 +10,12 @@ import com.fuhcm.swp391.be.itmms.dto.response.EmailDetail;
 import com.fuhcm.swp391.be.itmms.dto.response.LoginResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.error.exception.AuthenticationException;
 import com.fuhcm.swp391.be.itmms.error.exception.ConfirmPasswordNotMatchException;
 import com.fuhcm.swp391.be.itmms.error.exception.EmailAlreadyExistsException;
 import com.fuhcm.swp391.be.itmms.repository.AuthenticationRepository;
+import com.fuhcm.swp391.be.itmms.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,7 @@ public class AuthenticationService {
     private final ConfirmTokenRegisterService confirmTokenRegisterService;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final UserRepository userRepository;
 
     public AuthenticationService(AuthenticationRepository authenticationRepository,
                                  JWTService jwtService,
@@ -57,7 +60,7 @@ public class AuthenticationService {
                                  EmailService emailService,
                                  @Lazy ConfirmTokenRegisterService confirmTokenRegisterService,
                                  PasswordEncoder passwordEncoder,
-                                 RoleService roleService) {
+                                 RoleService roleService, UserRepository userRepository) {
         this.authenticationRepository = authenticationRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -66,6 +69,7 @@ public class AuthenticationService {
         this.confirmTokenRegisterService = confirmTokenRegisterService;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.userRepository = userRepository;
     }
 
     public Account getCurrentAccount() {
@@ -148,6 +152,9 @@ public class AuthenticationService {
                 account.setStatus(AccountStatus.DISABLED);
                 account.setCreatedBy(account);
                 account = authenticationRepository.save(account);
+                User user = new User();
+                user.setAccount(account);
+                userRepository.save(user);
             }
         }else {
             account.setFullName(registerRequest.getFullName());
@@ -158,6 +165,9 @@ public class AuthenticationService {
             account.setCreatedBy(account);
             account.setRoles(List.of(roleService.findByRoleName(AccountRole.ROLE_USER)));
             authenticationRepository.save(account);
+            User user = new User();
+            user.setAccount(account);
+            userRepository.save(user);
         }
 
         String token = confirmTokenRegisterService.generateToken(account,now);

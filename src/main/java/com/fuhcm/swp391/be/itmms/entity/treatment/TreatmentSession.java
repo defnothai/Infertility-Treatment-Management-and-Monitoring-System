@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.treatment;
 
+import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.prescription.Prescription;
 import com.fuhcm.swp391.be.itmms.entity.Ultrasound;
@@ -40,6 +41,10 @@ public class TreatmentSession {
 
     @Column(name = "isActive", nullable = false)
     private boolean isActive;
+
+    @Column(name = "Status")
+    @Enumerated(EnumType.STRING)
+    private TreatmentSessionStatus status;
 
     @ManyToOne
     @JoinColumn(name = "ProgressID", referencedColumnName = "Id")

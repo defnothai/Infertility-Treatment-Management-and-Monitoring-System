@@ -1,8 +1,11 @@
 package com.fuhcm.swp391.be.itmms.components;
 
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
+import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
+import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
+import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +20,8 @@ public class AppointmentStatusScheduler {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+    @Autowired
+    private TreatmentSessionRepository treatmentSessionRepository;
 
     @Scheduled(fixedRate = 600000)
     public void checkUnpaidAppointments(){
@@ -39,9 +44,14 @@ public class AppointmentStatusScheduler {
             if(appointmentDateTime.isBefore(fifteenMinutesAgo)){
                 appointment.setStatus(AppointmentStatus.CANCELLED);
                 appointmentsToCancel.add(appointment);
+                if (appointment.getSession() != null) {
+                    TreatmentSession session = appointment.getSession();
+                    session.setDiagnosis("Bệnh nhân hủy hẹn");
+                    session.setStatus(TreatmentSessionStatus.MISSED);
+                    treatmentSessionRepository.save(session);
+                }
             }
         }
         appointmentRepository.saveAll(appointmentsToCancel);
-
     }
 }

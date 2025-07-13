@@ -1,11 +1,13 @@
 package com.fuhcm.swp391.be.itmms.entity;
 
+import com.fuhcm.swp391.be.itmms.constant.ReminderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -28,12 +30,20 @@ public class Reminder {
     private String description;
 
     @Column(name = "RemindDate", nullable = false)
-    private Date remindDate;
+    private LocalDateTime remindDate;
 
-    @Column(name = "IsComplete", nullable = false, length = 3)
-    private String isComplete;
+    @Column(name = "IsSent", nullable = false)
+    private boolean isSent;
+
+    @Column(name = "ReminderType", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private ReminderType reminderType;
 
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "Id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
 }

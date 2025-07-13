@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +19,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByTime(LocalDate date);
 
     List<Appointment> findByDoctorIdAndTimeAndStatusNot(Long id, LocalDate time, AppointmentStatus status);
-
 
     boolean existsByUserIdAndTime(Long id, LocalDate date);
 
@@ -37,4 +35,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByStatusAndTimeLessThanEqual(AppointmentStatus appointmentStatus, LocalDate now);
 
     Appointment findTopByUserOrderByCreateAtDesc(Account account);
+
+    Optional<Appointment> findBySessionId(Long id);
 }

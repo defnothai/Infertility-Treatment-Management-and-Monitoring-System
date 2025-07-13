@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.dto.response;
 
+import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
 import jakarta.persistence.Column;
 import lombok.Data;
 
@@ -13,4 +14,6 @@ public class TreatmentSessionResponse {
     private String diagnosis;
     private String symptoms;
     private String notes;
+    private TreatmentSessionStatus status;
+
 }

@@ -3,6 +3,7 @@ package com.fuhcm.swp391.be.itmms.entity;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
+import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -73,4 +74,8 @@ public class Appointment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Doctor", nullable = false)
     private Account doctor;
+
+    @OneToOne
+    @JoinColumn(name = "treatment_session_id")
+    private TreatmentSession session;
 }

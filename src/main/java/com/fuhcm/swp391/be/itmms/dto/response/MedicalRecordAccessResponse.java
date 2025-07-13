@@ -11,7 +11,7 @@ public class MedicalRecordAccessResponse {
 
     private Long id;
     private LocalDateTime dayStart;
-    private LocalDateTime dayEnd;
+    private LocalDateTime dayEnd; // nếu là null thì vô hạn
     private PermissionLevel level;
     private AccessRole role;
     private String grantedBy; // Manager - name
