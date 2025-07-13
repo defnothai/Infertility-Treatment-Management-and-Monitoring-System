@@ -88,6 +88,15 @@ public class ScheduleController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", availableDates));
     }
 
+    @GetMapping("/my-available-dates")
+    public ResponseEntity<ApiResponse<?>> getMyAvailableDates() {
+        List<LocalDate> availableDates = scheduleService.getMyAvailableSchedules();
+        if(availableDates.isEmpty()){
+            return ResponseEntity.ok(new ApiResponse<>(true, "Không còn lịch trống", null));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", availableDates));
+    }
+
     @GetMapping("/slots")
     public ResponseEntity<ApiResponse<?>> getAvailableSlots(
             @Valid @RequestParam("id") Long id,

@@ -90,6 +90,17 @@ public class TreatmentSessionController {
         );
     }
 
+    @GetMapping("/api/treatment-sessions/{sessionId}/follow-up-details")
+    public ResponseEntity<?> getFollowUpDetail(@PathVariable Long sessionId) throws NotFoundException {
+        FollowUpRequest response = treatmentSessionService.getFollowUpDetail(sessionId);
+        return ResponseEntity.ok(new ResponseFormat<>(
+                HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy chi tiết lịch tái khám thành công",
+                response
+        ));
+    }
+
     @PutMapping("/api/treatment-sessions/{sessionId}")
     public ResponseEntity<?> updateFollowUpSession(
             @PathVariable Long sessionId,

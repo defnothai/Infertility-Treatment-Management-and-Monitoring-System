@@ -57,6 +57,8 @@ public class ScheduleService {
 
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private AuthenticationService authenticationService;
 
 //    public List<ScheduleResponse> getSchedulesByWeekYear(WeeklyScheduleRequest request, Authentication authentication) {
 //        Account currentUser = accountRepository.findByEmail(authentication.getName());
@@ -409,6 +411,33 @@ public class ScheduleService {
             responses.add(new ScheduleResponse(schedule));
         }
         return responses;
+    }
+
+    public List<LocalDate> getMyAvailableSchedules() {
+        LocalDate startDate = LocalDate.now().plusDays(1);
+        LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(startDate.plusMonths(1).lengthOfMonth());
+        Account doctor = authenticationService.getCurrentAccount();
+        List<Schedule> schedules = scheduleRepository.findByAssignToIdAndWorkDateBetween(doctor.getId(), startDate, endDate);
+        List<LocalDate> availableSchedules = new ArrayList<>();
+        for(Schedule schedule : schedules){
+            Shift shift = schedule.getShift();
+            List<LocalTime> allSlots = shiftService.generateSlot(shift.getStartTime(), shift.getEndTime(), Duration.ofMinutes(30));
+            List<Appointment> appointments = appointmentRepository.findByDoctorIdAndTime(doctor.getId(), schedule.getWorkDate());
+            Set<LocalTime> booked = new HashSet<>();
+            for(Appointment appointment : appointments){
+                if(appointment.getStartTime() != null){
+                    booked.add(appointment.getStartTime());
+                }
+            }
+            boolean hasFreeSlots = allSlots.stream().anyMatch(slot -> !booked.contains(slot));
+            if(hasFreeSlots){
+                availableSchedules.add(schedule.getWorkDate());
+            }
+        }
+        Collections.sort(availableSchedules);
+        return availableSchedules;
+
+
     }
 }
 

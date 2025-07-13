@@ -213,6 +213,11 @@ public class TreatmentSessionService {
     }
 
 
-
-
+    public FollowUpRequest getFollowUpDetail(Long sessionId) throws NotFoundException {
+        TreatmentSession session = sessionRepository.findByIdAndIsActiveTrue(sessionId)
+                .orElseThrow(() -> new NotFoundException("Buổi khám không tồn tại"));
+        Appointment appointment = appointmentRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new NotFoundException("Chưa đặt hẹn lịch tái khám"));
+        return new FollowUpRequest(appointment.getTime(), appointment.getStartTime(), appointment.getMessage());
+    }
 }
