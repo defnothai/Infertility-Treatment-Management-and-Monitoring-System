@@ -12,6 +12,7 @@ import com.fuhcm.swp391.be.itmms.repository.TreatmentPlanRepository;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentStageProgressRepository;
 import javassist.NotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,19 @@ public class TreatmentPlanService {
     private final ModelMapper modelMapper;
     private final ServiceService serviceService;
     private final MedicalRecordService medicalRecordService;
+    private final MedicalRecordAccessService medicalRecordAccessService;
 
     public TreatmentPlanService(TreatmentPlanRepository treatmentPlanRepository,
                                 TreatmentStageProgressRepository treatmentStageProgressRepository,
                                 ModelMapper modelMapper,
                                 ServiceService serviceService,
-                                MedicalRecordService medicalRecordService) {
+                                MedicalRecordService medicalRecordService, MedicalRecordAccessService medicalRecordAccessService) {
         this.treatmentPlanRepository = treatmentPlanRepository;
         this.treatmentStageProgressRepository = treatmentStageProgressRepository;
         this.modelMapper = modelMapper;
         this.serviceService = serviceService;
         this.medicalRecordService = medicalRecordService;
+        this.medicalRecordAccessService = medicalRecordAccessService;
     }
 
     public List<TreatmentPlanResponse> getByMedicalRecordId(Long medicalRecordId) {
@@ -65,6 +68,9 @@ public class TreatmentPlanService {
     @Transactional
     public TreatmentPlanResponse createTreatmentPlanWithStages(TreatmentPlanRequest request) throws NotFoundException {
         MedicalRecord medicalRecord = medicalRecordService.findById(request.getMedicalRecordId());
+        if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
+        }
         com.fuhcm.swp391.be.itmms.entity.service.Service service = serviceService.findById(request.getServiceId());
 
         TreatmentPlan plan = new TreatmentPlan();
@@ -77,7 +83,7 @@ public class TreatmentPlanService {
         List<TreatmentStageProgress> progresses = new ArrayList<>();
         for (ServiceStage stage : service.getStage()) {
             TreatmentStageProgress progress = new TreatmentStageProgress();
-            progress.setPlan(savedPlan); // gán plan đã có id
+            progress.setPlan(savedPlan);
             progress.setServiceStage(stage);
             progress.setStatus(TreatmentStageStatus.NOT_STARTED);
             progress.setActive(true);
@@ -96,6 +102,10 @@ public class TreatmentPlanService {
     public TreatmentPlanResponse updateTreatmentPlan(Long planId, TreatmentPlanRequest request) throws NotFoundException {
         TreatmentPlan existingPlan = treatmentPlanRepository.findById(planId)
                 .orElseThrow(() -> new NotFoundException("Bạn chưa tạo phác đồ điều trị trước đó"));
+        MedicalRecord medicalRecord = medicalRecordService.findById(request.getMedicalRecordId());
+        if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
+            throw new AccessDeniedException("Bạn không có quyền sử dụng tính năng này");
+        }
 
         com.fuhcm.swp391.be.itmms.entity.service.Service newService = serviceService.findById(request.getServiceId());
         existingPlan.setService(newService);

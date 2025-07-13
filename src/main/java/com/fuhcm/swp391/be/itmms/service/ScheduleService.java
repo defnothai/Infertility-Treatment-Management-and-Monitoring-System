@@ -44,10 +44,8 @@ public class ScheduleService {
     private AccountRepository accountRepository;
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
     private ShiftService shiftService;
-
     @Autowired
     private AppointmentRepository appointmentRepository;
 

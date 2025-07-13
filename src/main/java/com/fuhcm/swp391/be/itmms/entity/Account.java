@@ -6,6 +6,7 @@ import com.fuhcm.swp391.be.itmms.constant.Gender;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
 import com.fuhcm.swp391.be.itmms.entity.service.Service;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
@@ -104,9 +105,13 @@ public class Account {
     @JsonIgnore
     private List<Service> services;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "grantedBy")
     @JsonIgnore
-    private List<MedicalRecordAccess> medicalRecordAccess;
+    private List<MedicalRecordAccess> grantedRecords;
+
+    @OneToMany(mappedBy = "grantedTo")
+    @JsonIgnore
+    private List<MedicalRecordAccess> receivedRecords;
 
     @OneToMany(mappedBy = "account")
     @JsonIgnore
@@ -124,10 +129,6 @@ public class Account {
     @JsonIgnore
     private List<LabTestResult> labTestResults;
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-//    private List<ScheduleTemplate>  scheduleTemplates;
-
     @OneToMany(mappedBy = "staff")
     @JsonIgnore
     private List<Consultation>  consultations;
@@ -135,7 +136,7 @@ public class Account {
     @OneToOne(mappedBy = "account")
     @JsonIgnore
     private Doctor doctor;
-  
+
     @OneToMany(mappedBy = "doctor")
     private List<Ultrasound> ultrasounds;
 
@@ -149,5 +150,14 @@ public class Account {
     @OneToMany(mappedBy = "replace")
     @JsonIgnore
     private List<Schedule> schedule;
+  
+    @OneToMany(mappedBy = "updatedBy")
+    @JsonIgnore
+    private List<MedicalRecordAccess> updatedAccessRecords;
+
+    @OneToMany(mappedBy = "revokedBy")
+    @JsonIgnore
+    private List<MedicalRecordAccess> revokedAccessRecords;
+
 
 }

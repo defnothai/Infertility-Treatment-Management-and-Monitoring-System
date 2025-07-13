@@ -1,10 +1,14 @@
 package com.fuhcm.swp391.be.itmms.repository;
 
 import com.fuhcm.swp391.be.itmms.constant.AccessRole;
+import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,5 +19,13 @@ public interface MedicalRecordAccessRepository extends JpaRepository<MedicalReco
             AccessRole role
     );
 
+    Optional<MedicalRecordAccess> findByMedicalRecordAndRole(MedicalRecord medicalRecord, AccessRole accessRole);
 
+    List<MedicalRecordAccess> findByMedicalRecord_Id(Long medicalRecordId);
+
+
+    boolean existsByMedicalRecordAndRole(MedicalRecord medicalRecord, AccessRole accessRole);
+
+
+    List<MedicalRecordAccess> findByMedicalRecordAndGrantedTo(MedicalRecord medicalRecord, Account grantedTo);
 }
