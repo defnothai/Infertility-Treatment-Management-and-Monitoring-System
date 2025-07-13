@@ -1,6 +1,6 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
-import com.fuhcm.swp391.be.itmms.dto.request.FollowUpRequest;
+import com.fuhcm.swp391.be.itmms.dto.request.FollowUpDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.SessionDetailsResponse;
@@ -77,7 +77,7 @@ public class TreatmentSessionController {
     @PostMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions")
     public ResponseEntity<?> createFollowUpSession(
             @PathVariable Long progressId,
-            @RequestBody FollowUpRequest request
+            @RequestBody FollowUpDTO request
     ) throws NotFoundException {
         TreatmentSessionResponse response = treatmentSessionService.createFollowUpSession(progressId, request);
         return ResponseEntity.ok(
@@ -92,7 +92,7 @@ public class TreatmentSessionController {
 
     @GetMapping("/api/treatment-sessions/{sessionId}/follow-up-details")
     public ResponseEntity<?> getFollowUpDetail(@PathVariable Long sessionId) throws NotFoundException {
-        FollowUpRequest response = treatmentSessionService.getFollowUpDetail(sessionId);
+        FollowUpDTO response = treatmentSessionService.getFollowUpDetail(sessionId);
         return ResponseEntity.ok(new ResponseFormat<>(
                 HttpStatus.OK.value(),
                 "FETCH_SUCCESS",
@@ -104,7 +104,7 @@ public class TreatmentSessionController {
     @PutMapping("/api/treatment-sessions/{sessionId}")
     public ResponseEntity<?> updateFollowUpSession(
             @PathVariable Long sessionId,
-            @RequestBody FollowUpRequest request
+            @RequestBody FollowUpDTO request
     ) throws NotFoundException {
         TreatmentSessionResponse response = treatmentSessionService.updateFollowUpSession(sessionId, request);
         return ResponseEntity.ok(new ResponseFormat<>(

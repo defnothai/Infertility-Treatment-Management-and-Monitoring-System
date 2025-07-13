@@ -2,8 +2,7 @@ package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
-import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
-import com.fuhcm.swp391.be.itmms.dto.request.FollowUpRequest;
+import com.fuhcm.swp391.be.itmms.dto.request.FollowUpDTO;
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.SessionDetailsResponse;
@@ -21,9 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +50,7 @@ public class TreatmentSessionService {
     }
 
     public TreatmentSessionResponse createFollowUpSession(Long progressId,
-                                                   FollowUpRequest request)
+                                                   FollowUpDTO request)
                     throws NotFoundException {
         TreatmentStageProgress progress = progressRepository.findById(progressId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giai đoạn của phác đồ"));
@@ -80,7 +77,7 @@ public class TreatmentSessionService {
         return modelMapper.map(saved, TreatmentSessionResponse.class);
     }
 
-    public Appointment buildAppointment(FollowUpRequest request,
+    public Appointment buildAppointment(FollowUpDTO request,
                                         Account user,
                                         Account doctor,
                                         Schedule schedule,
@@ -101,11 +98,11 @@ public class TreatmentSessionService {
         return appointment;
     }
 
-    public TreatmentSessionResponse updateFollowUpSession(Long sessionId, FollowUpRequest request) throws NotFoundException {
+    public TreatmentSessionResponse updateFollowUpSession(Long sessionId, FollowUpDTO request) throws NotFoundException {
         TreatmentSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi khám"));
 
-        if (!session.isActive()) {
+        if (!session.isActive() || session.getStatus() != TreatmentSessionStatus.PENDING) {
             throw new IllegalStateException("Buổi khám đã bị hủy hoặc kết thúc, không thể chỉnh sửa");
         }
 
@@ -121,6 +118,14 @@ public class TreatmentSessionService {
         // appointment
         Appointment appointment = appointmentRepository.findBySessionId(session.getId())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy cuộc hẹn tương ứng"));
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime appointmentDateTime = LocalDateTime.of(appointment.getTime(), appointment.getStartTime());
+        Duration timeToAppointment = Duration.between(now, appointmentDateTime);
+
+        if (!timeToAppointment.isNegative() && timeToAppointment.toMinutes() < 60 * 8) {
+            throw new IllegalStateException("Không thể cập nhật cuộc hẹn");
+        }
 
         Account doctor = authenticationService.getCurrentAccount();
         Shift shift = shiftService.findMatchingShift(request.getTime());
@@ -213,11 +218,11 @@ public class TreatmentSessionService {
     }
 
 
-    public FollowUpRequest getFollowUpDetail(Long sessionId) throws NotFoundException {
+    public FollowUpDTO getFollowUpDetail(Long sessionId) throws NotFoundException {
         TreatmentSession session = sessionRepository.findByIdAndIsActiveTrue(sessionId)
                 .orElseThrow(() -> new NotFoundException("Buổi khám không tồn tại"));
         Appointment appointment = appointmentRepository.findBySessionId(sessionId)
                 .orElseThrow(() -> new NotFoundException("Chưa đặt hẹn lịch tái khám"));
-        return new FollowUpRequest(appointment.getTime(), appointment.getStartTime(), appointment.getMessage());
+        return new FollowUpDTO(appointment.getTime(), appointment.getStartTime(), appointment.getMessage());
     }
 }

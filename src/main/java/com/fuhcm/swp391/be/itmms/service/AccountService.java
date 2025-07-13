@@ -16,6 +16,7 @@ import javassist.NotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class AccountService {
     private ScheduleRepository scheduleRepo;
 
     @Autowired
+    @Lazy
     private ScheduleService scheduleService;
 
     @Autowired

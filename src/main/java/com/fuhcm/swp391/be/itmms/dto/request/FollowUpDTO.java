@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
-public class FollowUpRequest {
+public class FollowUpDTO {
 
     private LocalDate date;
     private LocalTime time;
