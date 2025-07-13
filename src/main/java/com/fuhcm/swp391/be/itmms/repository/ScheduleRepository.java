@@ -4,8 +4,6 @@ import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -30,5 +28,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findByWorkDateAndStatus(LocalDate workDate, ScheduleStatus status);
 
+    List<Shift> findShiftsByAssignToAndWorkDate(Account assignTo, LocalDate workDate);
+
     List<Schedule> findByWorkDateBetweenAndAssignToNot(LocalDate fromDate,LocalDate toDate, Account replace);
+
 }
