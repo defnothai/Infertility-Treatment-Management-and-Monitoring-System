@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.DoctorRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.DoctorAccountResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.DoctorResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
@@ -37,6 +38,21 @@ public class DoctorService {
         }
         return responses;
     }
+
+    public List<DoctorAccountResponse> getDoctorAccount() {
+        List<Doctor> doctors = doctorRepository.findAll();
+        List<DoctorAccountResponse> responses = new ArrayList<>();
+        for (Doctor doctor : doctors) {
+            if (List.of(EmploymentStatus.ACTIVE, EmploymentStatus.ON_LEAVE).contains(doctor.getStatus())) {
+                DoctorAccountResponse response = modelMapper.map(doctor, DoctorAccountResponse.class);
+                response.setFullName(doctor.getAccount().getFullName());
+                response.setAccountId(doctor.getAccount().getId());
+                responses.add(response);
+            }
+        }
+        return responses;
+    }
+
 
     public DoctorResponse getDoctorById(Long id) throws NotFoundException {
         Doctor doctor = doctorRepository.findById(id)

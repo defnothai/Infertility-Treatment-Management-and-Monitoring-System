@@ -32,6 +32,17 @@ public class DoctorController {
 
     }
 
+    @GetMapping("/api/doctor/account")
+    public ResponseEntity getDoctorAccount() {
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_SUCCESS",
+                        "Lấy dữ liệu thành công",
+                        doctorService.getDoctorAccount())
+        );
+
+    }
+
     @GetMapping("/api/doctors/{id}")
     public ResponseEntity getDoctorById(@PathVariable Long id) throws NotFoundException {
         DoctorResponse response = doctorService.getDoctorById(id);

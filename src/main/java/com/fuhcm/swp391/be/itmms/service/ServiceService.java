@@ -92,13 +92,10 @@ public class ServiceService {
 
     public ServiceResponse updateService(Long id,
                                          ServiceRequest serviceRequest) throws NotFoundException, IOException {
-        Account account = authenticationService.findByEmail(serviceRequest.getManagerAccount().getEmail());
         com.fuhcm.swp391.be.itmms.entity.service.Service service = this.findById(id);
         modelMapper.map(serviceRequest, service);
         service.setSlug(SlugUtil.toSlug(service.getServiceName()));
-        service.setAccount(account);
         ServiceResponse response = modelMapper.map(serviceRepository.save(service), ServiceResponse.class);
-        response.setManagerAccount(serviceRequest.getManagerAccount());
         return response;
     }
 }

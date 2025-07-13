@@ -17,6 +17,6 @@ public class ServiceRequest {
     private String summary;
     private ServiceStatus status;
     private String imgUrl;
-    private AccountBasic managerAccount;
+    private AccountBasic managerAccount; // update không cần
 
 }
