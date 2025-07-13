@@ -1,9 +1,7 @@
 package com.fuhcm.swp391.be.itmms.repository;
 
 import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
-import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
-import com.fuhcm.swp391.be.itmms.entity.Shift;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +25,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     Schedule findByAssignToIdAndWorkDateAndShiftId(Long doctorId, LocalDate date, int shiftId);
 
     List<Schedule> findByWorkDateAndStatus(LocalDate workDate, ScheduleStatus status);
-
-    List<Shift> findShiftsByAssignToAndWorkDate(Account assignTo, LocalDate workDate);
 }
