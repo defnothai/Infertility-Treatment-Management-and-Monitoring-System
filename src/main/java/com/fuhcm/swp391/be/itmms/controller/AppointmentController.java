@@ -3,13 +3,17 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentReportResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.service.AppointmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -74,6 +78,24 @@ public class AppointmentController {
                         appointmentService.getAllAppointments()
                 )
         );
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<?> getAppointmentReport(@Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
+                                                  @Valid @RequestParam("toDate") @NotNull LocalDate toDate) throws NotFoundException {
+        List<AppointmentReportResponse> response = appointmentService.getAppointmentReport(fromDate, toDate);
+        if(response == null){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy danh sách tài khoản thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách tài khoản thành công",
+                        response));
     }
 
 }
