@@ -1,8 +1,11 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.config.security.JWTFilter;
+import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.AccountReportResponse;
+import com.fuhcm.swp391.be.itmms.dto.response.AppointmentReportResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
@@ -13,12 +16,14 @@ import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
 import com.fuhcm.swp391.be.itmms.validation.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,5 +137,45 @@ public class AppointmentService {
             appointmentResponse = new AppointmentResponse(appointment);
         }
         return appointmentResponse;
+    }
+
+    public List<AppointmentReportResponse> getAppointmentReport(@Valid @NotNull LocalDate fromDate,
+                                                                @Valid @NotNull LocalDate toDate) {
+        List<AppointmentReportResponse> responses = new ArrayList<>();
+        List<Appointment> appointments = appointmentRepository.findByTimeBetween(fromDate, toDate);
+        System.out.println(appointments.size());
+        LocalDate current = fromDate;
+        while(!current.isAfter(toDate)){
+            List<Appointment> unPaid = new ArrayList<>();
+            List<Appointment> notPaid = new ArrayList<>();
+            List<Appointment> unCheckin  = new ArrayList<>();
+            List<Appointment> checkin = new ArrayList<>();
+            List<Appointment> cancelled = new ArrayList<>();
+            for(Appointment appointment : appointments){
+                if(appointment.getTime().equals(current)){
+                    if(appointment.getStatus().name().equalsIgnoreCase(AppointmentStatus.UNPAID.name())){
+                        unPaid.add(appointment);
+                    } else if(appointment.getStatus().name().equalsIgnoreCase(AppointmentStatus.NOT_PAID.name())){
+                        notPaid.add(appointment);
+                    } else if(appointment.getStatus().name().equalsIgnoreCase(AppointmentStatus.UNCHECKED_IN.name())){
+                        unCheckin.add(appointment);
+                    } else if(appointment.getStatus().name().equalsIgnoreCase(AppointmentStatus.CHECKED_IN.name())){
+                        checkin.add(appointment);
+                    } else if(appointment.getStatus().name().equalsIgnoreCase(AppointmentStatus.CANCELLED.name())){
+                        cancelled.add(appointment);
+                    }
+                }
+            }
+            AppointmentReportResponse response = new AppointmentReportResponse();
+            response.setDate(current);
+            response.setUnPaid(unPaid.size());
+            response.setNotPaid(notPaid.size());
+            response.setUnCheckin(unCheckin.size());
+            response.setCheckin(checkin.size());
+            response.setCancelled(cancelled.size());
+            responses.add(response);
+            current = current.plusDays(1);
+        }
+        return responses;
     }
 }

@@ -37,4 +37,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Appointment findTopByUserOrderByCreateAtDesc(Account account);
 
     Optional<Appointment> findBySessionId(Long id);
+
+    List<Appointment> findByTimeBetween(LocalDate timeAfter, LocalDate timeBefore);
 }

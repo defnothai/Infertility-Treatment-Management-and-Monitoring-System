@@ -12,6 +12,7 @@ import com.fuhcm.swp391.be.itmms.entity.*;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.repository.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
@@ -265,6 +266,40 @@ public class AccountService {
                 }
             }
         }
+        return responses;
+    }
+
+    public List<AccountReportResponse> getAccountReport(@Valid @NotNull LocalDate fromDate,
+                                                  @Valid @NotNull LocalDate toDate) {
+        List<AccountReportResponse> responses = new ArrayList<>();
+        List<Account> accounts = accountRepo.findByCreatedAtBetween(fromDate.atStartOfDay(), toDate.atStartOfDay().plusDays(1));
+        LocalDate current = fromDate;
+        while(!current.isAfter(toDate)){
+            List<Account> enabledAccounts = new ArrayList<>();
+            List<Account> disabledAccounts = new ArrayList<>();
+            List<Account> deletedAccounts = new ArrayList<>();
+            for(Account account : accounts){
+                if(account.getCreatedAt().toLocalDate().equals(current)){
+                    if(account.getStatus().name().equalsIgnoreCase(AccountStatus.DISABLED.name())){
+                        disabledAccounts.add(account);
+                    } else if(account.getStatus().name().equalsIgnoreCase(AccountStatus.ENABLED.name())){
+                        enabledAccounts.add(account);
+                    } else if(account.getStatus().name().equalsIgnoreCase(AccountStatus.DELETED.name())){
+                        deletedAccounts.add(account);
+                    }
+                }
+            }
+            AccountReportResponse accountReportResponse = new AccountReportResponse();
+            accountReportResponse.setEnabledAccount(enabledAccounts.size());
+            accountReportResponse.setDisabledAccount( disabledAccounts.size());
+            accountReportResponse.setDeletedAccount(deletedAccounts.size());
+            accountReportResponse.setTotalAccount(enabledAccounts.size() +  disabledAccounts.size() + deletedAccounts.size());
+            accountReportResponse.setDate(current);
+            responses.add(accountReportResponse);
+            current = current.plusDays(1);
+        }
+
+
         return responses;
     }
 }

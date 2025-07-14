@@ -117,7 +117,7 @@ public class ScheduleController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", availableSlots));
     }
 
-    @GetMapping
+    @GetMapping("/suggestion")
     public ResponseEntity<?> getSuggestionList(@Valid @RequestParam("id") @Min(1) Long id,
                                                @Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
                                                @Valid @RequestParam("toDate") @NotNull LocalDate toDate) {
