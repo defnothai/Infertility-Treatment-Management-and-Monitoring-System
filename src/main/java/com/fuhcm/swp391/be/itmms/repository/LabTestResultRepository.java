@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.repository;
 
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,8 @@ import java.util.List;
 public interface LabTestResultRepository extends JpaRepository<LabTestResult, Long> {
 
     List<LabTestResult> findByLabTestTypeAndMedicalRecord_Id(LabTestResultType labTestType, Long medicalRecordId);
+
+    List<LabTestResult> findBySession_Id(Long sessionId);
 
     @Query(value = """
     SELECT a.Id
@@ -52,11 +55,24 @@ public interface LabTestResultRepository extends JpaRepository<LabTestResult, Lo
                                         @Param("fullName") String fullName,
                                         @Param("testDate") LocalDate testDate);
 
+    List<LabTestResult> findByAccount_Id(Long staffId);
 
 
-
-
-
+    // lấy các cụm xn của ngày đó để tạo thành 1 bản ghi
+//    @Query("""
+//    SELECT new com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse(
+//        a.fullName,
+//        a.phoneNumber,
+//        lr.testDate
+//    )
+//    FROM LabTestResult lr
+//    JOIN lr.medicalRecord mr
+//    JOIN mr.user u
+//    JOIN u.account a
+//    WHERE lr.status = 'UNPAID'
+//    GROUP BY a.fullName, a.phoneNumber, lr.testDate
+//""")
+//    List<LabTestResultForStaffResponse> findUnpaidTestRequestsGrouped();
 
 
 

@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.service;
 
+import com.fuhcm.swp391.be.itmms.constant.TreatmentPlanStatus;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentStageStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentPlanRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentPlanResponse;
@@ -11,6 +12,7 @@ import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentStageProgress;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentPlanRepository;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentStageProgressRepository;
 import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TreatmentPlanService {
 
     private final TreatmentPlanRepository treatmentPlanRepository;
@@ -29,19 +32,6 @@ public class TreatmentPlanService {
     private final ServiceService serviceService;
     private final MedicalRecordService medicalRecordService;
     private final MedicalRecordAccessService medicalRecordAccessService;
-
-    public TreatmentPlanService(TreatmentPlanRepository treatmentPlanRepository,
-                                TreatmentStageProgressRepository treatmentStageProgressRepository,
-                                ModelMapper modelMapper,
-                                ServiceService serviceService,
-                                MedicalRecordService medicalRecordService, MedicalRecordAccessService medicalRecordAccessService) {
-        this.treatmentPlanRepository = treatmentPlanRepository;
-        this.treatmentStageProgressRepository = treatmentStageProgressRepository;
-        this.modelMapper = modelMapper;
-        this.serviceService = serviceService;
-        this.medicalRecordService = medicalRecordService;
-        this.medicalRecordAccessService = medicalRecordAccessService;
-    }
 
     public List<TreatmentPlanResponse> getByMedicalRecordId(Long medicalRecordId) {
         List<TreatmentPlan> plans = treatmentPlanRepository.findByMedicalRecord_Id(medicalRecordId);
@@ -77,6 +67,7 @@ public class TreatmentPlanService {
         plan.setMedicalRecord(medicalRecord);
         plan.setService(service);
         plan.setDayStart(LocalDate.now());
+        plan.setStatus(TreatmentPlanStatus.IN_PROGRESS);
 
         TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
 
@@ -160,4 +151,5 @@ public class TreatmentPlanService {
         res.setStageName(progress.getServiceStage().getName());
         return res;
     }
+
 }

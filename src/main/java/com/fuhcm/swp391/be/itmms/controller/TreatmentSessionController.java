@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.FollowUpDTO;
+import com.fuhcm.swp391.be.itmms.dto.request.FollowUpDeleteRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentSessionRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.SessionDetailsResponse;
@@ -18,8 +19,8 @@ public class TreatmentSessionController {
 
     private final TreatmentSessionService treatmentSessionService;
 
-    // =================================================================================
-
+    // lấy danh sách các treatment session bằng treatment stage progress
+    // cái này fe đã có
     @GetMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions")
     public ResponseEntity getByProgress(@PathVariable Long progressId) throws NotFoundException {
         return ResponseEntity.ok(
@@ -30,50 +31,7 @@ public class TreatmentSessionController {
                         treatmentSessionService.getByProgressId(progressId)));
     }
 
-    @DeleteMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
-    public ResponseEntity<?> softDelete(@PathVariable Long sessionId) throws NotFoundException {
-        treatmentSessionService.softDeleteById(sessionId);
-        return ResponseEntity.ok(
-                new ResponseFormat<>(
-                        HttpStatus.OK.value(),
-                        "DELETE_SUCCESS",
-                        "Xóa buổi khám thành công",
-                        null
-                )
-        );
-    }
-
-    @PutMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
-    public ResponseEntity<?> updateSession(
-            @PathVariable Long sessionId,
-            @RequestBody TreatmentSessionRequest request
-    ) throws NotFoundException {
-        TreatmentSessionResponse response = treatmentSessionService.update(sessionId, request);
-        return ResponseEntity.ok(
-                new ResponseFormat<>(
-                        HttpStatus.OK.value(),
-                        "UPDATE_SUCCESS",
-                        "Cập nhật buổi khám thành công",
-                        response
-                )
-        );
-    }
-
-    @GetMapping("/api/treatment-sessions/{sessionId}/details")
-    public ResponseEntity<?> getSessionDetail(@PathVariable Long sessionId) throws NotFoundException {
-        SessionDetailsResponse response = treatmentSessionService.getSessionDetail(sessionId);
-        return ResponseEntity.ok(new ResponseFormat<>(
-                HttpStatus.OK.value(),
-                "FETCH_SUCCESS",
-                "Lấy chi tiết buổi điều trị thành công",
-                response
-        ));
-    }
-
-
-    // ====================================================================================================
-
-    // bên fe chưa thay đổi phần này
+    // tạo session bằng hẹn tái khám
     @PostMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions")
     public ResponseEntity<?> createFollowUpSession(
             @PathVariable Long progressId,
@@ -90,6 +48,7 @@ public class TreatmentSessionController {
         );
     }
 
+    // lấy chi tiết lịch đã hẹn
     @GetMapping("/api/treatment-sessions/{sessionId}/follow-up-details")
     public ResponseEntity<?> getFollowUpDetail(@PathVariable Long sessionId) throws NotFoundException {
         FollowUpDTO response = treatmentSessionService.getFollowUpDetail(sessionId);
@@ -101,6 +60,7 @@ public class TreatmentSessionController {
         ));
     }
 
+    // update lịch đã hẹn
     @PutMapping("/api/treatment-sessions/{sessionId}")
     public ResponseEntity<?> updateFollowUpSession(
             @PathVariable Long sessionId,
@@ -115,16 +75,62 @@ public class TreatmentSessionController {
         ));
     }
 
-    @DeleteMapping("/api/treatment-sessions/{sessionId}")
-    public ResponseEntity<?> deleteFollowUpSession(@PathVariable Long sessionId) throws NotFoundException {
-        treatmentSessionService.deleteFollowUpSession(sessionId);
-        return ResponseEntity.ok(new ResponseFormat<>(
-                HttpStatus.OK.value(),
-                "DELETE_SUCCESS",
-                "Xóa lịch tái khám thành công",
-                null
-        ));
+
+    // cập nhật triệu chứng, kết luận khi khám
+    // cũng như là hoàn tất buổi khám
+    @PutMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
+    public ResponseEntity<?> updateSession(
+            @PathVariable Long sessionId,
+            @RequestBody TreatmentSessionRequest request
+    ) throws NotFoundException {
+        TreatmentSessionResponse response = treatmentSessionService.update(sessionId, request);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "UPDATE_SUCCESS",
+                        "Cập nhật buổi khám thành công",
+                        response
+                )
+        );
     }
+
+
+//        @GetMapping("/api/treatment-sessions/{sessionId}/details")
+//    public ResponseEntity<?> getSessionDetail(@PathVariable Long sessionId) throws NotFoundException {
+//        SessionDetailsResponse response = treatmentSessionService.getSessionDetail(sessionId);
+//        return ResponseEntity.ok(new ResponseFormat<>(
+//                HttpStatus.OK.value(),
+//                "FETCH_SUCCESS",
+//                "Lấy chi tiết buổi điều trị thành công",
+//                response
+//        ));
+//    }
+
+    //    @DeleteMapping("/api/treatment-stage-progress/{progressId}/treatment-sessions/{sessionId}")
+//    public ResponseEntity<?> softDelete(@PathVariable Long sessionId) throws NotFoundException {
+//        treatmentSessionService.softDeleteById(sessionId);
+//        return ResponseEntity.ok(
+//                new ResponseFormat<>(
+//                        HttpStatus.OK.value(),
+//                        "DELETE_SUCCESS",
+//                        "Xóa buổi khám thành công",
+//                        null
+//                )
+//        );
+//    }
+
+    // hủy lịch hẹn
+//    @DeleteMapping("/api/treatment-sessions/{sessionId}")
+//    public ResponseEntity<?> deleteFollowUpSession(@PathVariable Long sessionId,
+//                                                   @RequestBody FollowUpDeleteRequest request) throws NotFoundException {
+//        treatmentSessionService.deleteFollowUpSession(sessionId, request);
+//        return ResponseEntity.ok(new ResponseFormat<>(
+//                HttpStatus.OK.value(),
+//                "DELETE_SUCCESS",
+//                "Xóa lịch tái khám thành công",
+//                null
+//        ));
+//    }
 
 
 

@@ -20,7 +20,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok
                 (new ResponseFormat<>(HttpStatus.OK.value(),
                                 "LOGIN_SUCCESS",

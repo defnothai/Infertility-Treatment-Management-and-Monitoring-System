@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicalRecordService {
@@ -69,45 +70,71 @@ public class MedicalRecordService {
                 .orElseThrow(() -> new NotFoundException("Hồ sơ không tồn tại"));
     }
 
-    @Transactional
-    public MedicalRecordResponse getMedicalRecord(Long accountId) throws NotFoundException {
-        Account account = accountService.findById(accountId);
-        User user = userRepository.findByAccount(account).orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin bệnh nhân"));
+    // lấy lịch sử khám bệnh
+    public List<MedicalRecordSummaryResponse> getMedicalRecordsByAccountId(Long accountId) {
+        List<MedicalRecord> records = medicalRecordRepository.findByUserAccountId(accountId);
+        return records.stream().map(MedicalRecordSummaryResponse::new).collect(Collectors.toList());
+    }
+
+    // lấy lịch sử khám bệnh cho bệnh nhân
+    public List<MedicalRecordSummaryResponse> getMyMedicalRecords() {
+        Long accountId = authenticationService.getCurrentAccount().getId();
+        List<MedicalRecord> records = medicalRecordRepository.findByUserAccountId(accountId);
+        return records.stream().map(MedicalRecordSummaryResponse::new).collect(Collectors.toList());
+    }
+
+    // tạo hồ sơ khám trong lịch sử
+    public MedicalRecordSummaryResponse createNewMedicalRecord(Long accountId) {
         Account currentAccount = authenticationService.getCurrentAccount();
-        MedicalRecord medicalRecord = medicalRecordRepository.findByUser(user);
+        MedicalRecord medicalRecord = new MedicalRecord();
+        User user = userRepository.findByAccount_Id(accountId);
+        if (user == null) {
+            throw new RuntimeException("Không tìm thấy được thông tin để tạo hồ sơ");
+        }
+        medicalRecord.setUser(user);
+        medicalRecord.setDiagnosis("");
+        medicalRecord.setSymptoms("");
+        medicalRecord.setCreatedAt(LocalDate.now());
+        medicalRecord = medicalRecordRepository.save(medicalRecord);
+        // access
+        MedicalRecordAccess access = new MedicalRecordAccess();
+        access.setGrantedTo(currentAccount);
+        access.setGrantedBy(currentAccount);
+        access.setLevel(PermissionLevel.FULL_ACCESS);
+        access.setMedicalRecord(medicalRecord);
+        access.setDayStart(LocalDateTime.now());
+        access.setRole(AccessRole.MAIN_DOCTOR);
+        access.setDayEnd(null);
+        //
+        access = medicalRecordAccessRepository.save(access);
+        medicalRecord.setMedicalRecordAccess(List.of(access));
+
+        // dto
+        return new MedicalRecordSummaryResponse(medicalRecord);
+    }
+
+    // lấy chi tiết hồ sơ khám
+    @Transactional
+    public MedicalRecordResponse getMedicalRecord(Long recordId) throws NotFoundException {
+        Account currentAccount = authenticationService.getCurrentAccount();
+        MedicalRecord medicalRecord = medicalRecordRepository.findById(recordId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ"));
+        PermissionLevel level = PermissionLevel.FULL_ACCESS;
         if (medicalRecord != null) {
             if (!medicalRecordAccessService.canView(medicalRecord)) {
                 throw new NotFoundException("Bạn không thể truy cập vào hồ sơ này");
             }
+            MedicalRecordAccess recordAccess = medicalRecord.getMedicalRecordAccess()
+                    .stream().filter(medicalRecordAccess -> medicalRecordAccess.getGrantedTo().equals(currentAccount)).findFirst().orElse(null);
+            if (recordAccess == null) {
+                throw new RuntimeException("Không kiểm tra được khả năng truy cập");
+            }
+            level = recordAccess.getLevel();
         }
-        MedicalRecordAccess recordAccess = medicalRecord.getMedicalRecordAccess()
-                .stream().filter(medicalRecordAccess -> medicalRecordAccess.getGrantedTo().equals(currentAccount)).findFirst().orElse(null);
-        if (recordAccess == null) {
-            throw new RuntimeException("Không kiểm tra được khả năng truy cập");
+        User user = medicalRecord.getUser();
+        if (user == null) {
+            throw new RuntimeException("Không tìm thấy thông tin bệnh nhân");
         }
-        PermissionLevel level = recordAccess.getLevel();
-
-        if (medicalRecord == null) {
-            medicalRecord = new MedicalRecord();
-            medicalRecord.setUser(user);
-            medicalRecord.setDiagnosis("");
-            medicalRecord.setSymptoms("");
-            medicalRecord.setCreatedAt(LocalDate.now());
-
-            MedicalRecordAccess access = new MedicalRecordAccess();
-            access.setGrantedTo(currentAccount);
-            access.setGrantedBy(currentAccount);
-            access.setLevel(PermissionLevel.FULL_ACCESS);
-            access.setMedicalRecord(medicalRecord);
-            access.setDayStart(LocalDateTime.now());
-            access.setRole(AccessRole.MAIN_DOCTOR);
-            access.setDayEnd(null);
-
-            access = medicalRecordAccessRepository.save(access);
-            medicalRecord.setMedicalRecordAccess(List.of(access));
-            medicalRecord = medicalRecordRepository.save(medicalRecord);
-        }
-
         MedicalRecordResponse response = modelMapper.map(medicalRecord, MedicalRecordResponse.class);
         response.setFullName(user.getAccount().getFullName());
         response.setGender(user.getAccount().getGender());
@@ -124,7 +151,7 @@ public class MedicalRecordService {
         return response;
     }
 
-
+    // điền triệu chứng kết luận ban đầu
     @Transactional
     public UpdateDiagnosisSymptom updateDiagnosisAndSymptoms(Long medicalRecordId, UpdateDiagnosisSymptom request) throws NotFoundException {
         MedicalRecord medicalRecord = medicalRecordRepository.findById(medicalRecordId)
@@ -143,17 +170,18 @@ public class MedicalRecordService {
         );
     }
 
-    public UserMedicalRecordResponse getUserMedicalRecord() throws NotFoundException {
+    public UserMedicalRecordResponse getUserMedicalRecord(Long recordId) throws NotFoundException {
         Account account = authenticationService.getCurrentAccount();
         User user = userRepository.findByAccount(account)
                 .orElseThrow(() -> new NotFoundException("Bạn chưa có hồ sơ bệnh án"));
         if (user == null) {
             throw new NotFoundException("Bạn chưa có hồ sơ bệnh án");
         }
-        MedicalRecord medicalRecord = medicalRecordRepository.findByUser(user);
-        if (medicalRecord == null) {
-            throw new NotFoundException("Bạn chưa có hồ sơ bệnh án");
-        }
+        MedicalRecord medicalRecord = medicalRecordRepository
+                                        .findById(recordId)
+                                        .orElseThrow(
+                () -> new NotFoundException("Không tìm thấy hồ sơ bệnh án")
+        );
         MedicalRecordAccess access = medicalRecordAccessRepository
                 .findFirstByMedicalRecord_IdAndRoleAndDayEndIsNullOrderByDayStartDesc(
                         medicalRecord.getId(),
@@ -195,36 +223,34 @@ public class MedicalRecordService {
                 }).toList();
     }
 
-    public ManagerMedicalRecordResponse getManagerMedicalRecord(Long accountId) throws NotFoundException {
-        Account account = accountService.findById(accountId);
-        User user = account.getUser();
-        if (user == null || user.getMedicalRecord() == null) {
-            throw new NotFoundException("Không tìm thấy thông tin bệnh nhân hay hồ sơ bệnh án");
-        }
-        MedicalRecord medicalRecord = user.getMedicalRecord();
-        Optional<MedicalRecordAccess> accessOpt =
-                medicalRecordAccessRepository.findByMedicalRecordAndRole(medicalRecord, AccessRole.MAIN_DOCTOR);
-        DoctorResponse doctorResponse = null;
-        if (accessOpt.isPresent()) {
-            Account doctorAccount = accessOpt.get().getGrantedTo();
-            if (doctorAccount != null && doctorAccount.getDoctor() != null) {
-                doctorResponse = new DoctorResponse(doctorAccount);
-                modelMapper.map(doctorAccount.getDoctor(), doctorResponse);
-            }
-        }
-
-        MedicalRecordResponse medicalRecordResponse = new MedicalRecordResponse();
-        modelMapper.map(medicalRecord, medicalRecordResponse);
-
-        if (user != null) {
-            Account userAcc = user.getAccount();
-            if (userAcc != null) {
-                modelMapper.map(userAcc, medicalRecordResponse);
-            }
-            modelMapper.map(user, medicalRecordResponse);
-        }
-        return new ManagerMedicalRecordResponse(medicalRecordResponse, doctorResponse);
-    }
-
-
+    //    public ManagerMedicalRecordResponse getManagerMedicalRecord(Long accountId) throws NotFoundException {
+//        Account account = accountService.findById(accountId);
+//        User user = account.getUser();
+//        if (user == null || user.getMedicalRecord() == null) {
+//            throw new NotFoundException("Không tìm thấy thông tin bệnh nhân hay hồ sơ bệnh án");
+//        }
+//        MedicalRecord medicalRecord = user.getMedicalRecord();
+//        Optional<MedicalRecordAccess> accessOpt =
+//                medicalRecordAccessRepository.findByMedicalRecordAndRole(medicalRecord, AccessRole.MAIN_DOCTOR);
+//        DoctorResponse doctorResponse = null;
+//        if (accessOpt.isPresent()) {
+//            Account doctorAccount = accessOpt.get().getGrantedTo();
+//            if (doctorAccount != null && doctorAccount.getDoctor() != null) {
+//                doctorResponse = new DoctorResponse(doctorAccount);
+//                modelMapper.map(doctorAccount.getDoctor(), doctorResponse);
+//            }
+//        }
+//
+//        MedicalRecordResponse medicalRecordResponse = new MedicalRecordResponse();
+//        modelMapper.map(medicalRecord, medicalRecordResponse);
+//
+//        if (user != null) {
+//            Account userAcc = user.getAccount();
+//            if (userAcc != null) {
+//                modelMapper.map(userAcc, medicalRecordResponse);
+//            }
+//            modelMapper.map(user, medicalRecordResponse);
+//        }
+//        return new ManagerMedicalRecordResponse(medicalRecordResponse, doctorResponse);
+//    }
 }

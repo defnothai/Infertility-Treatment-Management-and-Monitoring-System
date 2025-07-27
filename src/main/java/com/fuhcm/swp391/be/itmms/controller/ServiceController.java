@@ -4,6 +4,7 @@ import com.fuhcm.swp391.be.itmms.dto.request.ServiceRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.ServiceResponse;
 import com.fuhcm.swp391.be.itmms.service.ServiceService;
+import jakarta.validation.Valid;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class ServiceController {
     }
 
     @PostMapping("/api/manage/services")
-    public ResponseEntity createService(@RequestBody ServiceRequest serviceRequest) throws IOException {
+    public ResponseEntity createService(@Valid @RequestBody ServiceRequest serviceRequest) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
                         "SERVICE_CREATED_SUCCESS",

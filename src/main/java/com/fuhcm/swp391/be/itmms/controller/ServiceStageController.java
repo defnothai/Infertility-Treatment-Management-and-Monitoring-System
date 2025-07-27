@@ -5,6 +5,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentPlanResponse;
 import com.fuhcm.swp391.be.itmms.service.ServiceStageService;
 import com.fuhcm.swp391.be.itmms.service.TreatmentPlanService;
+import jakarta.validation.Valid;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class ServiceStageController {
 
     @PostMapping("/api/manage/services/{serviceId}/service-stage")
     public ResponseEntity createServiceStages(@PathVariable Long serviceId,
-                                              @RequestBody List<ServiceStageRequest> stages) throws NotFoundException {
+                                              @Valid @RequestBody List<ServiceStageRequest> stages) throws NotFoundException {
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
                                                         "SERVICE_STAGES_CREATED_SUCCESS",
