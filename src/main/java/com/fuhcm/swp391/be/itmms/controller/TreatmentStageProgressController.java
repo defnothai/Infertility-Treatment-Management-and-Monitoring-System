@@ -7,10 +7,7 @@ import com.fuhcm.swp391.be.itmms.service.TreatmentStageProgressService;
 import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class TreatmentStageProgressController {
@@ -21,6 +18,7 @@ public class TreatmentStageProgressController {
         this.progressService = progressService;
     }
 
+    // hoàn thành giai đoạn
     @PutMapping("/api/medical-record/treatment-stage-progress/{id}")
     public ResponseEntity update(
             @PathVariable Long id,
@@ -32,6 +30,18 @@ public class TreatmentStageProgressController {
                         "UPDATE_SUCCESS",
                       "Cập nhật giai đoạn thành công",
                 progressService.update(id, request)));
+    }
+
+    // get status của stage sau khi tạo ra session
+    // vì gấp nên bỏ
+    @GetMapping("/api/medical-record/treatment-stage-progress/{id}")
+    public ResponseEntity getProgressStatus(@PathVariable Long id) throws NotFoundException {
+        return ResponseEntity
+                .ok(new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "FETCH_SUCCESS",
+                        "Lấy trạng thái giai đoạn thành công",
+                        progressService.getProgressStatus(id)));
     }
 
 }

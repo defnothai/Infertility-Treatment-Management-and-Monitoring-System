@@ -58,6 +58,8 @@ public class AppointmentService {
     private ReminderService reminderService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -79,12 +81,16 @@ public class AppointmentService {
         Schedule schedule = scheduleService.findSchedule(doctor.getId(), workDate, shift.getId().intValue());
         Appointment appointment = buildAppointment(appointmentRequest, bookBy, doctor, schedule);
 
+        appointment = appointmentRepository.save(appointment);
+
         // tạo reminder
-        reminderService.createRemindersForAppointment(appointment);
-        // gửi mail
+        reminderService.createReminders(appointment);
+        // gửi mail sau khi booking thành công
         EmailDetailReminder emailDetailReminder = reminderService.buildEmailDetail(appointment);
         emailService.sendAppointmentSuccess(emailDetailReminder);
-        return appointmentRepository.save(appointment);
+        // gửi noti khi booking thành công
+        notificationService.notifyUser(appointment.getUser(), "Bạn đã đặt lịch khám bệnh thành công");
+        return appointment;
     }
 
     public Appointment buildAppointment(AppointmentRequest appointmentRequest, Account user, Account doctor, Schedule schedule) {

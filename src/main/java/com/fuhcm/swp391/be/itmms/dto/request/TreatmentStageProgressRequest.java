@@ -7,10 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class TreatmentStageProgressRequest {
-    
-    private LocalDate dateStart;
-    private LocalDate dateComplete;
+
     private String notes;
-    private TreatmentStageStatus status;
-    private String stageName;
+
 }

@@ -5,6 +5,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.ImageUrlListResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.UltrasoundResponse;
 import com.fuhcm.swp391.be.itmms.service.UltrasoundService;
+import jakarta.validation.Valid;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class UltrasoundController {
     private final UltrasoundService ultrasoundService;
 
     @PostMapping("/api/init-ultrasounds")
-    public ResponseEntity createInitUltrasound(@RequestBody UltrasoundRequest request, Authentication authentication) {
+    public ResponseEntity createInitUltrasound(@Valid @RequestBody UltrasoundRequest request, Authentication authentication) {
         UltrasoundResponse response = ultrasoundService.createInitUltrasound(request, authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseFormat<>(
@@ -28,6 +29,18 @@ public class UltrasoundController {
                         "Tạo kết quả siêu âm thành công",
                         response
                 ));
+    }
+
+    @GetMapping("/api/session/{sessionId}/ultrasound")
+    public ResponseEntity getUltrasoundsBySessionId(@PathVariable Long sessionId) {
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy thành công ảnh siêu âm",
+                        ultrasoundService.getBySessionId(sessionId)
+                )
+        );
     }
 
     @PutMapping("/api/ultrasounds/{id}")
@@ -61,7 +74,7 @@ public class UltrasoundController {
     @PostMapping("/api/treatment-sessions/{sessionId}/follow-up-ultrasound")
     public ResponseEntity<?> createFollowUpUltrasound(
             @PathVariable Long sessionId,
-            @RequestBody UltrasoundRequest request,
+            @Valid @RequestBody UltrasoundRequest request,
             Authentication authentication) throws NotFoundException {
 
         UltrasoundResponse response = ultrasoundService.createFollowUpUltrasound(sessionId, request, authentication);
@@ -87,8 +100,4 @@ public class UltrasoundController {
                 )
         );
     }
-
-
-
-
 }
