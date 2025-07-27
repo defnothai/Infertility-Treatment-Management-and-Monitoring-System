@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chào mừng bạn đến với Bệnh viện Thành Nhân</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8fafc;
+      line-height: 1.6;
+      color: #334155;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="20" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+
+    .hospital-logo {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hospital-name {
+      font-size: 18px;
+      font-weight: 300;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .content {
+      padding: 40px 30px;
+    }
+
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .welcome-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 15px;
+    }
+
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .account-info-section {
+      background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
+      border: 2px solid #22c55e;
+      padding: 25px;
+      margin: 30px 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+    }
+
+    .account-info-title {
+      color: #15803d;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .account-info-title::before {
+      content: '✅';
+      margin-right: 10px;
+      font-size: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #dcfce7;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #166534;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #15803d;
+      font-weight: 500;
+      background-color: #dcfce7;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      max-width: 60%;
+      word-break: break-word;
+      text-align: right;
+    }
+
+    .password-value {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    .access-section {
+      text-align: center;
+      margin: 35px 0;
+    }
+
+    .access-text {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #475569;
+    }
+
+    .access-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      padding: 15px 40px;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+      border: none;
+      cursor: pointer;
+    }
+
+    .access-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .security-notice {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+    }
+
+    .security-notice-title {
+      color: #92400e;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .security-notice-title::before {
+      content: '🔐';
+      margin-right: 8px;
+    }
+
+    .security-notice-text {
+      color: #78350f;
+      font-size: 14px;
+    }
+
+    .important-notice {
+      background-color: #eff6ff;
+      border: 1px solid #93c5fd;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+    }
+
+    .important-notice-title {
+      color: #1d4ed8;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .important-notice-title::before {
+      content: '💡';
+      margin-right: 8px;
+    }
+
+    .important-notice-text {
+      color: #1e40af;
+      font-size: 14px;
+    }
+
+    .footer {
+      background-color: #f8fafc;
+      padding: 30px 20px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer-content {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .footer-hospital {
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 10px;
+    }
+
+    .contact-info {
+      margin: 15px 0;
+    }
+
+    .contact-item {
+      margin: 5px 0;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+      margin: 20px 0;
+    }
+
+    @media (max-width: 600px) {
+      .email-container {
+        margin: 0;
+        box-shadow: none;
+      }
+
+      .content {
+        padding: 30px 20px;
+      }
+
+      .access-button {
+        padding: 12px 30px;
+        font-size: 14px;
+      }
+
+      .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .info-value {
+        max-width: 100%;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="hospital-logo">🏥 MEDCARE</div>
+    <div class="hospital-name">Bệnh viện Thành Nhân</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1 class="welcome-title">Chào mừng bạn đến với MEDCARE!</h1>
+      <p class="welcome-subtitle">Tài khoản của bạn đã được tạo thành công</p>
+    </div>
+
+    <!-- Personal Greeting -->
+    <div style="background: linear-gradient(135deg, #fef2f2 0%, #fef8f8 100%); border: 2px solid #dc2626; padding: 25px; margin: 30px 0; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);">
+      <p style="color: #dc2626; font-size: 20px; font-weight: 600; margin: 0; letter-spacing: 0.5px;">
+        🎉 Xin chào <strong style="color: #ef4444; font-size: 22px;" th:text="${fullName}"></strong>!
+      </p>
+    </div>
+
+    <!-- Account Information Section -->
+    <div class="account-info-section">
+      <div class="account-info-title">Thông tin tài khoản của bạn</div>
+
+      <div class="info-item">
+        <span class="info-label">👤 Họ và tên:</span>
+        <span class="info-value" th:text="${fullName}"></span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">📧 Email đăng nhập:</span>
+        <span class="info-value" th:text="${email}"></span>
+      </div>
+
+      <div class="info-item">
+        <span class="info-label">🔑 Mật khẩu tạm thời:</span>
+        <span class="info-value password-value" th:text="${password}"></span>
+      </div>
+    </div>
+
+    <!-- Access Section -->
+    <div class="access-section">
+      <p class="access-text">
+        Bây giờ bạn có thể truy cập vào hệ thống bệnh viện để sử dụng các dịch vụ của chúng tôi:
+      </p>
+      <a th:href="${websiteLink}" class="access-button">
+        🌐 Truy cập hệ thống
+      </a>
+    </div>
+
+    <!-- Security Notice -->
+    <div class="security-notice">
+      <div class="security-notice-title">Bảo mật tài khoản</div>
+      <div class="security-notice-text">
+        <strong>Vì lý do bảo mật, chúng tôi khuyến nghị bạn:</strong><br>
+        • Đổi mật khẩu ngay sau lần đăng nhập đầu tiên<br>
+        • Sử dụng mật khẩu mạnh có ít nhất 8 ký tự<br>
+        • Không chia sẻ thông tin đăng nhập với bất kỳ ai<br>
+        • Đăng xuất sau khi sử dụng xong
+      </div>
+    </div>
+
+    <!-- Important Notice -->
+    <div class="important-notice">
+      <div class="important-notice-title">Hướng dẫn sử dụng</div>
+      <div class="important-notice-text">
+        <strong>Với tài khoản này, bạn có thể:</strong><br>
+        • Đặt lịch khám trực tuyến<br>
+        • Xem kết quả xét nghiệm và chẩn đoán<br>
+        • Theo dõi lịch sử khám bệnh<br>
+        • Nhận thông báo và nhắc nhở<br>
+        • Liên hệ trực tiếp với bác sĩ
+      </div>
+    </div>
+
+    <div class="divider"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-content">
+      <div class="footer-hospital">Bệnh viện Thành Nhân</div>
+      <div class="contact-info">
+        <div class="contact-item">📍 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh</div>
+        <div class="contact-item">📞 Hotline: 1900-xxxx | ☎️ Tel: (028) 3xxx-xxxx</div>
+        <div class="contact-item">✉️ Email: support@medcare-hospital.com</div>
+        <div class="contact-item">🌐 Website: www.medcare-hospital.com</div>
+      </div>
+      <div class="divider"></div>
+      <p style="font-size: 12px; color: #94a3b8;">
+        © 2025 Bệnh viện Đa khoa Thành Nhân. Tất cả quyền được bảo lưu.<br>
+        Email này được gửi tự động, vui lòng không trả lời trực tiếp.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

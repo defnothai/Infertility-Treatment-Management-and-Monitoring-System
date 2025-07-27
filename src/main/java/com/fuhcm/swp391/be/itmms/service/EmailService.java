@@ -113,4 +113,25 @@ public class EmailService {
         }
     }
 
+    @Async
+    public void sendDirectPatientAccountEmail(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", emailDetail.getFullName());
+            context.setVariable("email", emailDetail.getRecipient());
+            context.setVariable("password", emailDetail.getPassword());
+            context.setVariable("websiteLink", emailDetail.getLink());
+            String templateRegisterEmail = templateEngine.process("directPatientAccount", context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(BASE_EMAIL_ADDRESS);
+            messageHelper.setTo(emailDetail.getRecipient());
+            messageHelper.setSubject(emailDetail.getSubject());
+            messageHelper.setText(templateRegisterEmail, true);
+            javaMailSender.send(messageHelper.getMimeMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Gửi mail thông báo tạo tài khoản thất bại");
+        }
+    }
+
 }
