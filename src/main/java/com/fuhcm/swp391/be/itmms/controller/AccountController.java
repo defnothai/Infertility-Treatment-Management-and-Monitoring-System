@@ -105,4 +105,22 @@ public class AccountController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách doctor thành công",  availableDoctors));
     }
 
+    @GetMapping("/report")
+    public ResponseEntity<?> getAccountReport(@Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
+                                              @Valid @RequestParam("toDate") @NotNull LocalDate toDate) throws NotFoundException {
+        List<AccountReportResponse> response = accountService.getAccountReport(fromDate, toDate);
+        if(response == null){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy danh sách tài khoản thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách tài khoản thành công",
+                        response));
+    }
+
 }

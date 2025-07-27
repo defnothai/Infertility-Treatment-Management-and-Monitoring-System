@@ -19,6 +19,7 @@ public class AccountResponse {
     private String phoneNumber;
     private Gender gender;
     private Long createdBy;
+    private String role;
 
     public AccountResponse(Account account) {
         this.id = account.getId();
@@ -33,6 +34,7 @@ public class AccountResponse {
         } else {
             this.createdBy = null;
         }
+        this.role = account.getRoles().get(0).getRoleName().toString();
     }
 
 

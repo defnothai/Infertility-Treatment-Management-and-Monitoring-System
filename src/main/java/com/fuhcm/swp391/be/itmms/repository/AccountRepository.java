@@ -1,11 +1,16 @@
 package com.fuhcm.swp391.be.itmms.repository;
 
+import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -22,4 +27,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByRolesAndDoctorStatus(List<Role> roles, EmploymentStatus doctor_status);
 
     List<Account> findByRolesAndStaffStatus(List<Role> staffRoles, EmploymentStatus employmentStatus);
+
+    List<Account> findByCreatedAtBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
 }
