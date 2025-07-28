@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -97,5 +97,25 @@ public class AppointmentController {
                         "Lấy danh sách tài khoản thành công",
                         response));
     }
+
+    // danh sách buổi khám cho staff
+    @GetMapping("/staff/filter-appointment")
+    public ResponseEntity searchAppointments(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Long doctorId
+    ) throws NotFoundException {
+        if (keyword == null || keyword.trim().isEmpty() ) {
+            keyword = "";
+        }
+        List<AppointmentResponse> response = appointmentService.searchAppointments(keyword, date, doctorId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công thành công",
+                        response));
+    }
+
+
 
 }

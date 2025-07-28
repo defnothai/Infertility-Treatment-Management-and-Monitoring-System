@@ -193,6 +193,11 @@ public class TreatmentSessionService {
         return modelMapper.map(updated, TreatmentSessionResponse.class);
     }
 
+    public TreatmentSessionResponse getSessionDetail(Long sessionId) throws NotFoundException {
+        TreatmentSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi khám"));
+        return modelMapper.map(session, TreatmentSessionResponse.class);
+    }
 
 
 //    public SessionDetailsResponse getSessionDetail(Long sessionId) throws NotFoundException {

@@ -4,6 +4,8 @@ import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -39,4 +41,23 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Optional<Appointment> findBySessionId(Long id);
 
     List<Appointment> findByTimeBetween(LocalDate timeAfter, LocalDate timeBefore);
+
+    @Query(value = """
+    SELECT a.* FROM appointment a
+    JOIN account u ON a.BookBy = u.id
+    WHERE a.Time = :date
+      AND (
+          u.FullName COLLATE Latin1_General_CI_AI LIKE CONCAT('%', :keyword, '%')
+          OR u.PhoneNumber LIKE CONCAT('%', :keyword, '%')
+      )
+      AND (:doctorId IS NULL OR a.Doctor = :doctorId)
+    ORDER BY a.StartTime ASC
+""", nativeQuery = true)
+    List<Appointment> searchByKeywordDateAndDoctor(@Param("keyword") String keyword,
+                                                   @Param("date") LocalDate date,
+                                                   @Param("doctorId") Long doctorId);
+
+
+
+
 }

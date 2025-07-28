@@ -94,6 +94,21 @@ public class TreatmentSessionController {
         );
     }
 
+    // lấy chi tiết session (new)
+    @GetMapping("/api/treatment-sessions/{sessionId}")
+    public ResponseEntity<?> getSessionDetail(@PathVariable Long sessionId) throws NotFoundException {
+        TreatmentSessionResponse response = treatmentSessionService.getSessionDetail(sessionId);
+        return ResponseEntity.ok(
+                new ResponseFormat<>(
+                        HttpStatus.OK.value(),
+                        "UPDATE_SUCCESS",
+                        "Cập nhật buổi khám thành công",
+                        response
+                )
+        );
+    }
+
+
 
 //        @GetMapping("/api/treatment-sessions/{sessionId}/details")
 //    public ResponseEntity<?> getSessionDetail(@PathVariable Long sessionId) throws NotFoundException {
