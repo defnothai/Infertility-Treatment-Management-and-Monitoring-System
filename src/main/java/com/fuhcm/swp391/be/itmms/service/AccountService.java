@@ -7,6 +7,7 @@ import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
 import com.fuhcm.swp391.be.itmms.dto.request.AccountCreateRequest;
+import com.fuhcm.swp391.be.itmms.dto.DirectPatientDTO;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
@@ -14,7 +15,6 @@ import com.fuhcm.swp391.be.itmms.repository.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
-import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -59,6 +59,59 @@ public class AccountService {
 
     @Autowired
     private ShiftService shiftService;
+    @Autowired
+    @Lazy
+    private AuthenticationService authenticationService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
+
+
+    public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
+        Account staff = authenticationService.getCurrentAccount();
+        // account
+        Account account = modelMapper.map(request, Account.class);
+        account.setPassword(passwordEncoder.bCryptPasswordEncoder().encode(request.getPassword()));
+        account.setCreatedAt(LocalDateTime.now());
+        account.setStatus(AccountStatus.ENABLED);
+        account.setRoles(Collections.singletonList(roleService.findByRoleName(AccountRole.ROLE_USER)));
+        account.setCreatedBy(staff);
+        accountRepo.save(account);
+        // user
+        User user = modelMapper.map(request, User.class);
+        user.setAccount(account);
+        userRepository.save(user);
+        // email
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(account.getEmail());
+        emailDetail.setSubject("CHÀO MỪNG BẠN ĐẾN VỚI BỆNH VIỆN THÀNH NHÂN");
+        emailDetail.setFullName(account.getFullName());
+        emailDetail.setPassword(request.getPassword());
+        emailDetail.setLink("localhost:3000");
+        emailService.sendDirectPatientAccountEmail(emailDetail);
+        //
+        DirectPatientDTO dto = new DirectPatientDTO();
+        modelMapper.map(account, dto);
+        modelMapper.map(user, dto);
+        return dto;
+    }
+
+    public List<DirectPatientDTO> getDirectPatientsByCurrentStaff() {
+        Account currentStaff = authenticationService.getCurrentAccount();
+        List<Account> createdAccounts = accountRepo.findAllByCreatedByOrderByCreatedAtDesc(currentStaff);
+        List<DirectPatientDTO> patientList = new ArrayList<>();
+        for (Account account : createdAccounts) {
+            DirectPatientDTO dto = new DirectPatientDTO();
+            modelMapper.map(account, dto);
+            if (account.getUser() != null) {
+                modelMapper.map(account.getUser(), dto);
+            }
+            patientList.add(dto);
+        }
+        return patientList;
+    }
+
 
 
     public void register(Account account) {

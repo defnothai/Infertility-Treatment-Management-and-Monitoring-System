@@ -18,6 +18,8 @@ import com.fuhcm.swp391.be.itmms.validation.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import javassist.NotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,10 @@ public class AppointmentService {
     private EmailService emailService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -195,4 +201,41 @@ public class AppointmentService {
         }
         return responses;
     }
+
+    public List<AppointmentResponse> searchAppointments(String keyword, LocalDate date, Long doctorId) throws NotFoundException {
+        List<Appointment> appointments = appointmentRepository.searchByKeywordDateAndDoctor(keyword, date, doctorId);
+        if (appointments.isEmpty()) {
+            throw new NotFoundException("Không có cuộc hẹn nào");
+        }
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
+                    response.setPatientName(appointment.getUser() != null ? appointment.getUser().getFullName() : null);
+                    response.setPhoneNumber(appointment.getUser() != null ? appointment.getUser().getPhoneNumber() : null);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
+                    response.setDob(appointment.getUser().getUser().getDob());
+                    response.setGender(appointment.getUser().getGender().name());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<AppointmentResponse> getAppointmentsBookedByUser() throws NotFoundException {
+        Long userId = authenticationService.getCurrentAccount().getId();
+        List<Appointment> appointments = appointmentRepository.findByUserIdOrderByTimeDescStartTimeDesc(userId);
+        if (appointments.isEmpty()) {
+            throw new NotFoundException("Bạn chưa có cuộc hẹn nào");
+        }
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
 }

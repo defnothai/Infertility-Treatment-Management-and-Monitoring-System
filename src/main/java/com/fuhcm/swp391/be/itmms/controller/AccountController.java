@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
+import com.fuhcm.swp391.be.itmms.dto.DirectPatientDTO;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
@@ -31,6 +32,26 @@ public class AccountController {
 
     public AccountController(AccountService accountService) {
         this.accountService = accountService;
+    }
+
+    @PostMapping("/api/staff/direct-patients")
+    public ResponseEntity createPatientAccount(@Valid @RequestBody DirectPatientDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
+                        "CREATED_SUCCESS",
+                        "Tạo tài khoản thành công",
+                        accountService.createDirectPatient(request)));
+    }
+
+    @GetMapping("/api/staff/direct-patients")
+    public ResponseEntity<?> getAllDirectPatientsByStaff() {
+        List<DirectPatientDTO> result = accountService.getDirectPatientsByCurrentStaff();
+        return ResponseEntity.ok(new ResponseFormat<>(
+                HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy danh sách bệnh nhân thành công",
+                result
+        ));
     }
 
     @GetMapping("/api/patients")

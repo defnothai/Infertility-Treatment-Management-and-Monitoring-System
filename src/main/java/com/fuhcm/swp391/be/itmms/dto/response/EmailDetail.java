@@ -9,5 +9,6 @@ public class EmailDetail {
     private String subject;
     private String fullName;
     private String link;
+    private String password;
 
 }

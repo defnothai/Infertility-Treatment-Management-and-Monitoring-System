@@ -29,4 +29,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByRolesAndStaffStatus(List<Role> staffRoles, EmploymentStatus employmentStatus);
 
     List<Account> findByCreatedAtBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
+
+    List<Account> findAllByCreatedByOrderByCreatedAtDesc(Account currentStaff);
 }
