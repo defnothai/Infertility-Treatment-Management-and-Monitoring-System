@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.AccessRole;
+import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.PermissionLevel;
 import com.fuhcm.swp391.be.itmms.dto.request.UpdateDiagnosisSymptom;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
@@ -9,10 +10,7 @@ import com.fuhcm.swp391.be.itmms.entity.User;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecordAccess;
-import com.fuhcm.swp391.be.itmms.repository.DoctorRepository;
-import com.fuhcm.swp391.be.itmms.repository.MedicalRecordAccessRepository;
-import com.fuhcm.swp391.be.itmms.repository.MedicalRecordRepository;
-import com.fuhcm.swp391.be.itmms.repository.UserRepository;
+import com.fuhcm.swp391.be.itmms.repository.*;
 import jakarta.transaction.Transactional;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +39,9 @@ public class MedicalRecordService {
     private final UltrasoundService ultrasoundService;
     private final DoctorRepository doctorRepository;
     private final MedicalRecordAccessService medicalRecordAccessService;
+    private final AccountRepository accountRepository;
+    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
 
     public MedicalRecordService(MedicalRecordRepository medicalRecordRepository,
@@ -51,7 +53,7 @@ public class MedicalRecordService {
                                 ModelMapper modelMapper,
                                 UltrasoundService ultrasoundService,
                                 DoctorRepository doctorRepository,
-                                MedicalRecordAccessService medicalRecordAccessService) {
+                                MedicalRecordAccessService medicalRecordAccessService, AccountRepository accountRepository, RoleRepository roleRepository, RoleService roleService) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.userRepository = userRepository;
         this.medicalRecordAccessRepository = medicalRecordAccessRepository;
@@ -62,6 +64,9 @@ public class MedicalRecordService {
         this.ultrasoundService = ultrasoundService;
         this.doctorRepository = doctorRepository;
         this.medicalRecordAccessService = medicalRecordAccessService;
+        this.accountRepository = accountRepository;
+        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     public MedicalRecord findById(Long id) throws NotFoundException {
@@ -221,6 +226,45 @@ public class MedicalRecordService {
 
                     return dto;
                 }).toList();
+    }
+
+    public List<AccountResponse> searchByKeyWord(String keyword) {
+        return this.getMyPatient().stream().filter(
+                accountResponse -> filterByKeyword(accountResponse, keyword)
+        ).toList();
+    }
+
+    public boolean filterByKeyword(AccountResponse response, String keyword) {
+        return response.getFullName().toLowerCase().contains(keyword.toLowerCase()) || response.getPhoneNumber().contains(keyword);
+    }
+
+    public List<AccountResponse> getMyPatient() {
+        Long doctorId = authenticationService.getCurrentAccount().getId();
+        List<Account> accounts = accountRepository.findByRoles(List.of(roleService.findByRoleName(AccountRole.ROLE_USER)));
+        return accounts.stream()
+                        .filter(account -> filterMyPatient(account, doctorId))
+                        .map(AccountResponse::new).toList();
+    }
+
+    public boolean filterMyPatient(Account account, Long doctorId) {
+        if (account.getUser() == null) return false;
+        User user = account.getUser();
+        if (user.getMedicalRecords() == null || user.getMedicalRecords().isEmpty()) {
+            return false;
+        }
+        List<MedicalRecord> medicalRecords = user.getMedicalRecords();
+        for (MedicalRecord medicalRecord : medicalRecords) {
+            if (medicalRecord.getMedicalRecordAccess() == null || medicalRecord.getMedicalRecordAccess().isEmpty()) {
+                return false;
+            }else {
+                for (MedicalRecordAccess medicalRecordAccess : medicalRecord.getMedicalRecordAccess()) {
+                    if (medicalRecordAccess.getGrantedTo().getId().equals(doctorId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     //    public ManagerMedicalRecordResponse getManagerMedicalRecord(Long accountId) throws NotFoundException {

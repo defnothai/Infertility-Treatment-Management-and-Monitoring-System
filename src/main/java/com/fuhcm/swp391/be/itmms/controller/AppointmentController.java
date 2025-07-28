@@ -1,6 +1,4 @@
 package com.fuhcm.swp391.be.itmms.controller;
-
-
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentReportResponse;
@@ -98,7 +96,7 @@ public class AppointmentController {
                         response));
     }
 
-    // danh sách buổi khám cho staff
+    // danh sách lịch hẹn cho staff
     @GetMapping("/staff/filter-appointment")
     public ResponseEntity searchAppointments(
             @RequestParam(required = false) String keyword,
@@ -116,8 +114,16 @@ public class AppointmentController {
                         response));
     }
 
-
-
+    // user xem lịch sử cuộc hẹn
+    @GetMapping("/me")
+    public ResponseEntity getMyAppointments() throws NotFoundException {
+        List<AppointmentResponse> response = appointmentService.getAppointmentsBookedByUser();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công thành công",
+                        response));
+    }
 
 
 }

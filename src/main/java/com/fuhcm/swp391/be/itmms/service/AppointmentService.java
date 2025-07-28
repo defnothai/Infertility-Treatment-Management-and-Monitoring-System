@@ -64,6 +64,8 @@ public class AppointmentService {
     private NotificationService notificationService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -202,7 +204,7 @@ public class AppointmentService {
 
     public List<AppointmentResponse> searchAppointments(String keyword, LocalDate date, Long doctorId) throws NotFoundException {
         List<Appointment> appointments = appointmentRepository.searchByKeywordDateAndDoctor(keyword, date, doctorId);
-        if(appointments.isEmpty()) {
+        if (appointments.isEmpty()) {
             throw new NotFoundException("Không có cuộc hẹn nào");
         }
         return appointments.stream()
@@ -210,12 +212,30 @@ public class AppointmentService {
                     AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
                     response.setPatientName(appointment.getUser() != null ? appointment.getUser().getFullName() : null);
                     response.setPhoneNumber(appointment.getUser() != null ? appointment.getUser().getPhoneNumber() : null);
-                    response.setDoctorName(appointment.getDoctor() != null ? appointment.getDoctor().getFullName() : null);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
                     response.setDob(appointment.getUser().getUser().getDob());
                     response.setGender(appointment.getUser().getGender().name());
                     return response;
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<AppointmentResponse> getAppointmentsBookedByUser() throws NotFoundException {
+        Long userId = authenticationService.getCurrentAccount().getId();
+        List<Appointment> appointments = appointmentRepository.findByUserIdOrderByTimeDescStartTimeDesc(userId);
+        if (appointments.isEmpty()) {
+            throw new NotFoundException("Bạn chưa có cuộc hẹn nào");
+        }
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 
 }

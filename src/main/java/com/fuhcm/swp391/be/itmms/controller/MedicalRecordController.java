@@ -19,7 +19,26 @@ public class MedicalRecordController {
 
     // ================================================ DOCTOR =========================================================
 
-    // lấy danh sách lịch sử khám bệnh cho
+    // lấy danh sách bệnh nhân đã tiếp nhận cho bác sĩ
+    @GetMapping("/api/patient/me")
+    public ResponseEntity getMyPatients(@RequestParam(required = false) String keyword) throws NotFoundException {
+        List<AccountResponse> response;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            response = medicalRecordService.getMyPatient();
+        }else {
+            response = medicalRecordService.searchByKeyWord(keyword);
+        }
+        if (response.isEmpty()) {
+            throw new NotFoundException("Không tìm thấy bệnh nhân");
+        }
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy thông tin thành công",
+                response));
+    }
+
+
+    // lấy danh sách lịch sử khám bệnh cho doctor
     @GetMapping("/api/medical-record/history/{accountId}")
     public ResponseEntity getMedicalRecordsByAccountId(@PathVariable Long accountId) {
         List<MedicalRecordSummaryResponse> records = medicalRecordService.getMedicalRecordsByAccountId(accountId);
