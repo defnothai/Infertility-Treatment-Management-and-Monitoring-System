@@ -11,4 +11,6 @@ import java.util.List;
 public interface UltrasoundRepository extends JpaRepository<Ultrasound, Long> {
 
     List<Ultrasound> findByMedicalRecordIdAndTypeAndIsActiveTrue(Long medicalRecordId, UltrasoundType type);
+
+    List<Ultrasound> findBySession_IdAndIsActiveTrue(Long sessionId);
 }

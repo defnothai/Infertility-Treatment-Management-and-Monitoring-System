@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,44 +20,26 @@ public class ReminderService {
     private final ReminderRepository reminderRepository;
     private final EmailService emailService;
 
-    public void createRemindersForAppointment(Appointment appointment) {
-        createReminderIfNotExists(appointment, 24, ReminderType.APPOINTMENT_ONE_DAY_BEFORE, "Bạn có lịch hẹn vào ngày mai.");
-        createReminderIfNotExists(appointment, 2, ReminderType.APPOINTMENT_FIVE_HOURS_BEFORE, "Bạn có lịch hẹn sau 5 tiếng nữa.");
+    public void createReminders(Appointment a) {
+        LocalDateTime start = LocalDateTime.of(a.getTime(), a.getStartTime());
+
+        reminderRepository.saveAll(List.of(
+                new Reminder("NHẮC NHỞ LỊCH KHÁM 1 NGÀY NỮA", start.minusDays(1), ReminderType.EMAIL, a),
+                new Reminder("Nhắc lịch khám 1 ngày nữa", start.minusDays(1), ReminderType.WEB_NOTIFICATION, a),
+                new Reminder("NHẮC NHỞ LỊCH KHÁM SAU 5 TIẾNG NỮA", start.minusHours(5), ReminderType.EMAIL, a),
+                new Reminder("Nhắc lịch khám sau 5 tiếng", start.minusHours(5), ReminderType.WEB_NOTIFICATION, a)
+        ));
     }
 
-    public void createReminderIfNotExists(Appointment appointment, int hoursBefore, ReminderType type, String message) {
-        if (reminderRepository.existsByAppointmentAndReminderType(appointment, type)) return;
-
-        LocalDateTime appointmentDateTime = appointment.getTime().atTime(appointment.getStartTime());
-        LocalDateTime remindDateTime = appointmentDateTime.minusHours(hoursBefore);
-
-        Reminder reminder = new Reminder();
-        reminder.setTitle("NHẮC LỊCH HẸN");
-        reminder.setDescription(message);
-        reminder.setReminderType(type);
-        reminder.setRemindDate(remindDateTime);
-        reminder.setAppointment(appointment);
-        reminder.setUser(appointment.getUser().getUser());
-        reminder.setSent(false);
-        reminderRepository.save(reminder);
-    }
-
-    public void handleReminder(Reminder reminder) {
-        if (reminder.getUser() == null || reminder.getUser().getAccount() == null) return;
-
-        Account user = reminder.getUser().getAccount();
-        if (user.getEmail() == null || user.getEmail().isBlank()) return;
-
+    public void handleEmailReminder(Reminder reminder) {
         EmailDetailReminder emailDetail = buildEmailDetail(reminder.getAppointment());
         emailService.sendReminderEmail(emailDetail);
-        reminder.setSent(true);
-        reminderRepository.save(reminder);
     }
 
     public EmailDetailReminder buildEmailDetail(Appointment appointment) {
         EmailDetailReminder emailDetail = new EmailDetailReminder();
         emailDetail.setRecipient(appointment.getUser().getEmail());
-        emailDetail.setSubject("NHẮC NHỞ LỊCH HẸN");
+        emailDetail.setSubject("THÔNG BÁO LỊCH HẸN CỦA BẠN");
         emailDetail.setPatientName(appointment.getUser().getFullName());
         emailDetail.setAppointmentDate(appointment.getTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         emailDetail.setStartTime(appointment.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
@@ -66,12 +49,4 @@ public class ReminderService {
         emailDetail.setMessage(appointment.getMessage());
         return emailDetail;
     }
-
-
-
-
-
-
-
-
 }

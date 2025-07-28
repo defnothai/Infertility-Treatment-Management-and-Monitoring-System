@@ -14,6 +14,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -43,7 +44,6 @@ public class Account {
     @Size(max = 50, message = "Email tối đa 50 ký tự")
     private String email;
 
-
     @NotBlank(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "Mật khẩu ít nhất 8 ký tự")
     @Column(name = "Password", nullable = false, length = 255, columnDefinition = "NVARCHAR(100)")
@@ -66,13 +66,27 @@ public class Account {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy")
+    @JsonIgnore
     private Account createdBy;
 
-    @OneToOne(mappedBy = "account")
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @JsonIgnore
     private User user;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    public Account(String fullName, String email, String password, LocalDateTime createdAt, AccountStatus status, String phoneNumber, Gender gender, Account createdBy, User user, List<Role> roles) {
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.createdAt = createdAt;
+        this.status = status;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.createdBy = createdBy;
+        this.user = user;
+        this.roles = roles;
+    }
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     @JoinTable(
             name = "AccountRoles",
@@ -138,9 +152,11 @@ public class Account {
     private Doctor doctor;
 
     @OneToMany(mappedBy = "doctor")
+    @JsonIgnore
     private List<Ultrasound> ultrasounds;
 
     @OneToMany(mappedBy = "createdBy")
+    @JsonIgnore
     private List<HospitalAchievement> achievements;
 
     @OneToOne(mappedBy = "account")
@@ -150,7 +166,7 @@ public class Account {
     @OneToMany(mappedBy = "replace")
     @JsonIgnore
     private List<Schedule> schedule;
-  
+
     @OneToMany(mappedBy = "updatedBy")
     @JsonIgnore
     private List<MedicalRecordAccess> updatedAccessRecords;
@@ -159,5 +175,8 @@ public class Account {
     @JsonIgnore
     private List<MedicalRecordAccess> revokedAccessRecords;
 
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    private List<Notification> notifications;
 
 }

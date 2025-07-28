@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.entity.invoice;
 
 import com.fuhcm.swp391.be.itmms.constant.InvoiceStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.lab.LabTestResult;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -64,5 +65,8 @@ public class Invoice {
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<InvoicePayment> invoicePayments;
+
+
+
 
 }

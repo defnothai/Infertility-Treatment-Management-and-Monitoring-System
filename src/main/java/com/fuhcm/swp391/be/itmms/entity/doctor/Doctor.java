@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.entity.doctor;
 
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.entity.*;
+import com.fuhcm.swp391.be.itmms.utils.SlugUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +46,17 @@ public class Doctor {
 
     @Column(name = "ImgUrl", nullable = false)
     private String imgUrl;
+
+    public Doctor(String expertise, String position, EmploymentStatus status, String achievements, String description, String imgUrl, Account account) {
+        this.expertise = expertise;
+        this.position = position;
+        this.status = status;
+        this.achievements = achievements;
+        this.description = description;
+        this.imgUrl = imgUrl;
+        this.slug = SlugUtil.toSlug(account.getFullName() + " " + position + " " + expertise);
+        this.account = account;
+    }
 
     @OneToOne
     @JoinColumn(name = "AccountId", referencedColumnName = "Id")

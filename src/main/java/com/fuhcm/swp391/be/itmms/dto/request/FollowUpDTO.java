@@ -13,5 +13,6 @@ public class FollowUpDTO {
     private LocalDate date;
     private LocalTime time;
     private String message;
+    private String appointmentNote;
 
 }

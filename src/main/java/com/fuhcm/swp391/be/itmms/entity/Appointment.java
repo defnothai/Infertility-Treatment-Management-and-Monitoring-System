@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -41,7 +42,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 
-    @Column(name = "Note", nullable = true, length = 255)
+    @Column(name = "Note", nullable = true, length = 255, columnDefinition = "NVARCHAR(1000)")
     private String note;
 
     @Column(name = "CreateAt", nullable = false)
@@ -53,7 +54,7 @@ public class Appointment {
     @Column(name = "PhoneNumber", nullable = false, length = 15)
     private String phoneNumber;
 
-    @Column(name = "Message", length = 1000)
+    @Column(name = "Message", length = 1000, columnDefinition = "NVARCHAR(1000)")
     private String message;
 
     @Column(name = "Gender")
@@ -78,4 +79,8 @@ public class Appointment {
     @OneToOne
     @JoinColumn(name = "treatment_session_id")
     private TreatmentSession session;
+
+    @OneToMany(mappedBy = "appointment")
+    private List<Reminder> reminders;
+
 }

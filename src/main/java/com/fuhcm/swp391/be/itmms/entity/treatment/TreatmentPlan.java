@@ -1,5 +1,6 @@
 package com.fuhcm.swp391.be.itmms.entity.treatment;
 
+import com.fuhcm.swp391.be.itmms.constant.TreatmentPlanStatus;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
@@ -29,6 +30,16 @@ public class TreatmentPlan {
 
     @Column(name = "DateStart")
     private LocalDate dayStart;
+
+    @Column(name = "DateEnd")
+    private LocalDate dayEnd;
+
+    @Column(name = "Status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TreatmentPlanStatus status;
+
+    @Column(name = "Notes", nullable = true)
+    private String notes;
 
     @ManyToOne
     @JoinColumn(name = "ServiceID", referencedColumnName = "Id")

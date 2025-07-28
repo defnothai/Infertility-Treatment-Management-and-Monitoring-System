@@ -73,7 +73,7 @@ public class EmailService {
             context.setVariable("message", emailDetail.getMessage());
             context.setVariable("note", emailDetail.getNote());
 
-            String body = templateEngine.process("reminderEmail", context);
+            String body = templateEngine.process("appointmentReminder", context);
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
             helper.setFrom(BASE_EMAIL_ADDRESS);
@@ -99,7 +99,7 @@ public class EmailService {
             context.setVariable("message", emailDetail.getMessage());
             context.setVariable("note", emailDetail.getNote());
 
-            String body = templateEngine.process("reminderEmail", context);
+            String body = templateEngine.process("appointmentSuccess", context);
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
             helper.setFrom(BASE_EMAIL_ADDRESS);

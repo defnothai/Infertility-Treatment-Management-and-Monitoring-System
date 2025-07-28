@@ -152,5 +152,25 @@ public class UltrasoundService {
         return new ImageUrlListResponse(imageUrlList);
     }
 
+
+    public List<UltrasoundResponse> getBySessionId(Long sessionId) {
+        List<Ultrasound> ultrasounds = ultrasoundRepository.findBySession_IdAndIsActiveTrue(sessionId);
+        return ultrasounds.stream().map(u -> {
+            UltrasoundResponse dto = new UltrasoundResponse();
+            dto.setId(u.getId());
+            dto.setDate(u.getDate());
+            dto.setResult(u.getResult());
+            dto.setImgUrls(splitImageUrls(u.getImageUrls()));
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    private List<String> splitImageUrls(String imageUrls) {
+        if (imageUrls == null || imageUrls.trim().isEmpty()) return List.of();
+        return Arrays.stream(imageUrls.split(";"))
+                .map(String::trim)
+                .collect(Collectors.toList());
+    }
+
 }
 

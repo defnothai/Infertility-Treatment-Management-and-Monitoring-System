@@ -45,8 +45,8 @@ public class MedicalRecord {
     @JsonIgnore
     private TreatmentPlan treatmentPlan;
 
-    @OneToOne
-    @JoinColumn(name = "PatientID", referencedColumnName = "Id")
+    @ManyToOne
+    @JoinColumn(name = "PatientID") // tên cột FK trong bảng MedicalRecord
     private User user;
 
     @OneToMany(mappedBy = "medicalRecord")
@@ -54,6 +54,5 @@ public class MedicalRecord {
 
     @OneToMany(mappedBy = "medicalRecord")
     private List<Ultrasound> ultrasounds;
-
 
 }

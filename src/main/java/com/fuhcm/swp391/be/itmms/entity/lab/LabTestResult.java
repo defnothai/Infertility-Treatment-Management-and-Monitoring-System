@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultStatus;
 import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
 import com.fuhcm.swp391.be.itmms.entity.Account;
+import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
-import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentPlan;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Setter
@@ -64,4 +63,10 @@ public class LabTestResult {
     @ManyToOne
     @JoinColumn(name = "MedicalRecordId", referencedColumnName = "Id")
     private MedicalRecord medicalRecord;
+
+//    @ManyToOne
+//    @JoinColumn(name = "InvoiceId", referencedColumnName = "Id")
+//    @JsonIgnore
+//    private Invoice invoice;
+
 }
