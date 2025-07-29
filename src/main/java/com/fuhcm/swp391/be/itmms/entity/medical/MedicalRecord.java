@@ -37,6 +37,9 @@ public class MedicalRecord {
     @Column(name = "CreatedAt", nullable = false)
     private LocalDate createdAt;
 
+    @Column(name = "NumberOfMissed", nullable = false)
+    private int numberOfMissed = 0;   // max = 4
+
     @OneToMany(mappedBy = "medicalRecord")
     @JsonIgnore
     private List<MedicalRecordAccess> medicalRecordAccess;

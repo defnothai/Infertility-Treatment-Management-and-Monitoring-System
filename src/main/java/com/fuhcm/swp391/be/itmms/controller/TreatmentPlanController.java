@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentPlanRequest;
+import com.fuhcm.swp391.be.itmms.dto.request.TreatmentPlanUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentPlanResponse;
 import com.fuhcm.swp391.be.itmms.service.TreatmentPlanService;
@@ -46,8 +47,13 @@ public class TreatmentPlanController {
         );
     }
 
+    // *** NEW:
+    // bác sĩ:
+    // cân nhắc hủy khi không theo phác đồ
+    // cân nhắc hủy khi lỡ hẹn quá 3 lần
+    // có thể update lại nếu lỡ hủy
     @PutMapping("/api/medical-record/treatment-plan/{planId}")
-    public ResponseEntity updateTreatmentPlan(@PathVariable("planId") Long planId, @RequestBody TreatmentPlanRequest request) throws NotFoundException {
+    public ResponseEntity updateTreatmentPlan(@PathVariable("planId") Long planId, @RequestBody TreatmentPlanUpdateRequest request) throws NotFoundException {
         TreatmentPlanResponse updatedPlan = treatmentPlanService.updateTreatmentPlan(planId, request);
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
                 "UPDATE_SUCCESS",

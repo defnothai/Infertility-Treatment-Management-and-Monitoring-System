@@ -14,6 +14,7 @@ public class TreatmentPlanResponse {
     private LocalDate dateEnd;
     private TreatmentPlanStatus status;
     private String serviceName;
+    private String notes;
     private List<TreatmentStageProgressResponse> treatmentStageProgressResponses;
 
 

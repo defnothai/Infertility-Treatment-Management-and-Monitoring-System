@@ -26,6 +26,7 @@ public class MedicalRecordResponse {
     private String insuranceNumber;
     private String diagnosis;
     private String symptoms;
+    private int numberOfMissed;
     private List<LabTestResultResponse> initLabTestResults; // k cần dùng cho mana
     private List<UltrasoundResponse> initUltrasounds; // k cần dùng cho mana
     private PermissionLevel level;

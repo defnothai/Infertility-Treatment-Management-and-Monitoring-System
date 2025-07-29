@@ -33,7 +33,7 @@ public class Account {
     private Long id;
 
     @NotBlank(message = "Họ tên không được để trống")
-    @Size(min = 10, message = "Họ tên ít nhất 10 ký tự")
+    @Size(min = 3, message = "Họ tên ít nhất 3 ký tự")
     @Size(max = 100, message = "Họ tên tối đa 100 ký tự")
     @Column(name = "FullName", nullable = false, length = 100, columnDefinition = "NVARCHAR(100)")
     private String fullName;

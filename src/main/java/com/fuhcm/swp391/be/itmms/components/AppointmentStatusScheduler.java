@@ -6,8 +6,10 @@ import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Reminder;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
+import com.fuhcm.swp391.be.itmms.repository.MedicalRecordRepository;
 import com.fuhcm.swp391.be.itmms.repository.ReminderRepository;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
 import com.fuhcm.swp391.be.itmms.service.EmailService;
@@ -37,6 +39,8 @@ public class AppointmentStatusScheduler {
     private EmailService emailService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
 
     @Scheduled(fixedRate = 600000)
     public void checkUnpaidAppointments(){
@@ -64,6 +68,9 @@ public class AppointmentStatusScheduler {
                     session.setNotes("Bệnh nhân không đến khám");
                     session.setStatus(TreatmentSessionStatus.MISSED);
                     treatmentSessionRepository.save(session);
+                    MedicalRecord medicalRecord = session.getProgress().getPlan().getMedicalRecord();
+                    medicalRecord.setNumberOfMissed(medicalRecord.getNumberOfMissed() + 1);
+                    medicalRecordRepository.save(medicalRecord);
                 }
             }
         }
