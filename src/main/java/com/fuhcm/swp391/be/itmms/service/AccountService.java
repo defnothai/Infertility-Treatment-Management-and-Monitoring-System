@@ -5,21 +5,25 @@ import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
-import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
 import com.fuhcm.swp391.be.itmms.dto.request.AccountCreateRequest;
 import com.fuhcm.swp391.be.itmms.dto.DirectPatientDTO;
+import com.fuhcm.swp391.be.itmms.dto.request.ProfileUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -29,7 +33,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AccountService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     @Autowired
     private AccountRepository accountRepo;
@@ -119,42 +128,11 @@ public class AccountService {
     }
     public Account updateAccount(Account account) {return accountRepo.save(account);}
 
-    public List<PatientInfo> getPatientInfo() throws NotFoundException {
-        Role userRole = roleService.findByRoleName(AccountRole.ROLE_USER);
-        List<Account> patients = accountRepo.findByRoles(List.of(userRole));
-
-        if (patients.isEmpty()) {
-            throw new NotFoundException("Danh sách bệnh nhân trống");
-        }
-
-        return patients.stream()
-                .map(acc -> modelMapper.map(acc, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
 
     public Account findById(Long id) throws NotFoundException {
         return accountRepo.findById(id).orElseThrow(() -> new NotFoundException("Tài khoản không tồn tại"));
     }
 
-    public List<PatientInfo> searchPatientByPhoneNumber(String phoneNumber) throws NotFoundException {
-        List<Account> accounts = accountRepo.findByPhoneNumberContaining(phoneNumber);
-        if (accounts.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy bệnh nhân");
-        }
-        return accounts.stream()
-                .map(account -> modelMapper.map(account, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
-
-    public List<PatientInfo> searchPatientByEmail(String email) throws NotFoundException {
-        List<Account> accounts = accountRepo.findByEmailContaining(email);
-        if (accounts.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy bệnh nhân");
-        }
-        return accounts.stream()
-                .map(account -> modelMapper.map(account, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
 
     public List<AccountBasic> getManagerAccount() {
         return accountRepo
@@ -178,7 +156,6 @@ public class AccountService {
                         || account.getEmail().toLowerCase().contains(lowerKeyword))
                 .collect(Collectors.toList());
     }
-
 
 
     public ProfileResponse getUserProfile(Authentication authentication) {
@@ -357,4 +334,37 @@ public class AccountService {
 
         return responses;
     }
+
+    public ProfileResponse updateUserProfile(ProfileUpdateRequest request) {
+        Account account = authenticationService.getCurrentAccount();
+        account.setFullName(request.getFullName());
+        account.setPhoneNumber(request.getPhoneNumber());
+        account.setGender(request.getGender());
+        User user = account.getUser();
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        user.setDob(request.getDob());
+        user.setIdentityNumber(request.getIdentityNumber());
+        user.setNationality(request.getNationality());
+        user.setInsuranceNumber(request.getInsuranceNumber());
+        user.setAddress(request.getAddress());
+        user.setAccount(account);
+        userRepository.save(user);
+        account = accountRepo.save(account);
+        return new UserProfileResponse(
+                account.getFullName(),
+                account.getEmail(),
+                account.getPhoneNumber(),
+                user.getDob(),
+                account.getGender() == null ? null : account.getGender().toString(),
+                user.getIdentityNumber(),
+                user.getNationality(),
+                user.getInsuranceNumber(),
+                user.getAddress()
+        );
+    }
+
 }
+
+

@@ -34,11 +34,10 @@ public class User {
     @Column(name = "DayOfBirth", nullable = true)
     private LocalDate dob;
 
-    @NotBlank(message = "Số CMND/CCCD không được để trống", groups = OnUpdate.class)
     @Size(max = 15, message = "Số CMND/CCCD tối đa 15 ký tự", groups = OnUpdate.class)
     @Size(min = 9, message = "Số CMND/CCCD ít nhất 9 ký tự", groups = OnUpdate.class)
     @Pattern(regexp = "\\d{9,15}", message = "Số CMND/CCCD chỉ được chứa chữ số", groups = OnUpdate.class)
-    @Column(name = "IndentityNumber", nullable = true, length = 15)
+    @Column(name = "IdentityNumber", nullable = true, length = 15)
     private String identityNumber;
 
     @NotBlank(message = "Quốc tịch không được để trống" , groups = OnUpdate.class)
