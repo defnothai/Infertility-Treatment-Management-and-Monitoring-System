@@ -5,21 +5,25 @@ import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
-import com.fuhcm.swp391.be.itmms.dto.PatientInfo;
 import com.fuhcm.swp391.be.itmms.dto.request.AccountCreateRequest;
+import com.fuhcm.swp391.be.itmms.dto.DirectPatientDTO;
+import com.fuhcm.swp391.be.itmms.dto.request.ProfileUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.*;
 import com.fuhcm.swp391.be.itmms.entity.doctor.Doctor;
 import com.fuhcm.swp391.be.itmms.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
-import org.apache.coyote.BadRequestException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -29,7 +33,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class AccountService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     @Autowired
     private AccountRepository accountRepo;
@@ -59,9 +68,65 @@ public class AccountService {
 
     @Autowired
     private ShiftService shiftService;
+    @Autowired
+    @Lazy
+    private AuthenticationService authenticationService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private StaffRepository staffRepo;
+
+    @Autowired
+    private StaffRepository staffRepo;
+
+
+    public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
+        Account staff = authenticationService.getCurrentAccount();
+        // account
+        Account account = modelMapper.map(request, Account.class);
+        account.setPassword(passwordEncoder.bCryptPasswordEncoder().encode(request.getPassword()));
+        account.setCreatedAt(LocalDateTime.now());
+        account.setStatus(AccountStatus.ENABLED);
+        account.setRoles(Collections.singletonList(roleService.findByRoleName(AccountRole.ROLE_USER)));
+        account.setCreatedBy(staff);
+        accountRepo.save(account);
+        // user
+        User user = modelMapper.map(request, User.class);
+        user.setAccount(account);
+        userRepository.save(user);
+        // email
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(account.getEmail());
+        emailDetail.setSubject("CHÀO MỪNG BẠN ĐẾN VỚI BỆNH VIỆN THÀNH NHÂN");
+        emailDetail.setFullName(account.getFullName());
+        emailDetail.setPassword(request.getPassword());
+        emailDetail.setLink("localhost:3000");
+        emailService.sendDirectPatientAccountEmail(emailDetail);
+        //
+        DirectPatientDTO dto = new DirectPatientDTO();
+        modelMapper.map(account, dto);
+        modelMapper.map(user, dto);
+        return dto;
+    }
+
+    public List<DirectPatientDTO> getDirectPatientsByCurrentStaff() {
+        Account currentStaff = authenticationService.getCurrentAccount();
+        List<Account> createdAccounts = accountRepo.findAllByCreatedByOrderByCreatedAtDesc(currentStaff);
+        List<DirectPatientDTO> patientList = new ArrayList<>();
+        for (Account account : createdAccounts) {
+            DirectPatientDTO dto = new DirectPatientDTO();
+            modelMapper.map(account, dto);
+            if (account.getUser() != null) {
+                modelMapper.map(account.getUser(), dto);
+            }
+            patientList.add(dto);
+        }
+        return patientList;
+    }
+
 
 
     public void register(Account account) {
@@ -69,42 +134,11 @@ public class AccountService {
     }
     public Account updateAccount(Account account) {return accountRepo.save(account);}
 
-    public List<PatientInfo> getPatientInfo() throws NotFoundException {
-        Role userRole = roleService.findByRoleName(AccountRole.ROLE_USER);
-        List<Account> patients = accountRepo.findByRoles(List.of(userRole));
-
-        if (patients.isEmpty()) {
-            throw new NotFoundException("Danh sách bệnh nhân trống");
-        }
-
-        return patients.stream()
-                .map(acc -> modelMapper.map(acc, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
 
     public Account findById(Long id) throws NotFoundException {
         return accountRepo.findById(id).orElseThrow(() -> new NotFoundException("Tài khoản không tồn tại"));
     }
 
-    public List<PatientInfo> searchPatientByPhoneNumber(String phoneNumber) throws NotFoundException {
-        List<Account> accounts = accountRepo.findByPhoneNumberContaining(phoneNumber);
-        if (accounts.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy bệnh nhân");
-        }
-        return accounts.stream()
-                .map(account -> modelMapper.map(account, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
-
-    public List<PatientInfo> searchPatientByEmail(String email) throws NotFoundException {
-        List<Account> accounts = accountRepo.findByEmailContaining(email);
-        if (accounts.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy bệnh nhân");
-        }
-        return accounts.stream()
-                .map(account -> modelMapper.map(account, PatientInfo.class))
-                .collect(Collectors.toList());
-    }
 
     public List<AccountBasic> getManagerAccount() {
         return accountRepo
@@ -128,7 +162,6 @@ public class AccountService {
                         || account.getEmail().toLowerCase().contains(lowerKeyword))
                 .collect(Collectors.toList());
     }
-
 
 
     public ProfileResponse getUserProfile(Authentication authentication) {
@@ -235,7 +268,6 @@ public class AccountService {
         account.setStatus(request.getStatus());
         account.setCreatedBy(createdBy);
         account.setRoles(Collections.singletonList(role));
-
          accountRepo.save(account);
          if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
              Doctor doctor = new Doctor();
@@ -258,12 +290,26 @@ public class AccountService {
         return  account;
     }
 
-    public boolean deleteAccount(Long id) {
-        Account account =  accountRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Account not found"));
-        if(account == null) return false;
-        account.setStatus(AccountStatus.DELETED);
         accountRepo.save(account);
-        return true;
+        if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
+            Doctor doctor = new Doctor();
+            doctor.setAccount(account);
+            doctor.setExpertise(request.getExpertise());
+            doctor.setPosition(request.getPosition());
+            doctor.setStatus(EmploymentStatus.ACTIVE);
+            doctor.setDescription(request.getDescription());
+             doctor.setSlug(request.getSlug());
+            doctor.setImgUrl(request.getImgUrl());
+            doctorRepo.save(doctor);
+        } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
+            Staff staff = new Staff();
+            staff.setAccount(account);
+            staff.setStatus(EmploymentStatus.ACTIVE);
+            staff.setStartDate(LocalDate.now());
+            staffRepo.save(staff);
+        }
+
+        return  account;
     }
 
     public Set<AccountResponse> getAvailableDoctors() {
@@ -328,6 +374,7 @@ public class AccountService {
         return responses;
     }
 
+
     public AccountBasic getInfoLogin(Authentication authentication) {
         Account account = accountRepo.findByEmail(authentication.getName());
         if(account == null){
@@ -346,4 +393,62 @@ public class AccountService {
         }
         return responses;
     }
+    public ProfileResponse updateUserProfile(ProfileUpdateRequest request) {
+        Account account = authenticationService.getCurrentAccount();
+        account.setFullName(request.getFullName());
+        account.setPhoneNumber(request.getPhoneNumber());
+        account.setGender(request.getGender());
+        User user = account.getUser();
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        user.setDob(request.getDob());
+        user.setIdentityNumber(request.getIdentityNumber());
+        user.setNationality(request.getNationality());
+        user.setInsuranceNumber(request.getInsuranceNumber());
+        user.setAddress(request.getAddress());
+        user.setAccount(account);
+        userRepository.save(user);
+        account = accountRepo.save(account);
+        return new UserProfileResponse(
+                account.getFullName(),
+                account.getEmail(),
+                account.getPhoneNumber(),
+                user.getDob(),
+                account.getGender() == null ? null : account.getGender().toString(),
+                user.getIdentityNumber(),
+                user.getNationality(),
+                user.getInsuranceNumber(),
+                user.getAddress()
+        );
+    }
+
+//    như thêm
+public boolean deleteAccount(Long id) {
+    Optional<Account> accountOptional = accountRepo.findById(id);
+    if (accountOptional.isEmpty()) {
+        return false;
+    }
+
+    Account account = accountOptional.get();
+    // Gán trạng thái DELETED thay vì xóa cứng
+    account.setStatus(AccountStatus.DELETED);
+
+    accountRepo.save(account);
+    return true;
 }
+
+    public AccountBasic getInfoLogin(Authentication authentication) {
+        Account account = accountRepo.findByEmail(authentication.getName());
+        if(account == null){
+            throw new IllegalArgumentException("Account not found");
+        }
+        String role = account.getRoles().getFirst().getRoleName().toString();
+        return new AccountBasic(account.getFullName(), role);
+    }
+
+
+
+}
+
+

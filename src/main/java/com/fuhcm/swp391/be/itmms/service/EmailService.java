@@ -73,7 +73,7 @@ public class EmailService {
             context.setVariable("message", emailDetail.getMessage());
             context.setVariable("note", emailDetail.getNote());
 
-            String body = templateEngine.process("reminderEmail", context);
+            String body = templateEngine.process("appointmentReminder", context);
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
             helper.setFrom(BASE_EMAIL_ADDRESS);
@@ -99,7 +99,7 @@ public class EmailService {
             context.setVariable("message", emailDetail.getMessage());
             context.setVariable("note", emailDetail.getNote());
 
-            String body = templateEngine.process("reminderEmail", context);
+            String body = templateEngine.process("appointmentSuccess", context);
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
             helper.setFrom(BASE_EMAIL_ADDRESS);
@@ -112,6 +112,7 @@ public class EmailService {
             throw new RuntimeException("Gửi email nhắc nhở thất bại");
         }
     }
+
 
     public void sendPaymentEmail(EmailDetail emailDetail) {
         try {
@@ -130,6 +131,51 @@ public class EmailService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Gửi email thanh toán thất bại");
+    @Async
+    public void sendDirectPatientAccountEmail(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", emailDetail.getFullName());
+            context.setVariable("email", emailDetail.getRecipient());
+            context.setVariable("password", emailDetail.getPassword());
+            context.setVariable("websiteLink", emailDetail.getLink());
+            String templateRegisterEmail = templateEngine.process("directPatientAccount", context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(BASE_EMAIL_ADDRESS);
+            messageHelper.setTo(emailDetail.getRecipient());
+            messageHelper.setSubject(emailDetail.getSubject());
+            messageHelper.setText(templateRegisterEmail, true);
+            javaMailSender.send(messageHelper.getMimeMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Gửi mail thông báo tạo tài khoản thất bại");
+        }
+    }
+
+    @Async
+    public void sendUpdateAppointment(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", emailDetail.getFullName());
+            context.setVariable("note", emailDetail.getNote());
+            context.setVariable("message", emailDetail.getMessage());
+            context.setVariable("oldDate", emailDetail.getOldDate());
+            context.setVariable("oldTime", emailDetail.getOldTime());
+            context.setVariable("newDate", emailDetail.getNewDate());
+            context.setVariable("newTime", emailDetail.getNewTime());
+            context.setVariable("doctorName", emailDetail.getDoctorName());
+
+            String templateRegisterEmail = templateEngine.process("updateAppointment", context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(BASE_EMAIL_ADDRESS);
+            messageHelper.setTo(emailDetail.getRecipient());
+            messageHelper.setSubject(emailDetail.getSubject());
+            messageHelper.setText(templateRegisterEmail, true);
+            javaMailSender.send(messageHelper.getMimeMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Gửi mail thông báo cập nhật cuộc hẹn thất bại");
+
         }
     }
 

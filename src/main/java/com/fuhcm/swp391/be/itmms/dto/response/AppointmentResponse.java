@@ -1,7 +1,5 @@
 package com.fuhcm.swp391.be.itmms.dto.response;
 
-import com.fuhcm.swp391.be.itmms.constant.Gender;
-import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
 import lombok.AllArgsConstructor;
@@ -28,8 +26,8 @@ public class AppointmentResponse {
     private String message;
     private String gender;
     private LocalDate dob;
-    private Long user;
-
+    private Long userId; // id của account
+    private String doctorName;
 
     public AppointmentResponse(Appointment appointment) {
         this.id = appointment.getId();
@@ -42,7 +40,7 @@ public class AppointmentResponse {
         this.patientName = appointment.getPatientName();
         this.phoneNumber = appointment.getPhoneNumber();
         this.message = appointment.getMessage();
-        this.gender = appointment.getGender().toString();
+        this.gender = appointment.getGender() != null ? appointment.getGender().toString() : null;
         this.dob = appointment.getDob();
         this.user = appointment.getUser().getId();
     }
@@ -56,6 +54,6 @@ public class AppointmentResponse {
         this.note = note;
         this.createAt = createAt.toLocalDate();
         this.patientName = patientName;
-        this.user = userId;
+        this.userId = userId;
     }
 }

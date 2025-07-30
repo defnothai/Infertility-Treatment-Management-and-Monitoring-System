@@ -6,6 +6,7 @@ import com.fuhcm.swp391.be.itmms.constant.LabTestResultType;
 import com.fuhcm.swp391.be.itmms.constant.ScheduleStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultForStaffRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LabTestResultRequest;
+import com.fuhcm.swp391.be.itmms.dto.response.LabTestGroupResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultForStaffResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.LabTestResultResponse;
 import com.fuhcm.swp391.be.itmms.entity.Account;
@@ -22,14 +23,15 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +48,7 @@ public class LabTestResultService {
     private final TreatmentSessionRepository treatmentSessionRepository;
     private final LabTestRepository labTestRepository;
     private final MedicalRecordAccessService medicalRecordAccessService;
+    private final AuthenticationService authenticationService;
 
     @Transactional
     public List<LabTestResultResponse> sendInitLabTestRequest(Long recordId,
@@ -74,7 +77,6 @@ public class LabTestResultService {
         return responses;
     }
 
-
     public List<LabTestResultResponse> getInitLabTestResults(Long medicalRecordId) {
         List<LabTestResult> results = labTestResultRepository
                 .findByLabTestTypeAndMedicalRecord_Id(LabTestResultType.INITIAL, medicalRecordId);
@@ -84,6 +86,21 @@ public class LabTestResultService {
                 .collect(Collectors.toList());
     }
 
+    public List<LabTestResultResponse> getLabTestResultsBySessionId(Long sessionId) {
+        List<LabTestResult> results = labTestResultRepository.findBySession_Id(sessionId);
+        return results.stream().map(result -> {
+            LabTestResultResponse dto = new LabTestResultResponse();
+            dto.setId(result.getId());
+            dto.setTestDate(result.getTestDate());
+            dto.setResultSummary(result.getResultSummary());
+            dto.setResultDetails(result.getResultDetails());
+            dto.setStatus(result.getStatus());
+            dto.setNotes(result.getNotes());
+            dto.setLabTestName(result.getTest() != null ? result.getTest().getName() : null);
+            dto.setStaffFullName(result.getAccount() != null ? result.getAccount().getFullName() : null);
+            return dto;
+        }).collect(Collectors.toList());
+    }
 
     private LabTestResultResponse convertToResponse(LabTestResult result) {
         LabTestResultResponse response = modelMapper.map(result, LabTestResultResponse.class);
@@ -98,16 +115,19 @@ public class LabTestResultService {
     }
 
 
-    public List<LabTestResultResponse> findAll() {
+    public List<LabTestResultForStaffResponse> findAll() {
         return labTestResultRepository.findAll().stream().map(entity -> {
-            LabTestResultResponse dto = modelMapper.map(entity, LabTestResultResponse.class);
+            LabTestResultForStaffResponse dto = modelMapper.map(entity, LabTestResultForStaffResponse.class);
 
             if (entity.getTest() != null) {
                 dto.setLabTestName(entity.getTest().getName());
             }
 
             if (entity.getAccount() != null) {
-                dto.setStaffFullName(entity.getAccount().getFullName());
+                dto.setPatientFullName(entity.getAccount().getFullName());
+                dto.setPatientDob(entity.getAccount().getUser().getDob().toString());
+                dto.setPatientPhoneNumber(entity.getAccount().getPhoneNumber());
+                dto.setPatientGender(entity.getAccount().getGender());
             }
             return dto;
         }).collect(Collectors.toList());
@@ -266,6 +286,102 @@ public class LabTestResultService {
             return dto;
         }).toList();
     }
+
+    public List<LabTestGroupResponse> findGroupedByPatientAndDate(String keyword,
+                                                                  LocalDate filterDate,
+                                                                  LabTestResultStatus filterStatus) {
+        Long staffId = authenticationService.getCurrentAccount().getId();
+        List<LabTestResult> list = labTestResultRepository.findByAccount_Id(staffId);
+
+        // Group theo: MedicalRecord (patient) + testDate
+        Map<String, List<LabTestResult>> grouped = list.stream()
+                .collect(Collectors.groupingBy(result -> {
+                    Long recordId = result.getMedicalRecord().getId();
+                    String phoneNumber = result.getMedicalRecord().getUser().getAccount().getPhoneNumber();
+                    String date = result.getTestDate().toString();
+                    return recordId + "_" + date + "_" + phoneNumber;
+                }));
+
+        List<LabTestGroupResponse> result = new ArrayList<>();
+
+        for (Map.Entry<String, List<LabTestResult>> entry : grouped.entrySet()) {
+            List<LabTestResult> groupItems = entry.getValue();
+            LabTestResult first = groupItems.getFirst();
+            Account patient = first.getMedicalRecord().getUser().getAccount();
+            // build response
+            LabTestGroupResponse group = new LabTestGroupResponse();
+            group.setPatientName(patient.getFullName());
+            group.setPatientDob(patient.getUser().getDob().toString());
+            group.setPatientPhoneNumber(patient.getPhoneNumber());
+            group.setTestDate(first.getTestDate());
+            group.setTotalTests(groupItems.size());
+            group.setStatus(getGroupedLabTestResultStatus(groupItems));
+            // Lấy id của từng test để load details
+            group.setLabTestResultIds(groupItems.stream().map(LabTestResult::getId).toList());
+            //
+            result.add(group);
+        }
+        return result.stream()
+                .filter(group -> matchesFilters(group, keyword, filterDate, filterStatus))
+                .sorted(Comparator.comparing(LabTestGroupResponse::getTestDate).reversed())
+                .toList();
+    }
+
+    private boolean matchesFilters(LabTestGroupResponse group,
+                                   String keyword,
+                                   LocalDate filterDate,
+                                   LabTestResultStatus filterStatus) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String k = keyword.toLowerCase();
+            if (!(group.getPatientName().toLowerCase().contains(k)
+                    || group.getPatientPhoneNumber().toLowerCase().contains(k))) {
+                return false;
+            }
+        }
+        if (filterDate != null && !filterDate.equals(group.getTestDate())) {
+            return false;
+        }
+        if (filterStatus != null && !filterStatus.equals(group.getStatus())) {
+            return false;
+        }
+        return true;
+    }
+
+
+    // Lấy status đại diện cho 1 group
+    public LabTestResultStatus getGroupedLabTestResultStatus(List<LabTestResult> groupedResults) {
+        LabTestResultStatus status = LabTestResultStatus.COMPLETED;
+        for (LabTestResult labTestResult : groupedResults) {
+            if (labTestResult.getStatus() == LabTestResultStatus.PROCESSING) {
+                return LabTestResultStatus.PROCESSING;
+            }
+        }
+        return status;
+    }
+
+    // lấy details xn từ group
+    public List<LabTestResultForStaffResponse> getDetailsByGroup(List<Long> labTestResultIds) {
+        List<LabTestResult> results = labTestResultRepository.findAllById(labTestResultIds);
+        return results.stream().map(LabTestResultForStaffResponse::new).toList();
+    }
+
+
+//    public List<LabTestResultForStaffResponse> getUnpaidGroupedTestRequests() {
+//        return labTestResultRepository.findUnpaidTestRequestsGrouped();
+//    }
+
+//    public LabTestPaymentTotal getLabTestPaymentDetails(String phoneNumber, String fullName, LocalDate testDate) {
+//        List<LabTestResult> labTestResults = labTestResultRepository.searchByFilters(phoneNumber, fullName, testDate);
+//        List<LabTestPayment> labTestPayments = new ArrayList<>();
+//        for (LabTestResult labTestResult : labTestResults) {
+//            labTestPayments.add(new LabTestPayment(labTestResult));
+//        }
+//        double total = 0.0;
+//        for (LabTestPayment labTestPayment : labTestPayments) {
+//            total += labTestPayment.getPrice();
+//        }
+//        return new LabTestPaymentTotal(labTestPayments, total);
+//    }
 
 
 

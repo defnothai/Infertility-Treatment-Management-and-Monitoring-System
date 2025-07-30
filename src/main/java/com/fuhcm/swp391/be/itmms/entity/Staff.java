@@ -31,4 +31,10 @@ public class Staff {
 
     @Column(name = "StartDate")
     private LocalDate startDate;
+
+    public Staff(Account account, EmploymentStatus status, LocalDate startDate) {
+        this.account = account;
+        this.status = status;
+        this.startDate = startDate;
+    }
 }

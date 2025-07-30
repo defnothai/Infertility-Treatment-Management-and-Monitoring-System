@@ -21,6 +21,24 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalException {
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseFormat<Object>> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String field = error.getField();
+            String message = error.getDefaultMessage();
+            errors.put(field, message);
+        });
+        ResponseFormat<Object> res = new ResponseFormat<>(
+                HttpStatus.BAD_REQUEST.value(),
+                "BAD_REQUEST",
+                errors,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseFormat<Object>> handleAllException(Exception e) {
         ResponseFormat<Object> res = new ResponseFormat<Object>();
@@ -52,24 +70,6 @@ public class GlobalException {
         res.setMessage(ex.getMessage());
         res.setError("NOT_FOUND");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(res);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseFormat<Object>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            String field = error.getField();
-            String message = error.getDefaultMessage();
-            errors.put(field, message);
-        });
-        ResponseFormat<Object> res = new ResponseFormat<>(
-                HttpStatus.BAD_REQUEST.value(),
-                "BAD_REQUEST",
-                errors,
-               null
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
     @ExceptionHandler(value = {

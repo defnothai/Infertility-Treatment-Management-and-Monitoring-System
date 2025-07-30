@@ -1,11 +1,12 @@
 package com.fuhcm.swp391.be.itmms.controller;
 
+import com.fuhcm.swp391.be.itmms.dto.DirectPatientDTO;
+import com.fuhcm.swp391.be.itmms.dto.request.ProfileUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.*;
-import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.service.AccountService;
+import com.fuhcm.swp391.be.itmms.validation.OnUpdate;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.Set;
 
 import java.util.List;
@@ -33,27 +34,24 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @GetMapping("/api/patients")
-    public ResponseEntity getPatientList(
-            @RequestParam(value = "phone-number", required = false) String phoneNumber,
-            @RequestParam(value = "email", required = false) String email
-    ) throws NotFoundException {
-        if (phoneNumber != null) {
-            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                    "FETCH_DATA_SUCCESS",
-                    "Lấy thông tin theo số điện thoại thành công",
-                    accountService.searchPatientByPhoneNumber(phoneNumber)));
-        } else if (email != null) {
-            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                    "FETCH_DATA_SUCCESS",
-                    "Lấy thông tin theo email thành công",
-                    accountService.searchPatientByEmail(email)));
-        } else {
-            return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
-                    "FETCH_DATA_SUCCESS",
-                    "Lấy tất cả bệnh nhân thành công",
-                    accountService.getPatientInfo()));
-        }
+    @PostMapping("/api/staff/direct-patients")
+    public ResponseEntity createPatientAccount(@Valid @RequestBody DirectPatientDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
+                        "CREATED_SUCCESS",
+                        "Tạo tài khoản thành công",
+                        accountService.createDirectPatient(request)));
+    }
+
+    @GetMapping("/api/staff/direct-patients")
+    public ResponseEntity<?> getAllDirectPatientsByStaff() {
+        List<DirectPatientDTO> result = accountService.getDirectPatientsByCurrentStaff();
+        return ResponseEntity.ok(new ResponseFormat<>(
+                HttpStatus.OK.value(),
+                "FETCH_SUCCESS",
+                "Lấy danh sách bệnh nhân thành công",
+                result
+        ));
     }
 
     @GetMapping("/api/user/profile")
@@ -69,6 +67,15 @@ public class AccountController {
         return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
                 "FETCH_DATA_SUCCESS",
                 "Lấy thông tin profile thành công",
+                profile));
+    }
+
+    @PutMapping("/api/user/profile")
+    public ResponseEntity updateUserProfile(@Validated(OnUpdate.class) @RequestBody ProfileUpdateRequest request) throws NotFoundException {
+        ProfileResponse profile = accountService.updateUserProfile(request);
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "UPDATE_SUCCESS",
+                "Cập nhật thông tin profile thành công",
                 profile));
     }
 
@@ -123,7 +130,6 @@ public class AccountController {
                         response));
     }
 
-
     @GetMapping("api/accounts/login-info")
     public ResponseEntity getInfoLogin(Authentication authentication) throws NotFoundException {
         AccountBasic response = accountService.getInfoLogin(authentication);
@@ -140,6 +146,7 @@ public class AccountController {
                         "Lấy information thành công",
                         response));
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/api/accounts/accounts-report")

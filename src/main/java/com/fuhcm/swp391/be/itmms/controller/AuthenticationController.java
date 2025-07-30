@@ -20,7 +20,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok
                 (new ResponseFormat<>(HttpStatus.OK.value(),
                                 "LOGIN_SUCCESS",
@@ -76,6 +76,16 @@ public class AuthenticationController {
                                 "RESET_PASSWORD_SUCCESS",
                         "Đặt lại mật khẩu thành công", null));
 
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authenticationService.changePassword(request);
+        return ResponseEntity.ok
+                (new ResponseFormat<>(HttpStatus.OK.value(),
+                        "CHANGE_PASSWORD_SUCCESS",
+                        "Đổi mật khẩu thành công",
+                        null));
     }
 
 }

@@ -1,6 +1,4 @@
 package com.fuhcm.swp391.be.itmms.controller;
-
-
 import com.fuhcm.swp391.be.itmms.dto.request.AppointmentRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.AppointmentReportResponse;
@@ -8,12 +6,13 @@ import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.service.AppointmentService;
+import com.fuhcm.swp391.be.itmms.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +28,8 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @GetMapping()
     public ResponseEntity<ApiResponse<?>> getAppointmentsByDoctorId(@Valid Authentication authentication) {
@@ -143,4 +144,52 @@ public class AppointmentController {
                         "Cập nhật appointment thành công",
                         response));
     }
+    // danh sách lịch hẹn cho staff
+    @GetMapping("/staff/filter-appointment")
+    public ResponseEntity searchAppointments(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Long doctorId
+    ) throws NotFoundException {
+        if (keyword == null || keyword.trim().isEmpty() ) {
+            keyword = "";
+        }
+        List<AppointmentResponse> response = appointmentService.searchAppointments(keyword, date, doctorId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công thành công",
+                        response));
+    }
+
+    // user xem lịch sử cuộc hẹn
+    @GetMapping("/me")
+    public ResponseEntity getMyAppointments() throws NotFoundException {
+        List<AppointmentResponse> response = appointmentService.getAppointmentsBookedByUser();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công",
+                        response));
+    }
+
+    // danh sách lịch hẹn cho doctor
+    @GetMapping("/doctor/filter-appointment")
+    public ResponseEntity searchAppointments(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) throws NotFoundException {
+        if (keyword == null || keyword.trim().isEmpty() ) {
+            keyword = "";
+        }
+        Long doctorId = authenticationService.getCurrentAccount().getId();
+        List<AppointmentResponse> response = appointmentService.searchAppointments(keyword, date, doctorId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công",
+                        response));
+    }
+
+
 }

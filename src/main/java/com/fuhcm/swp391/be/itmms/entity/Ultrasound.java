@@ -23,7 +23,7 @@ public class Ultrasound {
     @Column(name = "Date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "Result", columnDefinition = "TEXT")
+    @Column(name = "Result", columnDefinition = "NVARCHAR(255)")
     private String result;
 
     @Column(name = "IsActive")

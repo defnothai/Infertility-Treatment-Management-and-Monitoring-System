@@ -12,8 +12,9 @@ import java.util.List;
 @Repository
 public interface ReminderRepository extends JpaRepository<Reminder, Long> {
 
-    List<Reminder> findByRemindDateBetweenAndIsSentFalse(LocalDateTime from, LocalDateTime to);
+    List<Reminder> findByRemindAtBetweenAndIsSentFalse(LocalDateTime from, LocalDateTime to);
 
-    boolean existsByAppointmentAndReminderType(Appointment appointment, ReminderType type);
+    List<Reminder> findByRemindAtBeforeAndIsSentFalse(LocalDateTime now);
 
+    List<Reminder> findByAppointment_Id(Long id);
 }

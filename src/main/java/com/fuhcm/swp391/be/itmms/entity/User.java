@@ -34,17 +34,16 @@ public class User {
     @Column(name = "DayOfBirth", nullable = true)
     private LocalDate dob;
 
-    @NotBlank(message = "Số CMND/CCCD không được để trống", groups = OnUpdate.class)
     @Size(max = 15, message = "Số CMND/CCCD tối đa 15 ký tự", groups = OnUpdate.class)
     @Size(min = 9, message = "Số CMND/CCCD ít nhất 9 ký tự", groups = OnUpdate.class)
     @Pattern(regexp = "\\d{9,15}", message = "Số CMND/CCCD chỉ được chứa chữ số", groups = OnUpdate.class)
-    @Column(name = "IndentityNumber", nullable = true, length = 15)
+    @Column(name = "IdentityNumber", nullable = true, length = 15)
     private String identityNumber;
 
     @NotBlank(message = "Quốc tịch không được để trống" , groups = OnUpdate.class)
     @Size(max = 15, message = "Quốc tịch tối đa 15 ký tự", groups = OnUpdate.class)
     @Size(min = 2, message = "Quốc tịch ít nhất 2 ký tự", groups = OnUpdate.class)
-    @Column(name = "Nationality", nullable = true, length = 15)
+    @Column(name = "Nationality", nullable = true, length = 15, columnDefinition = "NVARCHAR(50)")
     private String nationality;
 
     @Size(min = 0, max = 20, message = "Số BHYT tối đa 20 chữ số", groups = OnUpdate.class)
@@ -57,13 +56,22 @@ public class User {
     @JoinColumn(name = "AccountID", referencedColumnName = "Id")
     private Account account;
 
+    public User(String address, LocalDate dob, String identityNumber, String nationality, String insuranceNumber, Account account) {
+        this.address = address;
+        this.dob = dob;
+        this.identityNumber = identityNumber;
+        this.nationality = nationality;
+        this.insuranceNumber = insuranceNumber;
+        this.account = account;
+    }
+
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Report> reports;
 
-    @OneToMany(mappedBy = "user")
-    @JsonIgnore
-    private List<Reminder> reminders;
+//    @OneToMany(mappedBy = "user")
+//    @JsonIgnore
+//    private List<Reminder> reminders;
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -73,9 +81,10 @@ public class User {
     @JsonIgnore
     private List<ServiceReview> serviceReviews;
 
-    @OneToOne(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
-    private MedicalRecord medicalRecord;
+    private List<MedicalRecord> medicalRecords;
+
 //
 //    @OneToMany(mappedBy = "user")
 //    @JsonIgnore

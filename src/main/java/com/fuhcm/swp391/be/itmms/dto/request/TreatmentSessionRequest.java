@@ -7,9 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class TreatmentSessionRequest {
-    private LocalDate date;
     private String diagnosis;
     private String symptoms;
     private String notes;
-    private TreatmentSessionStatus status;
 }

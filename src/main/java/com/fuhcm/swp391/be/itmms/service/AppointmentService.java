@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import javassist.NotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,12 @@ public class AppointmentService {
     private ReminderService reminderService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -79,14 +86,14 @@ public class AppointmentService {
 
         Schedule schedule = scheduleService.findSchedule(doctor.getId(), workDate, shift.getId().intValue());
         Appointment appointment = buildAppointment(appointmentRequest, bookBy, doctor, schedule);
-
-
-        appointmentRepository.save(appointment);
+        appointment = appointmentRepository.save(appointment);
         // tạo reminder
-        reminderService.createRemindersForAppointment(appointment);
-        // gửi mail
+        reminderService.createReminders(appointment);
+        // gửi mail sau khi booking thành công
         EmailDetailReminder emailDetailReminder = reminderService.buildEmailDetail(appointment);
         emailService.sendAppointmentSuccess(emailDetailReminder);
+        // gửi noti khi booking thành công
+        notificationService.notifyUser(appointment.getUser(), "Bạn đã đặt lịch khám bệnh thành công");
         return appointment;
     }
 
@@ -197,6 +204,7 @@ public class AppointmentService {
         return responses;
     }
 
+
     public List<AppointmentResponse> getListAppointmentsForReport(@Valid @NotNull LocalDate fromDate, @Valid @NotNull LocalDate toDate) {
         if(fromDate.isAfter(toDate)){
             throw new IllegalArgumentException("fromDate is after toDate");
@@ -218,4 +226,42 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
         return new AppointmentResponse(appointment);
     }
+
+    public List<AppointmentResponse> searchAppointments(String keyword, LocalDate date, Long doctorId) throws NotFoundException {
+        List<Appointment> appointments = appointmentRepository.searchByKeywordDateAndDoctor(keyword, date, doctorId);
+        if (appointments.isEmpty()) {
+            throw new NotFoundException("Không có cuộc hẹn nào");
+        }
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
+                    response.setPatientName(appointment.getUser() != null ? appointment.getUser().getFullName() : null);
+                    response.setPhoneNumber(appointment.getUser() != null ? appointment.getUser().getPhoneNumber() : null);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
+                    response.setDob(appointment.getUser().getUser().getDob());
+                    response.setGender(appointment.getUser().getGender().name());
+                    response.setUserId(appointment.getUser().getId());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<AppointmentResponse> getAppointmentsBookedByUser() throws NotFoundException {
+        Long userId = authenticationService.getCurrentAccount().getId();
+        List<Appointment> appointments = appointmentRepository.findByUserIdOrderByTimeDescStartTimeDesc(userId);
+        if (appointments.isEmpty()) {
+            throw new NotFoundException("Bạn chưa có cuộc hẹn nào");
+        }
+        return appointments.stream()
+                .map(appointment -> {
+                    AppointmentResponse response = modelMapper.map(appointment, AppointmentResponse.class);
+                    response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
 }

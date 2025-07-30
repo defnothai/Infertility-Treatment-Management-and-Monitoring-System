@@ -1,13 +1,19 @@
 package com.fuhcm.swp391.be.itmms.components;
 
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
+import com.fuhcm.swp391.be.itmms.constant.ReminderType;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
+import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Reminder;
+import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
 import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentSession;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
+import com.fuhcm.swp391.be.itmms.repository.MedicalRecordRepository;
 import com.fuhcm.swp391.be.itmms.repository.ReminderRepository;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentSessionRepository;
+import com.fuhcm.swp391.be.itmms.service.EmailService;
+import com.fuhcm.swp391.be.itmms.service.NotificationService;
 import com.fuhcm.swp391.be.itmms.service.ReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,6 +35,12 @@ public class AppointmentStatusScheduler {
     private ReminderRepository reminderRepository;
     @Autowired
     private ReminderService reminderService;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
 
     @Scheduled(fixedRate = 600000)
     public void checkUnpaidAppointments(){
@@ -53,9 +65,12 @@ public class AppointmentStatusScheduler {
                 appointmentsToCancel.add(appointment);
                 if (appointment.getSession() != null) {
                     TreatmentSession session = appointment.getSession();
-                    session.setDiagnosis("Bệnh nhân hủy hẹn");
+                    session.setNotes("Bệnh nhân không đến khám");
                     session.setStatus(TreatmentSessionStatus.MISSED);
                     treatmentSessionRepository.save(session);
+                    MedicalRecord medicalRecord = session.getProgress().getPlan().getMedicalRecord();
+                    medicalRecord.setNumberOfMissed(medicalRecord.getNumberOfMissed() + 1);
+                    medicalRecordRepository.save(medicalRecord);
                 }
             }
         }
@@ -63,11 +78,21 @@ public class AppointmentStatusScheduler {
     }
 
     @Scheduled(cron = "0 */15 * * * *")
-    public void processReminders() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime in15Min = now.plusMinutes(15);
-        List<Reminder> reminders = reminderRepository.findByRemindDateBetweenAndIsSentFalse(now, in15Min);
-        reminders.forEach(reminderService::handleReminder);
+    public void sendReminders() {
+        List<Reminder> due = reminderRepository.findByRemindAtBeforeAndIsSentFalse(LocalDateTime.now());
+        for (Reminder r : due) {
+            Account user = r.getAppointment().getUser();
+            if (r.getType() == ReminderType.EMAIL) {
+                reminderService.handleEmailReminder(r);
+            }
+            if (r.getType() == ReminderType.WEB_NOTIFICATION) {
+                notificationService.notifyUser(user, r.getContent());
+            }
+            r.setSent(true);
+            r.setSentAt(LocalDateTime.now());
+            reminderRepository.save(r);
+        }
     }
+
 
 }

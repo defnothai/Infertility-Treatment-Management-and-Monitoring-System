@@ -37,6 +37,9 @@ public class MedicalRecord {
     @Column(name = "CreatedAt", nullable = false)
     private LocalDate createdAt;
 
+    @Column(name = "NumberOfMissed", nullable = false)
+    private int numberOfMissed = 0;   // max = 4
+
     @OneToMany(mappedBy = "medicalRecord")
     @JsonIgnore
     private List<MedicalRecordAccess> medicalRecordAccess;
@@ -45,8 +48,8 @@ public class MedicalRecord {
     @JsonIgnore
     private TreatmentPlan treatmentPlan;
 
-    @OneToOne
-    @JoinColumn(name = "PatientID", referencedColumnName = "Id")
+    @ManyToOne
+    @JoinColumn(name = "PatientID") // tên cột FK trong bảng MedicalRecord
     private User user;
 
     @OneToMany(mappedBy = "medicalRecord")
@@ -54,6 +57,5 @@ public class MedicalRecord {
 
     @OneToMany(mappedBy = "medicalRecord")
     private List<Ultrasound> ultrasounds;
-
 
 }

@@ -1,7 +1,9 @@
 package com.fuhcm.swp391.be.itmms.service;
 
+import com.fuhcm.swp391.be.itmms.constant.TreatmentPlanStatus;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentStageStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.TreatmentPlanRequest;
+import com.fuhcm.swp391.be.itmms.dto.request.TreatmentPlanUpdateRequest;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentPlanResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.TreatmentStageProgressResponse;
 import com.fuhcm.swp391.be.itmms.entity.medical.MedicalRecord;
@@ -11,6 +13,7 @@ import com.fuhcm.swp391.be.itmms.entity.treatment.TreatmentStageProgress;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentPlanRepository;
 import com.fuhcm.swp391.be.itmms.repository.TreatmentStageProgressRepository;
 import javassist.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TreatmentPlanService {
 
     private final TreatmentPlanRepository treatmentPlanRepository;
@@ -29,19 +33,6 @@ public class TreatmentPlanService {
     private final ServiceService serviceService;
     private final MedicalRecordService medicalRecordService;
     private final MedicalRecordAccessService medicalRecordAccessService;
-
-    public TreatmentPlanService(TreatmentPlanRepository treatmentPlanRepository,
-                                TreatmentStageProgressRepository treatmentStageProgressRepository,
-                                ModelMapper modelMapper,
-                                ServiceService serviceService,
-                                MedicalRecordService medicalRecordService, MedicalRecordAccessService medicalRecordAccessService) {
-        this.treatmentPlanRepository = treatmentPlanRepository;
-        this.treatmentStageProgressRepository = treatmentStageProgressRepository;
-        this.modelMapper = modelMapper;
-        this.serviceService = serviceService;
-        this.medicalRecordService = medicalRecordService;
-        this.medicalRecordAccessService = medicalRecordAccessService;
-    }
 
     public List<TreatmentPlanResponse> getByMedicalRecordId(Long medicalRecordId) {
         List<TreatmentPlan> plans = treatmentPlanRepository.findByMedicalRecord_Id(medicalRecordId);
@@ -77,6 +68,7 @@ public class TreatmentPlanService {
         plan.setMedicalRecord(medicalRecord);
         plan.setService(service);
         plan.setDayStart(LocalDate.now());
+        plan.setStatus(TreatmentPlanStatus.IN_PROGRESS);
 
         TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
 
@@ -99,41 +91,20 @@ public class TreatmentPlanService {
 
 
     @Transactional
-    public TreatmentPlanResponse updateTreatmentPlan(Long planId, TreatmentPlanRequest request) throws NotFoundException {
-        TreatmentPlan existingPlan = treatmentPlanRepository.findById(planId)
+    public TreatmentPlanResponse updateTreatmentPlan(Long planId, TreatmentPlanUpdateRequest request) throws NotFoundException {
+        TreatmentPlan plan = treatmentPlanRepository.findById(planId)
                 .orElseThrow(() -> new NotFoundException("Bạn chưa tạo phác đồ điều trị trước đó"));
-        MedicalRecord medicalRecord = medicalRecordService.findById(request.getMedicalRecordId());
+        MedicalRecord medicalRecord = plan.getMedicalRecord();
         if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
             throw new AccessDeniedException("Bạn không có quyền sử dụng tính năng này");
         }
+        plan.setDayEnd(LocalDate.now());
+        plan.setStatus(request.getStatus());
+        plan.setNotes(request.getNotes());
+        TreatmentPlan savedPlan = treatmentPlanRepository.save(plan);
+        return buildTreatmentPlanResponse(savedPlan, savedPlan.getTreatmentStageProgress());
 
-        com.fuhcm.swp391.be.itmms.entity.service.Service newService = serviceService.findById(request.getServiceId());
-        existingPlan.setService(newService);
-
-        for (TreatmentStageProgress progress : existingPlan.getTreatmentStageProgress()) {
-            progress.setActive(false);
-        }
-
-        List<TreatmentStageProgress> newProgresses = new ArrayList<>();
-        for (ServiceStage stage : newService.getStage()) {
-            TreatmentStageProgress progress = new TreatmentStageProgress();
-            progress.setPlan(existingPlan);
-            progress.setServiceStage(stage);
-            progress.setStatus(TreatmentStageStatus.NOT_STARTED);
-            progress.setActive(true);
-            progress.setNotes("");
-            newProgresses.add(progress);
-        }
-
-        List<TreatmentStageProgress> savedProgresses = treatmentStageProgressRepository.saveAll(newProgresses);
-
-        existingPlan.getTreatmentStageProgress().addAll(savedProgresses);
-
-        treatmentPlanRepository.save(existingPlan);
-
-        return buildTreatmentPlanResponse(existingPlan, savedProgresses);
     }
-
 
     private TreatmentPlanResponse buildTreatmentPlanResponse(TreatmentPlan plan, List<TreatmentStageProgress> progresses) {
         TreatmentPlanResponse response = modelMapper.map(plan, TreatmentPlanResponse.class);
@@ -145,7 +116,7 @@ public class TreatmentPlanService {
         }
 
         response.setTreatmentStageProgressResponses(progressResponses);
-        response.setDateStart(plan.getDayStart());
+        response.setDayStart(plan.getDayStart());
 
         return response;
     }
@@ -160,4 +131,5 @@ public class TreatmentPlanService {
         res.setStageName(progress.getServiceStage().getName());
         return res;
     }
+
 }
