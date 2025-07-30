@@ -28,7 +28,7 @@ public class LabTest {
     @Column(name = "Description", nullable = false, columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(name = "SampleType", nullable = false)
+    @Column(name = "SampleType", nullable = false, columnDefinition = "NVARCHAR(50)")
     private String sampleType;
 
     @Column(name = "EstimatedTime", nullable = false)

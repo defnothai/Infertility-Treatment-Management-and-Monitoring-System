@@ -25,7 +25,7 @@ public class Shift {
     @Column(name = "Id")
     private Long id;
 
-    @Column(name = "Name", nullable = false)
+    @Column(name = "Name", nullable = false, columnDefinition = "NVARCHAR(50)")
     private String name;
 
     @Column(name = "StartTime", nullable = false)
