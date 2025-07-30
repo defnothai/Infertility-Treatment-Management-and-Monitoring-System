@@ -4,6 +4,7 @@ import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
 import com.fuhcm.swp391.be.itmms.constant.EmploymentStatus;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Role;
+import com.fuhcm.swp391.be.itmms.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +32,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByCreatedAtBetween(LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
     List<Account> findAllByCreatedByOrderByCreatedAtDesc(Account currentStaff);
+
+    Account findByUser(User user);
 }

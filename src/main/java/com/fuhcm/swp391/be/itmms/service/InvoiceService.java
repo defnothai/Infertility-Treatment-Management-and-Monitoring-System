@@ -99,14 +99,12 @@ public class InvoiceService {
         if(account == null){
             throw new IllegalArgumentException("Doctor not found");
         }
-        Account owner = accountRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
-        Optional<User> user = userRepository.findByAccount(owner);
-        if(!user.isPresent()){
-            throw new IllegalArgumentException("User not found");
+        MedicalRecord record = medicalRecordRepository.findById(id).orElse(null);
+        if(record == null){
+            throw new IllegalArgumentException("Medical record not found");
         }
-        System.out.println(user.get().getId());
-        MedicalRecord record = medicalRecordRepository.findByUser(user.get());
+        User user = record.getUser();
+        Account owner = accountRepository.findByUser(user);
         TreatmentPlan plan = treatmentPlanRepository.findByMedicalRecord(record);
         List<TreatmentPlan> plans =  new ArrayList<>();
         plans.add(plan);
