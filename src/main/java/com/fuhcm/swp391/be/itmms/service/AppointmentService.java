@@ -96,7 +96,10 @@ public class AppointmentService {
         // tạo reminder
         reminderService.createReminders(appointment);
         // gửi mail sau khi booking thành công
-        Invoice invoice = invoiceRepository.findByOwner(bookBy);
+        Invoice invoice = invoiceRepository.findByOwnerAndDate(bookBy, LocalDate.now());
+        Account user = accountRepository.findByPhoneNumberContaining(appointment.getPhoneNumber()).getFirst();
+        invoice.setOwner(user);
+        invoiceRepository.save(invoice);
         String link = paymentService.createPaymentLink(invoice.getId());
         appointment.setNote(link);
         EmailDetailReminder emailDetailReminder = reminderService.buildEmailDetail(appointment);

@@ -6,8 +6,10 @@ import com.fuhcm.swp391.be.itmms.dto.response.EmailDetailReminder;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Reminder;
+import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.ReminderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +22,8 @@ public class ReminderService {
 
     private final ReminderRepository reminderRepository;
     private final EmailService emailService;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public void createReminders(Appointment a) {
         LocalDateTime start = LocalDateTime.of(a.getTime(), a.getStartTime());
@@ -39,7 +43,8 @@ public class ReminderService {
 
     public EmailDetailReminder buildEmailDetail(Appointment appointment) {
         EmailDetailReminder emailDetail = new EmailDetailReminder();
-        emailDetail.setRecipient(appointment.getUser().getEmail());
+        String email = accountRepository.findByPhoneNumberContaining(appointment.getPhoneNumber()).getFirst().getEmail();
+        emailDetail.setRecipient(email);
         emailDetail.setSubject("THÔNG BÁO LỊCH HẸN CỦA BẠN");
         emailDetail.setPatientName(appointment.getUser().getFullName());
         emailDetail.setAppointmentDate(appointment.getTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));

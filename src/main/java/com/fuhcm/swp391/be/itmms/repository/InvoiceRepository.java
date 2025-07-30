@@ -17,4 +17,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     List<Invoice> findByDateBetween(LocalDate dateAfter, LocalDate dateBefore);
 
     Invoice findByOwner(Account bookBy);
+
+    Invoice findByOwnerAndDate(Account bookBy, LocalDate now);
 }

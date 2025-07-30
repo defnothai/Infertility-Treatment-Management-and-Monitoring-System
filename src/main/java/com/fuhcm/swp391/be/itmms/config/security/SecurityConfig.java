@@ -82,7 +82,7 @@ public class SecurityConfig {
                         // USER role
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
-                        .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER", "STAFF")
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasAnyRole("MANAGER", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "api/user/appointments/available-doctors").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/appointments").hasRole("USER")

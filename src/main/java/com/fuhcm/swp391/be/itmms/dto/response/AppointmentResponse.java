@@ -42,7 +42,7 @@ public class AppointmentResponse {
         this.message = appointment.getMessage();
         this.gender = appointment.getGender() != null ? appointment.getGender().toString() : null;
         this.dob = appointment.getDob();
-        this.user = appointment.getUser().getId();
+        this.userId = appointment.getUser().getId();
     }
 
     public AppointmentResponse(Long id, LocalDate time,  LocalTime startTime, LocalTime endTime, AppointmentStatus status, String note, LocalDateTime createAt, String patientName, Long userId) {
