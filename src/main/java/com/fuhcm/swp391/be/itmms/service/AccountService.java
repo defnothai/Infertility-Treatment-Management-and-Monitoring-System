@@ -39,7 +39,6 @@ public class AccountService {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Autowired
     private AccountRepository accountRepo;
     @Autowired
@@ -79,8 +78,6 @@ public class AccountService {
     @Autowired
     private StaffRepository staffRepo;
 
-    @Autowired
-    private StaffRepository staffRepo;
 
 
     public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
@@ -290,27 +287,7 @@ public class AccountService {
         return  account;
     }
 
-        accountRepo.save(account);
-        if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
-            Doctor doctor = new Doctor();
-            doctor.setAccount(account);
-            doctor.setExpertise(request.getExpertise());
-            doctor.setPosition(request.getPosition());
-            doctor.setStatus(EmploymentStatus.ACTIVE);
-            doctor.setDescription(request.getDescription());
-             doctor.setSlug(request.getSlug());
-            doctor.setImgUrl(request.getImgUrl());
-            doctorRepo.save(doctor);
-        } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
-            Staff staff = new Staff();
-            staff.setAccount(account);
-            staff.setStatus(EmploymentStatus.ACTIVE);
-            staff.setStartDate(LocalDate.now());
-            staffRepo.save(staff);
-        }
 
-        return  account;
-    }
 
     public Set<AccountResponse> getAvailableDoctors() {
         LocalDate current = LocalDate.now().plusDays(1);
@@ -374,15 +351,6 @@ public class AccountService {
         return responses;
     }
 
-
-    public AccountBasic getInfoLogin(Authentication authentication) {
-        Account account = accountRepo.findByEmail(authentication.getName());
-        if(account == null){
-            throw new IllegalArgumentException("Account not found");
-        }
-        String role = account.getRoles().getFirst().getRoleName().toString();
-        return new AccountBasic(account.getFullName(), role);
-    }
 
     public List<AccountResponse> getListAccountsForReport(@Valid @NotNull LocalDate fromDate,
                                                           @Valid @NotNull LocalDate toDate) {
@@ -450,5 +418,6 @@ public boolean deleteAccount(Long id) {
 
 
 }
+
 
 

@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
 
-                        .requestMatchers("/api/accounts/login-info").permitAll()
+                        
                         .requestMatchers("/api/application").permitAll()
 
                                 .requestMatchers("/ws/**").permitAll()
@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/blogs/for-user").permitAll()
 
+                                .requestMatchers("/api/accounts/login-info").hasAnyRole("ADMIN", "MANAGER", "STAFF", "USER", "DOCTOR")
                         // USER role
                         .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")

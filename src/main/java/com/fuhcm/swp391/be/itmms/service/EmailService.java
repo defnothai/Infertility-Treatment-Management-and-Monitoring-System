@@ -131,6 +131,8 @@ public class EmailService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Gửi email thanh toán thất bại");
+        }
+    }
     @Async
     public void sendDirectPatientAccountEmail(EmailDetail emailDetail) {
         try {
