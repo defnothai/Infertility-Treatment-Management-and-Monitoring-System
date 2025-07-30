@@ -113,6 +113,26 @@ public class EmailService {
         }
     }
 
+
+    public void sendPaymentEmail(EmailDetail emailDetail) {
+        try {
+            Context context = new Context();
+            context.setVariable("customerName", emailDetail.getFullName());
+            context.setVariable("link", emailDetail.getSubject());
+            context.setVariable("amount", emailDetail.getLink());
+            String body = templateEngine.process("paymentEmail", context);
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+            helper.setFrom(BASE_EMAIL_ADDRESS);
+            helper.setTo(emailDetail.getRecipient());
+            helper.setSubject("Thanh toán dịch vụ");
+            helper.setText(body, true);
+            javaMailSender.send(mimeMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Gửi email thanh toán thất bại");
+        }
+    }
     @Async
     public void sendDirectPatientAccountEmail(EmailDetail emailDetail) {
         try {
@@ -157,6 +177,7 @@ public class EmailService {
             javaMailSender.send(messageHelper.getMimeMessage());
         } catch (Exception e) {
             throw new RuntimeException("Gửi mail thông báo cập nhật cuộc hẹn thất bại");
+
         }
     }
 

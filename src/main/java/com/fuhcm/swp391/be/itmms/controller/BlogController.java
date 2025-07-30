@@ -11,9 +11,11 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -42,6 +44,22 @@ public class BlogController {
     @GetMapping("/mine")
     public ResponseEntity getMinePosts(Authentication authentication) {
         List<BlogPostResponse> blogPostResponses = blogPostService.getMinePosts(authentication);
+        if(blogPostResponses.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseFormat<>(HttpStatus.NOT_FOUND.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy blog posts thất bại",
+                            null));
+        }
+        return ResponseEntity.ok(new ResponseFormat<>(HttpStatus.OK.value(),
+                "FETCH_DATA_SUCCESS",
+                "Lấy blog posts thành công",
+                blogPostResponses));
+    }
+
+    @GetMapping("/for-user")
+    public ResponseEntity getPostsForUser(){
+        List<BlogPostResponse> blogPostResponses = blogPostService.getBlogPostsForUsers();
         if(blogPostResponses.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseFormat<>(HttpStatus.NOT_FOUND.value(),

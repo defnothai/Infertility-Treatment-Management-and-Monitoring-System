@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 640px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        /* Header */
+        .header {
+            background-color: #0284c7;
+            color: #ffffff;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .hospital-logo {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .hospital-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Content */
+        .content {
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .payment-section .success-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .payment-section .success-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .payment-section .success-subtitle {
+            font-size: 16px;
+            color: #334155;
+        }
+
+        .payment-section a {
+            background-color: #3b82f6;
+            color: #ffffff !important;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 16px;
+        }
+
+        .payment-section a:hover {
+            background-color: #2563eb;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #e2e8f0;
+            padding: 24px;
+            text-align: center;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .footer .footer-hospital {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .footer .contact-info {
+            margin-bottom: 12px;
+        }
+
+        .footer .contact-item {
+            margin: 4px 0;
+        }
+
+        .footer .divider {
+            height: 1px;
+            background-color: #cbd5e1;
+            margin: 16px 0;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .content, .footer {
+                padding: 16px;
+            }
+
+            .payment-section .success-title {
+                font-size: 20px;
+            }
+
+            .payment-section .success-icon {
+                font-size: 36px;
+            }
+
+            .payment-section a {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+
+</head>
+<body>
+<div class="email-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="hospital-logo">🏥 MEDCARE</div>
+        <div class="hospital-name">Bệnh viện Đa khoa Thành Nhân</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <!-- Payment Section -->
+        <div class="payment-section">
+            <div class="success-icon">💳</div>
+            <h1 class="success-title">Thông báo thanh toán</h1>
+            <p class="success-subtitle">
+                Xin chào <strong th:text="${customerName}">bạn</strong>,<br />
+                Bạn có một khoản thanh toán cần được xử lý.
+            </p>
+            <p class="success-subtitle">
+                Số tiền cần thanh toán <strong th:text="${amount}"></strong>
+            </p>
+            <p style="margin-top: 16px">
+                Vui lòng nhấn vào nút bên dưới để hoàn tất thanh toán:
+            </p>
+            <div style="margin: 24px 0">
+                <a th:href="${link}" style="
+                    background-color: #3b82f6;
+                    color: white;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    display: inline-block;
+                ">👉 Thanh toán ngay</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-content">
+            <div class="footer-hospital">Bệnh viện Thành Nhân</div>
+            <div class="contact-info">
+                <div class="contact-item">
+                    📍 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh
+                </div>
+                <div class="contact-item">
+                    📞 Hotline: 1900-xxxx | ☎️ Tel: (028) 3xxx-xxxx
+                </div>
+                <div class="contact-item">
+                    ✉️ Email: support@medcare-hospital.com
+                </div>
+                <div class="contact-item">🌐 Website: www.medcare-hospital.com</div>
+            </div>
+            <div class="divider"></div>
+            <p style="font-size: 12px; color: #94a3b8">
+                © 2025 Bệnh viện Đa khoa Thành Nhân. Tất cả quyền được bảo lưu.<br />
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

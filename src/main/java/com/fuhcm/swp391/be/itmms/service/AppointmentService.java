@@ -86,9 +86,7 @@ public class AppointmentService {
 
         Schedule schedule = scheduleService.findSchedule(doctor.getId(), workDate, shift.getId().intValue());
         Appointment appointment = buildAppointment(appointmentRequest, bookBy, doctor, schedule);
-
         appointment = appointmentRepository.save(appointment);
-
         // tạo reminder
         reminderService.createReminders(appointment);
         // gửi mail sau khi booking thành công
@@ -164,6 +162,9 @@ public class AppointmentService {
 
     public List<AppointmentReportResponse> getAppointmentReport(@Valid @NotNull LocalDate fromDate,
                                                                 @Valid @NotNull LocalDate toDate) {
+        if(fromDate.isAfter(toDate)){
+            throw new IllegalArgumentException("fromDate is after toDate");
+        }
         List<AppointmentReportResponse> responses = new ArrayList<>();
         List<Appointment> appointments = appointmentRepository.findByTimeBetween(fromDate, toDate);
         System.out.println(appointments.size());
@@ -196,10 +197,34 @@ public class AppointmentService {
             response.setUnCheckin(unCheckin.size());
             response.setCheckin(checkin.size());
             response.setCancelled(cancelled.size());
+            response.setTotal(unPaid.size() + notPaid.size() + checkin.size() + cancelled.size());
             responses.add(response);
             current = current.plusDays(1);
         }
         return responses;
+    }
+
+
+    public List<AppointmentResponse> getListAppointmentsForReport(@Valid @NotNull LocalDate fromDate, @Valid @NotNull LocalDate toDate) {
+        if(fromDate.isAfter(toDate)){
+            throw new IllegalArgumentException("fromDate is after toDate");
+        }
+        List<Appointment> appointments = appointmentRepository.findByTimeBetween(fromDate, toDate);
+        List<AppointmentResponse> responses = new ArrayList<>();
+        for(Appointment appointment : appointments){
+            responses.add(new AppointmentResponse(appointment));
+        }
+        return responses;
+    }
+
+    public AppointmentResponse updateAppointmentStatus(@Valid @NotNull Long id) {
+        Appointment appointment = appointmentRepository.findById(id).orElse(null);
+        if(appointment == null){
+            throw new IllegalArgumentException("appointment not found");
+        }
+        appointment.setStatus(AppointmentStatus.CHECKED_IN);
+        appointmentRepository.save(appointment);
+        return new AppointmentResponse(appointment);
     }
 
     public List<AppointmentResponse> searchAppointments(String keyword, LocalDate date, Long doctorId) throws NotFoundException {

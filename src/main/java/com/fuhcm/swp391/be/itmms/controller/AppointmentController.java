@@ -41,12 +41,20 @@ public class AppointmentController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<?>> createAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest, Authentication authentication) {
+    public ResponseEntity<?> createAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest, Authentication authentication) {
         Appointment appointment = appointmentService.createNewAppointment(appointmentRequest, authentication);
         if(appointment == null){
-            return ResponseEntity.ok(new ApiResponse<>(true, "Tạo appointment không thành công", null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseFormat<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "CREATE_APPOINTMENT_FAILED",
+                            "Tạo appointment thất bại",
+                            null));
         }
-        return ResponseEntity.ok(new ApiResponse<>(true, "Tạo appointment thành công", null));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseFormat<>(HttpStatus.CREATED.value(),
+                        "CREATE_APPOINTMENT_SUCCESS",
+                        "Tạo appointment thành công",
+                        null));
     }
 
     @PutMapping("/confirm-appointment")
@@ -85,7 +93,7 @@ public class AppointmentController {
     public ResponseEntity<?> getAppointmentReport(@Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
                                                   @Valid @RequestParam("toDate") @NotNull LocalDate toDate) throws NotFoundException {
         List<AppointmentReportResponse> response = appointmentService.getAppointmentReport(fromDate, toDate);
-        if(response == null){
+        if(response.isEmpty()){
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
                             "FETCH_DATA_FAIL",
@@ -99,6 +107,43 @@ public class AppointmentController {
                         response));
     }
 
+    @GetMapping("/report/list-appointments")
+    public ResponseEntity<?> getListAppointmentsForReport(
+            @Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
+            @Valid @RequestParam("toDate") @NotNull LocalDate toDate
+    ){
+        List<AppointmentResponse> responses = appointmentService.getListAppointmentsForReport(fromDate, toDate);
+        if(responses.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy danh sách tài khoản thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách tài khoản thành công",
+                        responses));
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PutMapping("/update-status")
+    public ResponseEntity<?> updateAppointmentStatus(@Valid @RequestParam("id") @NotNull Long id){
+        AppointmentResponse response = appointmentService.updateAppointmentStatus(id);
+        if(response == null){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseFormat<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "FETCH_DATA_FAIL",
+                            "Cập nhật appointment thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Cập nhật appointment thành công",
+                        response));
+    }
     // danh sách lịch hẹn cho staff
     @GetMapping("/staff/filter-appointment")
     public ResponseEntity searchAppointments(
@@ -145,7 +190,6 @@ public class AppointmentController {
                         "Lấy danh sách cuộc hẹn thành công",
                         response));
     }
-
 
 
 }

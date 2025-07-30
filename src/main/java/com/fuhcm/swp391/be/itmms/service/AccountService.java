@@ -39,7 +39,6 @@ public class AccountService {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     @Autowired
     private AccountRepository accountRepo;
     @Autowired
@@ -78,6 +77,7 @@ public class AccountService {
 
     @Autowired
     private StaffRepository staffRepo;
+
 
 
     public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
@@ -265,28 +265,29 @@ public class AccountService {
         account.setStatus(request.getStatus());
         account.setCreatedBy(createdBy);
         account.setRoles(Collections.singletonList(role));
-
-        accountRepo.save(account);
-        if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
-            Doctor doctor = new Doctor();
-            doctor.setAccount(account);
-            doctor.setExpertise(request.getExpertise());
-            doctor.setPosition(request.getPosition());
-            doctor.setStatus(EmploymentStatus.ACTIVE);
-            doctor.setDescription(request.getDescription());
-             doctor.setSlug(request.getSlug());
-            doctor.setImgUrl(request.getImgUrl());
-            doctorRepo.save(doctor);
-        } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
-            Staff staff = new Staff();
-            staff.setAccount(account);
-            staff.setStatus(EmploymentStatus.ACTIVE);
-            staff.setStartDate(LocalDate.now());
-            staffRepo.save(staff);
-        }
+         accountRepo.save(account);
+         if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
+             Doctor doctor = new Doctor();
+             doctor.setAccount(account);
+             doctor.setExpertise(request.getExpertise());
+             doctor.setPosition(request.getPosition());
+             doctor.setStatus(EmploymentStatus.ACTIVE);
+             doctor.setDescription(request.getDescription());
+//             doctor.setSlug(request.getSlug());
+             doctor.setImgUrl(request.getImgUrl());
+             doctorRepo.save(doctor);
+         } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
+             Staff staff = new Staff();
+             staff.setAccount(account);
+             staff.setStatus(EmploymentStatus.ACTIVE);
+             staff.setStartDate(LocalDate.now());
+             staffRepo.save(staff);
+         }
 
         return  account;
     }
+
+
 
     public Set<AccountResponse> getAvailableDoctors() {
         LocalDate current = LocalDate.now().plusDays(1);
@@ -350,6 +351,16 @@ public class AccountService {
         return responses;
     }
 
+
+    public List<AccountResponse> getListAccountsForReport(@Valid @NotNull LocalDate fromDate,
+                                                          @Valid @NotNull LocalDate toDate) {
+        List<AccountResponse> responses = new ArrayList<>();
+        List<Account> accounts = accountRepo.findByCreatedAtBetween(fromDate.atStartOfDay(), toDate.atStartOfDay().plusDays(1));
+        for(Account account : accounts){
+            responses.add(new AccountResponse(account));
+        }
+        return responses;
+    }
     public ProfileResponse updateUserProfile(ProfileUpdateRequest request) {
         Account account = authenticationService.getCurrentAccount();
         account.setFullName(request.getFullName());
@@ -407,5 +418,6 @@ public boolean deleteAccount(Long id) {
 
 
 }
+
 
 
