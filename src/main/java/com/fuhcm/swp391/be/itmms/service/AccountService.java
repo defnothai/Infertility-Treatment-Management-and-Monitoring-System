@@ -100,7 +100,7 @@ public class AccountService {
         emailDetail.setSubject("CHÀO MỪNG BẠN ĐẾN VỚI BỆNH VIỆN THÀNH NHÂN");
         emailDetail.setFullName(account.getFullName());
         emailDetail.setPassword(request.getPassword());
-        emailDetail.setLink("localhost:3000");
+        emailDetail.setLink("localhost:3000/dang-nhap");
         emailService.sendDirectPatientAccountEmail(emailDetail);
         //
         DirectPatientDTO dto = new DirectPatientDTO();
