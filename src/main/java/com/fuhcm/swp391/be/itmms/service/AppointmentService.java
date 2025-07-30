@@ -12,8 +12,10 @@ import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.Shift;
+import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.repository.AccountRepository;
 import com.fuhcm.swp391.be.itmms.repository.AppointmentRepository;
+import com.fuhcm.swp391.be.itmms.repository.InvoiceRepository;
 import com.fuhcm.swp391.be.itmms.validation.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -66,6 +68,10 @@ public class AppointmentService {
     private ModelMapper modelMapper;
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+    @Autowired
+    private PaymentService paymentService;
 
     public Appointment createNewAppointment(AppointmentRequest appointmentRequest,
                                             Authentication authentication) {
@@ -90,6 +96,9 @@ public class AppointmentService {
         // tạo reminder
         reminderService.createReminders(appointment);
         // gửi mail sau khi booking thành công
+        Invoice invoice = invoiceRepository.findByOwner(bookBy);
+        String link = paymentService.createPaymentLink(invoice.getId());
+        appointment.setNote(link);
         EmailDetailReminder emailDetailReminder = reminderService.buildEmailDetail(appointment);
         emailService.sendAppointmentSuccess(emailDetailReminder);
         // gửi noti khi booking thành công
