@@ -35,6 +35,10 @@ public class TreatmentStageProgressService {
     public TreatmentStageProgressResponse update(Long id, TreatmentStageProgressRequest request) throws NotFoundException {
         TreatmentStageProgress progress = treatmentStageProgressRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Giai đoạn của phác đồ không tồn tại"));
+        TreatmentPlan existPlan = progress.getPlan();
+        if (existPlan.getStatus() == TreatmentPlanStatus.COMPLETED || existPlan.getStatus() == TreatmentPlanStatus.CANCELLED) {
+            throw new RuntimeException("Không thể cập nhật khi phác đồ đã hủy hoặc đã hoàn thành");
+        }
         // còn session chưa hoàn thành thì không cho hoàn tất
         boolean hasPendingSession = progress.getSessions()
                 .stream()

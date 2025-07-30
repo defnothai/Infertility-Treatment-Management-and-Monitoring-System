@@ -7,6 +7,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.*;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Schedule;
 import com.fuhcm.swp391.be.itmms.entity.ScheduleTemplate;
+import com.fuhcm.swp391.be.itmms.service.AuthenticationService;
 import com.fuhcm.swp391.be.itmms.service.ScheduleService;
 import com.fuhcm.swp391.be.itmms.service.ScheduleTemplateService;
 import jakarta.validation.Valid;
@@ -35,6 +36,8 @@ public class ScheduleController {
 
     @Autowired
     private ScheduleService scheduleService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
 //    @PostMapping("/generate/staff")
 //    public ResponseEntity<?> generateStaffSchedules(@RequestBody ScheduleRequest request,
@@ -96,6 +99,18 @@ public class ScheduleController {
             return ResponseEntity.ok(new ApiResponse<>(true, "Không còn lịch trống", null));
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách thành công", availableDates));
+    }
+
+    //***
+    @GetMapping("/my-free-slot")
+    public ResponseEntity<ApiResponse<?>> getMyAvailableSlots(
+            @Valid @RequestParam("date") LocalDate date) {
+        Long doctorId = authenticationService.getCurrentAccount().getId();
+        List<LocalTime> availableSlots = scheduleService.getAvailableSlots(doctorId, date);
+        if(availableSlots.isEmpty()){
+            return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách slot không thành công", null));
+        }
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách slot thành công", availableSlots));
     }
 
     @GetMapping("/slots")

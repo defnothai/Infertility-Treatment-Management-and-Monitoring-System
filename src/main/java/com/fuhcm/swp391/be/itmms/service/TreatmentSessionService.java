@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.AppointmentStatus;
+import com.fuhcm.swp391.be.itmms.constant.TreatmentPlanStatus;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentSessionStatus;
 import com.fuhcm.swp391.be.itmms.constant.TreatmentStageStatus;
 import com.fuhcm.swp391.be.itmms.dto.request.FollowUpDTO;
@@ -63,6 +64,10 @@ public class TreatmentSessionService {
                     throws NotFoundException {
         TreatmentStageProgress progress = progressRepository.findById(progressId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy giai đoạn của phác đồ"));
+        TreatmentPlan existPlan = progress.getPlan();
+        if (existPlan.getStatus() == TreatmentPlanStatus.COMPLETED || existPlan.getStatus() == TreatmentPlanStatus.CANCELLED) {
+            throw new RuntimeException("Không thể tạo hẹn khám khi phác đồ đã hủy hoặc đã hoàn thành");
+        }
         MedicalRecord medicalRecord = progress.getPlan().getMedicalRecord();
         if (medicalRecord != null && !medicalRecordAccessService.canCreate(medicalRecord)) {
             throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
@@ -142,6 +147,12 @@ public class TreatmentSessionService {
         TreatmentSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy buổi khám"));
 
+        TreatmentPlan existPlan = session.getProgress().getPlan();
+
+        if (existPlan.getStatus() == TreatmentPlanStatus.COMPLETED || existPlan.getStatus() == TreatmentPlanStatus.CANCELLED) {
+            throw new RuntimeException("Không thể cập nhật khi phác đồ đã hủy hoặc đã hoàn thành");
+        }
+
         if (!session.isActive() || session.getStatus() != TreatmentSessionStatus.PENDING) {
             throw new IllegalStateException("Buổi khám đã bị hủy hoặc kết thúc, không thể chỉnh sửa");
         }
@@ -213,6 +224,12 @@ public class TreatmentSessionService {
     public TreatmentSessionResponse update(Long sessionId, TreatmentSessionRequest request) throws NotFoundException {
         TreatmentSession session = sessionRepository.findByIdAndIsActiveTrue(sessionId)
                 .orElseThrow(() -> new NotFoundException("Buổi khám không tồn tại"));
+
+        TreatmentPlan existPlan = session.getProgress().getPlan();
+
+        if (existPlan.getStatus() == TreatmentPlanStatus.COMPLETED || existPlan.getStatus() == TreatmentPlanStatus.CANCELLED) {
+            throw new RuntimeException("Không thể cập nhật khi phác đồ đã hủy hoặc đã hoàn thành");
+        }
         MedicalRecord medicalRecord = session.getProgress().getPlan().getMedicalRecord();
         if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
             throw new AccessDeniedException("Bạn không thể sử dụng tính năng này");
