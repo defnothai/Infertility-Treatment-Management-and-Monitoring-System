@@ -76,6 +76,9 @@ public class AccountService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private StaffRepository staffRepo;
+
 
     public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
         Account staff = authenticationService.getCurrentAccount();
@@ -262,15 +265,27 @@ public class AccountService {
         account.setStatus(request.getStatus());
         account.setCreatedBy(createdBy);
         account.setRoles(Collections.singletonList(role));
-        return accountRepo.save(account);
-    }
 
-    public boolean deleteAccount(Long id) {
-        Account account =  accountRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Account not found"));
-        if(account == null) return false;
-        account.setStatus(AccountStatus.DELETED);
         accountRepo.save(account);
-        return true;
+        if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
+            Doctor doctor = new Doctor();
+            doctor.setAccount(account);
+            doctor.setExpertise(request.getExpertise());
+            doctor.setPosition(request.getPosition());
+            doctor.setStatus(EmploymentStatus.ACTIVE);
+            doctor.setDescription(request.getDescription());
+             doctor.setSlug(request.getSlug());
+            doctor.setImgUrl(request.getImgUrl());
+            doctorRepo.save(doctor);
+        } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
+            Staff staff = new Staff();
+            staff.setAccount(account);
+            staff.setStatus(EmploymentStatus.ACTIVE);
+            staff.setStartDate(LocalDate.now());
+            staffRepo.save(staff);
+        }
+
+        return  account;
     }
 
     public Set<AccountResponse> getAvailableDoctors() {
@@ -364,6 +379,32 @@ public class AccountService {
                 user.getAddress()
         );
     }
+
+//    như thêm
+public boolean deleteAccount(Long id) {
+    Optional<Account> accountOptional = accountRepo.findById(id);
+    if (accountOptional.isEmpty()) {
+        return false;
+    }
+
+    Account account = accountOptional.get();
+    // Gán trạng thái DELETED thay vì xóa cứng
+    account.setStatus(AccountStatus.DELETED);
+
+    accountRepo.save(account);
+    return true;
+}
+
+    public AccountBasic getInfoLogin(Authentication authentication) {
+        Account account = accountRepo.findByEmail(authentication.getName());
+        if(account == null){
+            throw new IllegalArgumentException("Account not found");
+        }
+        String role = account.getRoles().getFirst().getRoleName().toString();
+        return new AccountBasic(account.getFullName(), role);
+    }
+
+
 
 }
 

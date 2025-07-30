@@ -78,4 +78,14 @@ public class AuthenticationController {
 
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authenticationService.changePassword(request);
+        return ResponseEntity.ok
+                (new ResponseFormat<>(HttpStatus.OK.value(),
+                        "CHANGE_PASSWORD_SUCCESS",
+                        "Đổi mật khẩu thành công",
+                        null));
+    }
+
 }

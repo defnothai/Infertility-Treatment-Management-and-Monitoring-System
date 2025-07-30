@@ -10,8 +10,8 @@ import java.util.List;
 public class TreatmentPlanResponse {
 
     private Long id;
-    private LocalDate dateStart;
-    private LocalDate dateEnd;
+    private LocalDate dayStart;
+    private LocalDate dayEnd;
     private TreatmentPlanStatus status;
     private String serviceName;
     private String notes;

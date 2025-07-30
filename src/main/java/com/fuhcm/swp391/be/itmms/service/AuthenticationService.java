@@ -3,6 +3,7 @@ package com.fuhcm.swp391.be.itmms.service;
 import com.fuhcm.swp391.be.itmms.config.ModelMapperConfig;
 import com.fuhcm.swp391.be.itmms.constant.AccountRole;
 import com.fuhcm.swp391.be.itmms.constant.AccountStatus;
+import com.fuhcm.swp391.be.itmms.dto.request.ChangePasswordRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.LoginRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.RegisterRequest;
 import com.fuhcm.swp391.be.itmms.dto.request.ResetPasswordRequest;
@@ -245,6 +246,18 @@ public class AuthenticationService {
         String token = resetPasswordRequest.getToken();
         Account account = jwtService.extractAccount(token);
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+        authenticationRepository.save(account);
+    }
+
+    public void changePassword(ChangePasswordRequest request) {
+        Account account = this.getCurrentAccount();
+        if (!passwordEncoder.matches(request.getOldPassword(), account.getPassword())) {
+            throw new AuthenticationException("Mật khẩu cũ sai. Vui lòng nhập lại");
+        }
+        if (!isValidConfirmPassword(request.getNewPassword(), request.getConfirmPassword())) {
+            throw new ConfirmPasswordNotMatchException("Mật khẩu mới và xác nhận mật khẩu không khớp");
+        }
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
         authenticationRepository.save(account);
     }
 }
