@@ -48,6 +48,15 @@ public class ServiceStageController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("api/manage/services/{serviceId}/service-stage")
+    public ResponseEntity getServiceDetails(@PathVariable("serviceId") Long serviceId) throws NotFoundException {
+        return ResponseEntity.ok(
+                new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_SUCCESS",
+                        "Lấy dữ liệu thành công",
+                        serviceStageService.getAllServiceStages(serviceId))
+        );
+    }
 
 
 
