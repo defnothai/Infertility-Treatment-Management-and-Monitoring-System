@@ -215,6 +215,7 @@ public class AppointmentService {
                     response.setDoctorName(appointment.getDoctor().getFullName() + " - " + appointment.getDoctor().getDoctor().getPosition());
                     response.setDob(appointment.getUser().getUser().getDob());
                     response.setGender(appointment.getUser().getGender().name());
+                    response.setUserId(appointment.getUser().getId());
                     return response;
                 })
                 .collect(Collectors.toList());

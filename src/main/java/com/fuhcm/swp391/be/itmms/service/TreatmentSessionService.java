@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,7 @@ public class TreatmentSessionService {
     private final ReminderService reminderService;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final ReminderRepository reminderRepository;
 
     public List<TreatmentSessionResponse> getByProgressId(Long progressId) throws NotFoundException {
         List<TreatmentSession> sessions = treatmentSessionRepository.findByProgress_IdAndIsActive(progressId, true);
@@ -145,6 +149,7 @@ public class TreatmentSessionService {
         TreatmentStageProgress progress = session.getProgress();
         MedicalRecord medicalRecord = progress.getPlan().getMedicalRecord();
 
+
         if (medicalRecord != null && !medicalRecordAccessService.canUpdate(medicalRecord)) {
             throw new AccessDeniedException("Bạn không thể chỉnh sửa buổi khám này");
         }
@@ -155,6 +160,10 @@ public class TreatmentSessionService {
         Appointment appointment = appointmentRepository.findBySessionId(session.getId())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy cuộc hẹn tương ứng"));
 
+        LocalDate oldDate = appointment.getTime();
+        LocalTime oldTime = appointment.getStartTime();
+
+        //
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime appointmentDateTime = LocalDateTime.of(appointment.getTime(), appointment.getStartTime());
         Duration timeToAppointment = Duration.between(now, appointmentDateTime);
@@ -173,7 +182,30 @@ public class TreatmentSessionService {
         appointment.setSchedule(schedule);
         appointment.setMessage(request.getMessage());
         appointment.setNote(request.getAppointmentNote());
-        appointmentRepository.save(appointment);
+        appointment = appointmentRepository.save(appointment);
+        // remove reminder
+        List<Reminder> reminders = reminderRepository.findByAppointment_Id(appointment.getId());
+        if (!reminders.isEmpty()) {
+            reminderRepository.deleteAll(reminders);
+        }
+        Account userAccount = medicalRecord.getUser().getAccount();
+        // add reminder
+        reminderService.createReminders(appointment);
+        // gui mail thong bao
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setFullName(appointment.getUser().getFullName());
+        emailDetail.setNote(appointment.getNote() != null ? appointment.getNote() : "");
+        emailDetail.setMessage(appointment.getMessage() != null ? appointment.getMessage() : "");
+        emailDetail.setOldDate(oldDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        emailDetail.setOldTime(oldTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+        emailDetail.setNewDate(appointment.getTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        emailDetail.setNewTime(appointment.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+        emailDetail.setDoctorName(appointment.getDoctor().getFullName());
+        emailDetail.setRecipient(userAccount.getEmail());
+        emailDetail.setSubject("CẬP NHẬT CUỘC HẸN BUỔI KHÁM");
+        emailService.sendUpdateAppointment(emailDetail);
+        // gui noti thong bao
+        notificationService.notifyUser(userAccount, "Bác sĩ đã cập nhật lịch hẹn của bạn sang ngày " + appointment.getTime() + " lúc " + appointment.getStartTime());
         return modelMapper.map(updated, TreatmentSessionResponse.class);
     }
 

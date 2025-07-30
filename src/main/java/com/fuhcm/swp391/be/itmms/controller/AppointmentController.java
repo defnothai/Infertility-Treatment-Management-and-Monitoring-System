@@ -6,6 +6,7 @@ import com.fuhcm.swp391.be.itmms.dto.response.AppointmentResponse;
 import com.fuhcm.swp391.be.itmms.dto.response.ResponseFormat;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
 import com.fuhcm.swp391.be.itmms.service.AppointmentService;
+import com.fuhcm.swp391.be.itmms.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,8 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @GetMapping()
     public ResponseEntity<ApiResponse<?>> getAppointmentsByDoctorId(@Valid Authentication authentication) {
@@ -121,9 +124,28 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseFormat<>(HttpStatus.OK.value(),
                         "FETCH_DATA_SUCCESS",
-                        "Lấy danh sách cuộc hẹn thành công thành công",
+                        "Lấy danh sách cuộc hẹn thành công",
                         response));
     }
+
+    // danh sách lịch hẹn cho doctor
+    @GetMapping("/doctor/filter-appointment")
+    public ResponseEntity searchAppointments(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) throws NotFoundException {
+        if (keyword == null || keyword.trim().isEmpty() ) {
+            keyword = "";
+        }
+        Long doctorId = authenticationService.getCurrentAccount().getId();
+        List<AppointmentResponse> response = appointmentService.searchAppointments(keyword, date, doctorId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy danh sách cuộc hẹn thành công",
+                        response));
+    }
+
 
 
 }

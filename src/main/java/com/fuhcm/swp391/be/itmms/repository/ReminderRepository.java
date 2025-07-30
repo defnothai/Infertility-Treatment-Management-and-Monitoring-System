@@ -15,4 +15,6 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
     List<Reminder> findByRemindAtBetweenAndIsSentFalse(LocalDateTime from, LocalDateTime to);
 
     List<Reminder> findByRemindAtBeforeAndIsSentFalse(LocalDateTime now);
+
+    List<Reminder> findByAppointment_Id(Long id);
 }

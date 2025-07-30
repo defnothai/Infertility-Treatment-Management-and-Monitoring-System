@@ -116,7 +116,7 @@ public class TreatmentPlanService {
         }
 
         response.setTreatmentStageProgressResponses(progressResponses);
-        response.setDateStart(plan.getDayStart());
+        response.setDayStart(plan.getDayStart());
 
         return response;
     }
