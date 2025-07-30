@@ -39,6 +39,7 @@ public class Invoice {
     private double finalAmount;
 
     @Column(name = "Status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
 
     @Column(name = "Notes", nullable = true)

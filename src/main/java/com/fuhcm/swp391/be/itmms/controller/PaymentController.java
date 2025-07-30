@@ -2,6 +2,7 @@ package com.fuhcm.swp391.be.itmms.controller;
 
 import com.fuhcm.swp391.be.itmms.dto.PaymentDTO;
 import com.fuhcm.swp391.be.itmms.dto.response.ApiResponse;
+import com.fuhcm.swp391.be.itmms.entity.invoice.Invoice;
 import com.fuhcm.swp391.be.itmms.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,12 +29,15 @@ public class PaymentController {
     }
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<ApiResponse<?>> payCallbackHandler(@RequestParam("vnp_ResponseCode") String responseCode,
-                                                             @RequestParam("vnp_TxnRef") String txnRef,
-                                                             @RequestParam("vnp_ResponseMessage") String message) {
-        PaymentDTO paymentDTO = paymentService.vnPayCallback(responseCode, txnRef, message);
+                                                             @RequestParam("vnp_TxnRef") String txnRef) {
+        PaymentDTO paymentDTO = paymentService.vnPayCallback(responseCode, txnRef);
         if(paymentDTO == null) {
-            return ResponseEntity.ok(new ApiResponse<>(false, paymentDTO.getMessage(), null));
+            return ResponseEntity.ok(new ApiResponse<>(false, null, null));
         }
-        return ResponseEntity.ok(new ApiResponse<>(true, paymentDTO.getMessage(), paymentDTO));
+        return ResponseEntity.ok(new ApiResponse<>(true, null, paymentDTO));
+    }
+
+    public String createPaymentLink(Long id) {
+        return paymentService.createPaymentLink(id);
     }
 }

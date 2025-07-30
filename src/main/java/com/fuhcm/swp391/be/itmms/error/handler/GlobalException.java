@@ -101,4 +101,13 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseFormat<Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ResponseFormat<Object> res = new ResponseFormat<>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setMessage(ex.getMessage());
+        res.setError(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res); // HTTP 400
+    }
+
 }

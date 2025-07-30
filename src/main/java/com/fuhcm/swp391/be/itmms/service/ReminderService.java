@@ -1,6 +1,7 @@
 package com.fuhcm.swp391.be.itmms.service;
 
 import com.fuhcm.swp391.be.itmms.constant.ReminderType;
+import com.fuhcm.swp391.be.itmms.dto.response.EmailDetail;
 import com.fuhcm.swp391.be.itmms.dto.response.EmailDetailReminder;
 import com.fuhcm.swp391.be.itmms.entity.Account;
 import com.fuhcm.swp391.be.itmms.entity.Appointment;
@@ -67,7 +68,14 @@ public class ReminderService {
         return emailDetail;
     }
 
-
+    public EmailDetail buildEmailForPayment(String link, String email, String fullName, double amount) {
+        EmailDetail emailDetail = new EmailDetail();
+        emailDetail.setRecipient(email);
+        emailDetail.setSubject(link);
+        emailDetail.setFullName(fullName);
+        emailDetail.setLink(amount + "");
+        return emailDetail;
+    }
 
 
 

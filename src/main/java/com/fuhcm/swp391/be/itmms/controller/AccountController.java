@@ -123,4 +123,43 @@ public class AccountController {
                         response));
     }
 
+
+    @GetMapping("api/accounts/login-info")
+    public ResponseEntity getInfoLogin(Authentication authentication) throws NotFoundException {
+        AccountBasic response = accountService.getInfoLogin(authentication);
+        if(response == null){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy information thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy information thành công",
+                        response));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/api/accounts/accounts-report")
+    public ResponseEntity<?> getListAccountsForReport(
+            @Valid @RequestParam("fromDate") @NotNull LocalDate fromDate,
+            @Valid @RequestParam("toDate") @NotNull LocalDate toDate
+    ){
+        List<AccountResponse> responses = accountService.getListAccountsForReport(fromDate, toDate);
+        if(responses == null){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new ResponseFormat<>(HttpStatus.NO_CONTENT.value(),
+                            "FETCH_DATA_FAIL",
+                            "Lấy information thất bại",
+                            null));
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseFormat<>(HttpStatus.OK.value(),
+                        "FETCH_DATA_SUCCESS",
+                        "Lấy information thành công",
+                        responses));
+    }
+
 }

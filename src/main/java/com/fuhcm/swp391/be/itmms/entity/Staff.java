@@ -31,5 +31,4 @@ public class Staff {
 
     @Column(name = "StartDate")
     private LocalDate startDate;
-
 }

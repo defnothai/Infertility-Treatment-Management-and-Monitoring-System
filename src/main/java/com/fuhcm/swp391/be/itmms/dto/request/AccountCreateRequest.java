@@ -32,4 +32,12 @@ public class AccountCreateRequest {
 
     @NotNull(message = "Role không được để trống")
     private AccountRole roles;
+
+    private String expertise;
+
+    private String position;
+
+    private String description;
+
+    private String imgUrl;
 }
