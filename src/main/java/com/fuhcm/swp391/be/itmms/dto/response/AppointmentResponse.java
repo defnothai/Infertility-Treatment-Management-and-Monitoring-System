@@ -18,9 +18,9 @@ public class AppointmentResponse {
     private LocalDate time;
     private LocalTime startTime;
     private LocalTime endTime;
-    private AppointmentStatus status;
+    private String status;
     private String note;
-    private LocalDateTime createAt;
+    private LocalDate createAt;
     private String patientName;
     private String phoneNumber;
     private String message;
@@ -30,10 +30,19 @@ public class AppointmentResponse {
     private String doctorName;
 
     public AppointmentResponse(Appointment appointment) {
+        this.id = appointment.getId();
+        this.time = appointment.getTime();
+        this.startTime = appointment.getStartTime();
+        this.endTime = appointment.getEndTime();
+        this.status = appointment.getStatus().name();
+        this.note = appointment.getNote();
+        this.createAt = appointment.getCreateAt().toLocalDate();
         this.patientName = appointment.getPatientName();
         this.phoneNumber = appointment.getPhoneNumber();
+        this.message = appointment.getMessage();
         this.gender = appointment.getGender() != null ? appointment.getGender().toString() : null;
         this.dob = appointment.getDob();
+        this.user = appointment.getUser().getId();
     }
 
     public AppointmentResponse(Long id, LocalDate time,  LocalTime startTime, LocalTime endTime, AppointmentStatus status, String note, LocalDateTime createAt, String patientName, Long userId) {
@@ -41,9 +50,9 @@ public class AppointmentResponse {
         this.time = time;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = status;
+        this.status = status.name();
         this.note = note;
-        this.createAt = createAt;
+        this.createAt = createAt.toLocalDate();
         this.patientName = patientName;
         this.userId = userId;
     }

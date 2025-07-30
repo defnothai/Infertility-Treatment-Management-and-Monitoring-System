@@ -95,4 +95,13 @@ public class BlogPostService {
         }
         return blogPostResponses;
     }
+
+    public List<BlogPostResponse> getBlogPostsForUsers() {
+        List<BlogPostResponse> blogPostResponses = new ArrayList<>();
+        List<BlogPost> blogPosts = blogPostRepository.findByStatus(BlogStatus.APPROVED);
+        for (BlogPost blogPost : blogPosts) {
+            blogPostResponses.add(new BlogPostResponse(blogPost));
+        }
+        return blogPostResponses;
+    }
 }

@@ -40,5 +40,7 @@ public class AccountCreateRequest {
     private String description;
 
     private String imgUrl;
+
     private String slug;
+
 }

@@ -79,6 +79,9 @@ public class AccountService {
     @Autowired
     private StaffRepository staffRepo;
 
+    @Autowired
+    private StaffRepository staffRepo;
+
 
     public DirectPatientDTO createDirectPatient(DirectPatientDTO request) {
         Account staff = authenticationService.getCurrentAccount();
@@ -265,6 +268,27 @@ public class AccountService {
         account.setStatus(request.getStatus());
         account.setCreatedBy(createdBy);
         account.setRoles(Collections.singletonList(role));
+         accountRepo.save(account);
+         if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
+             Doctor doctor = new Doctor();
+             doctor.setAccount(account);
+             doctor.setExpertise(request.getExpertise());
+             doctor.setPosition(request.getPosition());
+             doctor.setStatus(EmploymentStatus.ACTIVE);
+             doctor.setDescription(request.getDescription());
+//             doctor.setSlug(request.getSlug());
+             doctor.setImgUrl(request.getImgUrl());
+             doctorRepo.save(doctor);
+         } else if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_STAFF)){
+             Staff staff = new Staff();
+             staff.setAccount(account);
+             staff.setStatus(EmploymentStatus.ACTIVE);
+             staff.setStartDate(LocalDate.now());
+             staffRepo.save(staff);
+         }
+
+        return  account;
+    }
 
         accountRepo.save(account);
         if(account.getRoles().get(0).getRoleName().equals(AccountRole.ROLE_DOCTOR)){
@@ -350,6 +374,25 @@ public class AccountService {
         return responses;
     }
 
+
+    public AccountBasic getInfoLogin(Authentication authentication) {
+        Account account = accountRepo.findByEmail(authentication.getName());
+        if(account == null){
+            throw new IllegalArgumentException("Account not found");
+        }
+        String role = account.getRoles().getFirst().getRoleName().toString();
+        return new AccountBasic(account.getFullName(), role);
+    }
+
+    public List<AccountResponse> getListAccountsForReport(@Valid @NotNull LocalDate fromDate,
+                                                          @Valid @NotNull LocalDate toDate) {
+        List<AccountResponse> responses = new ArrayList<>();
+        List<Account> accounts = accountRepo.findByCreatedAtBetween(fromDate.atStartOfDay(), toDate.atStartOfDay().plusDays(1));
+        for(Account account : accounts){
+            responses.add(new AccountResponse(account));
+        }
+        return responses;
+    }
     public ProfileResponse updateUserProfile(ProfileUpdateRequest request) {
         Account account = authenticationService.getCurrentAccount();
         account.setFullName(request.getFullName());

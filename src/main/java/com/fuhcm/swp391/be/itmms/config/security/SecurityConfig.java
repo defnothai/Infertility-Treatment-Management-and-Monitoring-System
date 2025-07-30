@@ -46,21 +46,6 @@ public class SecurityConfig {
         this.passwordEncoder = passwordEncoder;
     }
 
-//    private static final String[] PUBLIC_API = {
-//            "/api/auth/register",
-//            "/api/auth/login",
-//            "/api/auth/register/resend-verification-email",
-//            "/api/auth/forgot-password",
-//            "/api/auth/reset-password",
-//            "/api/auth/register/confirm-email",
-//            "/oauth2/**",
-//            "/api/home/**",
-//            "/api/doctors/**",
-//            "/api/services/**",
-//            "/api/list/**",
-//            "/api/manager/**"
-//    };
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         System.out.println("Filter í running");
@@ -70,6 +55,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+
+                        .requestMatchers("/api/accounts/login-info").permitAll()
+                        .requestMatchers("/api/application").permitAll()
+
                                 .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/topic/**", "/app/**", "/user/**").permitAll()
                                 .requestMatchers("/api/application").permitAll()
@@ -86,17 +75,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/manager/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/consultation").permitAll()
                         .requestMatchers("/o/oauth2/v2/auth/**").permitAll()
-                        //.requestMatchers(PUBLIC_API).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay-callback").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/blogs/for-user").permitAll()
+
                         // USER role
+                        .requestMatchers(HttpMethod.PUT, "api/appointments/confirm-appointment").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/user/profile").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/payment/vn-pay").hasAnyRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/blogs").hasAnyRole("MANAGER", "DOCTOR")
                         .requestMatchers(HttpMethod.GET, "api/user/appointments/available-doctors").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/appointments").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/invoices/**").hasAnyRole("USER", "STAFF")
+                        .requestMatchers(HttpMethod.GET, "/api/invoices/**").hasAnyRole("USER", "STAFF", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/schedules/view/**").hasAnyRole("USER", "DOCTOR", "MANAGER", "STAFF")
 
                         // DOCTOR role
@@ -116,9 +106,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/blogs").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/api/blogs").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/api/blogs").hasRole("MANAGER")
+                        .requestMatchers("/api/invoices/report").hasRole("MANAGER")
 
                         // ADMIN role
-                        .requestMatchers("/api/invoices/**").hasAnyRole("MANAGER", "STAFF")
                         .requestMatchers("/api/reminders/**").hasRole("ADMIN")
                         .requestMatchers("/api/medical-records/authorize/**").hasRole("MANAGER")
                         .requestMatchers("/api/service/manage/**").hasAnyRole("ADMIN", "MANAGER")

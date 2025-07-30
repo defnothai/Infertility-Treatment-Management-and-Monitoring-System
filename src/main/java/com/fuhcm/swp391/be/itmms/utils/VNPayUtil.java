@@ -43,6 +43,7 @@ public class VNPayUtil {
         } catch (Exception e) {
             ipAdress = "Invalid IP:" + e.getMessage();
         }
+        System.out.println(ipAdress);
         return ipAdress;
     }
 
